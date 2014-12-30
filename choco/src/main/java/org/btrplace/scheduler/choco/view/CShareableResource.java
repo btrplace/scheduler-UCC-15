@@ -127,7 +127,7 @@ public class CShareableResource implements ChocoView {
         //We create a BP with only the VMs requiring a not null amount of resources
         ChocoView v = rp.getView(Packing.VIEW_ID);
         if (v == null) {
-            throw new SchedulerException(rp.getSourceModel(), "View '" + Cumulatives.VIEW_ID + "' is required but missing");
+            throw new SchedulerException(rp.getSourceModel(), "View '" + Packing.VIEW_ID + "' is required but missing");
         }
         ((Packing) v).addDim(r.getResourceIdentifier(),
                 virtRcUsage,

@@ -101,7 +101,6 @@ public class CShareableResourceTest {
 
         VM vm1 = mo.newVM();
         VM vm2 = mo.newVM();
-        VM vm3 = mo.newVM();
 
         Node n1 = mo.newNode();
         Node n2 = mo.newNode();
