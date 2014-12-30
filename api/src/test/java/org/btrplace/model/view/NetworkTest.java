@@ -1,9 +1,6 @@
 package org.btrplace.model.view;
 
-import org.btrplace.model.DefaultModel;
-import org.btrplace.model.Model;
-import org.btrplace.model.Node;
-import org.btrplace.model.Switch;
+import org.btrplace.model.*;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -19,7 +16,7 @@ public class NetworkTest {
         Node n1 = mo.newNode();
         Node n2 = mo.newNode();
 
-        Network net = new Network("net1");
+        Network net = new Network(new DefaultRouting());
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(5000);
         Switch s2 = net.newSwitch(2000);
@@ -41,7 +38,7 @@ public class NetworkTest {
         Node n1 = mo.newNode();
         Node n2 = mo.newNode();
 
-        Network net = new Network("net1");
+        Network net = new Network(new DefaultRouting());
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(5000);
         Switch s2 = net.newSwitch(2000);
