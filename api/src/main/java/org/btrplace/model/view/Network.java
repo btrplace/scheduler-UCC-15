@@ -1,11 +1,8 @@
 package org.btrplace.model.view;
 
-import org.btrplace.model.Node;
-import org.btrplace.model.Switch;
-import org.btrplace.model.VM;
+import org.btrplace.model.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -14,21 +11,23 @@ import java.util.List;
 public class Network implements ModelView, Cloneable {
 
     private List<Switch> switches;
+    private Routing routing;
+    private String viewId;
 
     /**
      * The base of the view identifier. Once instantiated, it is completed
      * by the network identifier.
      */
-    public static final String VIEW_ID_BASE = "Network.";
+    public static final String VIEW_ID = "Network";
 
-    private String viewId;
+    public Network() {
+        this(new DefaultRouting());
+    }
 
-    private String netId;
-
-    public Network(String id) {
+    public Network(Routing routing) {
+        this.viewId = VIEW_ID;
         switches = new ArrayList<>();
-        netId = id;
-        viewId = VIEW_ID_BASE + netId;
+        setRouting(routing);
     }
 
     public Switch newSwitch(int capacity) {
@@ -37,8 +36,17 @@ public class Network implements ModelView, Cloneable {
         return s;
     }
 
+    public void setRouting(Routing routing) {
+        this.routing = routing;
+        routing.setNetwork(this);
+    }
+
     public List<Switch> getSwitches() {
         return switches;
+    }
+
+    public List<Switch.Interface> getPath(Node n1, Node n2) {
+        return routing.getPath(n1, n2);
     }
 
     public int getMaxBW(Node n1, Node n2) {
@@ -49,46 +57,23 @@ public class Network implements ModelView, Cloneable {
         return maxBW;
     }
 
-    public List<Switch.Interface> getPath(Node n1, Node n2) {
-
-        // Return the first path found
-        return getFirstPath(new ArrayList<>(Collections.singletonList(getSwitchInterface(n1))), n2);
-    }
-
-    private List<Switch.Interface> getFirstPath(List<Switch.Interface> currentPath, Node dst) {
-
-        for (Switch.Interface swif : currentPath.get(currentPath.size()-1).getHost().getInterfaces()) {
-            if(currentPath.contains(swif)) { continue; }
-            currentPath.add(swif);
-            if(swif.getRemote() instanceof Node) {
-                if (swif.getRemote().equals(dst)) { return currentPath; }
+    public List<Switch.Interface> getAllInterfaces() {
+        List<Switch.Interface> list = new ArrayList<>();
+        for (Switch s : switches) {
+            for (Switch.Interface si : s.getInterfaces()) {
+                if(!list.contains(si)) list.add(si);
             }
-            else {
-                currentPath.add((Switch.Interface)swif.getRemote());
-                return getFirstPath(currentPath, dst);
-            }
-            currentPath.remove(currentPath.get(currentPath.size()-1));
         }
-        currentPath.remove(currentPath.get(currentPath.size()-1));
-        return currentPath;
+        return list;
     }
 
-    private Switch.Interface getSwitchInterface(Node n) {
+    public Switch.Interface getSwitchInterface(Node n) {
         for (Switch sw : switches) {
             for (Switch.Interface swif : sw.getInterfaces()) {
                 if (swif.getRemote().equals(n)) { return swif; }
             }
         }
         return null;
-    }
-
-    /**
-     * Get the network identifier
-     *
-     * @return a non-empty string
-     */
-    public String getNetworkIdentifier() {
-        return netId;
     }
 
     @Override
@@ -104,12 +89,12 @@ public class Network implements ModelView, Cloneable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return this.netId.equals(((Network) o).getNetworkIdentifier());
+        return this.viewId.equals(((Network) o).getIdentifier());
     }
 
     @Override
     public ModelView clone() {
-        Network net = new Network(netId);
+        Network net = new Network(routing);
         net.getSwitches().addAll(switches);
         return net;
     }
