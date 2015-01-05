@@ -36,25 +36,28 @@ public class MigrateVM extends Action implements VMEvent, RunningVMPlacement {
 
     private Node src, dst;
 
+    private int bw;
+
     /**
      * Make a new action.
      *
-     * @param v     the VM to migrate
-     * @param from  the node the VM is currently running on
-     * @param to    the node where to place the VM
-     * @param start the moment the action will consume
-     * @param end   the moment the action will stop
+     * @param v         the VM to migrate
+     * @param from      the node the VM is currently running on
+     * @param to        the node where to place the VM
+     * @param start     the moment the action will consume
+     * @param end       the moment the action will stop
+     * @param bandwidth the reserved bandwidth (negative value for unlimited bw)
      */
-    public MigrateVM(VM v, Node from, Node to, int start, int end) {
+    public MigrateVM(VM v, Node from, Node to, int start, int end, int bandwidth) {
         super(start, end);
         this.vm = v;
         this.src = from;
         this.dst = to;
+        this.bw = bandwidth;
     }
 
-    @Override
-    public Node getDestinationNode() {
-        return dst;
+    public MigrateVM(VM v, Node from, Node to, int start, int end) {
+        this(v, from, to, start, end, -1);
     }
 
     /**
@@ -64,6 +67,20 @@ public class MigrateVM extends Action implements VMEvent, RunningVMPlacement {
      */
     public Node getSourceNode() {
         return src;
+    }
+
+    /**
+     * Get the bandwidth reserved for the migration
+     *
+     * @return the bandwidth reserved
+     */
+    public int getBandwidth() {
+        return bw;
+    }
+
+    @Override
+    public Node getDestinationNode() {
+        return dst;
     }
 
     @Override
@@ -110,7 +127,9 @@ public class MigrateVM extends Action implements VMEvent, RunningVMPlacement {
 
     @Override
     public String pretty() {
-        return "migrate(vm=" + vm + ", from=" + src + ", to=" + dst + ')';
+        String pretty = "migrate(vm=" + vm + ", from=" + src + ", to=" + dst;
+        if(bw > 0) { pretty += ", bw=" + bw; }
+        return pretty + ')';
     }
 
     @Override
