@@ -1,8 +1,6 @@
 package org.btrplace.model.view.net;
 
 import org.btrplace.model.Node;
-import org.btrplace.model.Routing;
-import org.btrplace.model.view.Network;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,18 +25,23 @@ public class DefaultRouting implements Routing {
     }
 
     @Override
-    public List<Switch.Interface> getPath(Node n1, Node n2) {
+    public List<Port> getPath(Node n1, Node n2) {
 
         if (net == null) { return Collections.emptyList(); }
 
         // Return the first path found
-        return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
+        List<Port> path = new ArrayList<>();
+        for (Port p : n1.getPorts()) {
+            path = getFirstPath(new ArrayList<>(Collections.singletonList(p.getRemote())), n2);
+            if (!path.isEmpty()) { break; }
+        }
+        return path;
     }
 
     @Override
     public int getMaxBW(Node n1, Node n2) {
         int max = 0;
-        for (Switch.Interface inf : getPath(n1, n2)) {
+        for (Port inf : getPath(n1, n2)) {
             if (inf.getBandwidth() > max) {
                 max = inf.getBandwidth();
             }
@@ -46,16 +49,16 @@ public class DefaultRouting implements Routing {
         return max;
     }
 
-    private List<Switch.Interface> getFirstPath(List<Switch.Interface> currentPath, Node dst) {
+    private List<Port> getFirstPath(List<Port> currentPath, Node dst) {
 
-        for (Switch.Interface swif : currentPath.get(currentPath.size()-1).getHost().getInterfaces()) {
-            if(currentPath.contains(swif)) { continue; }
-            currentPath.add(swif);
-            if(swif.getRemote() instanceof Node) {
-                if (swif.getRemote().equals(dst)) { return currentPath; }
+        for (Port p : currentPath.get(currentPath.size()-1).getHost().getPorts()) {
+            if(currentPath.contains(p)) { continue; }
+            currentPath.add(p);
+            if(p.getRemote().getHost() instanceof Node) {
+                if (p.getRemote().getHost().equals(dst)) { return currentPath; }
             }
             else {
-                currentPath.add((Switch.Interface)swif.getRemote());
+                currentPath.add(p.getRemote());
                 return getFirstPath(currentPath, dst);
             }
             currentPath.remove(currentPath.size()-1);
