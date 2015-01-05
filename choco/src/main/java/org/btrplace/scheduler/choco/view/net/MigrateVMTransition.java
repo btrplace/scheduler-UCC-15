@@ -16,20 +16,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.scheduler.choco.transition;
+package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.Model;
 import org.btrplace.model.Node;
 import org.btrplace.model.VM;
 import org.btrplace.model.VMState;
 import org.btrplace.model.view.ModelView;
-import org.btrplace.model.view.Network;
+import org.btrplace.model.view.net.Network;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.Slice;
 import org.btrplace.scheduler.choco.SliceBuilder;
+import org.btrplace.scheduler.choco.transition.KeepRunningVM;
+import org.btrplace.scheduler.choco.transition.VMTransition;
+import org.btrplace.scheduler.choco.transition.VMTransitionBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.ICF;
@@ -60,7 +63,7 @@ import org.chocosolver.solver.variables.VariableFactory;
  *
  * @author Fabien Hermenier
  */
-public class MigrateVM implements KeepRunningVM {
+public class MigrateVMTransition implements KeepRunningVM {
 
     public static final String PREFIX = "migrate(";
     public static final String PREFIX_STAY = "stayRunningOn(";
@@ -80,7 +83,7 @@ public class MigrateVM implements KeepRunningVM {
      * @param e the VM managed by the action
      * @throws org.btrplace.scheduler.SchedulerException if an error occurred
      */
-    public MigrateVM(ReconfigurationProblem p, VM e) throws SchedulerException {
+    public MigrateVMTransition(ReconfigurationProblem p, VM e) throws SchedulerException {
 
         this.vm = e;
         this.rp = p;
@@ -186,7 +189,8 @@ public class MigrateVM implements KeepRunningVM {
             Node dst = rp.getNode(dSlice.getHoster().getValue());
             int st = getStart().getValue();
             int ed = getEnd().getValue();
-            a = new org.btrplace.plan.event.MigrateVM(vm, src, dst, st, ed);
+            int bw = getBandwidth().getValue();
+            a = new org.btrplace.plan.event.MigrateVM(vm, src, dst, st, ed, bw);
             plan.add(a);
         }
         return true;
@@ -231,9 +235,9 @@ public class MigrateVM implements KeepRunningVM {
     @Override
     public String toString() {
         return "migrate(" +
-                " ,vm=" + vm +
-                " ,from=" + src + "(" + rp.getNode(src) + ")" +
-                " ,to=" + dSlice.getHoster().toString() + ")";
+                "vm=" + vm +
+                ", from=" + src + "(" + rp.getNode(src) + ")" +
+                ", to=" + dSlice.getHoster().toString() + ")";
     }
 
     /**
@@ -250,7 +254,7 @@ public class MigrateVM implements KeepRunningVM {
 
         @Override
         public VMTransition build(ReconfigurationProblem r, VM v) throws SchedulerException {
-            return new MigrateVM(r, v);
+            return new MigrateVMTransition(r, v);
         }
     }
 }

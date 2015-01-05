@@ -1,4 +1,6 @@
-package org.btrplace.model;
+package org.btrplace.model.view.net;
+
+import org.btrplace.model.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,8 +43,10 @@ public class Switch {
             if(elt instanceof Node) {
                 connect((Node) elt, bandwidth);
             }
-            if(elt instanceof Switch) {
+            else if(elt instanceof Switch) {
                 connect((Switch) elt, bandwidth);
+            } else {
+                throw new ClassCastException("Unsupported network element: " + elt.getClass().getSimpleName());
             }
         }
     }

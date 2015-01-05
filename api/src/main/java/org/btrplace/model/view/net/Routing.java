@@ -1,5 +1,6 @@
-package org.btrplace.model;
+package org.btrplace.model.view.net;
 
+import org.btrplace.model.Node;
 import org.btrplace.model.view.Network;
 
 import java.util.List;

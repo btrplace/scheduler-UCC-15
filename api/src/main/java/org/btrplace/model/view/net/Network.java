@@ -1,6 +1,8 @@
-package org.btrplace.model.view;
+package org.btrplace.model.view.net;
 
-import org.btrplace.model.*;
+import org.btrplace.model.Node;
+import org.btrplace.model.VM;
+import org.btrplace.model.view.ModelView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,27 +15,31 @@ public class Network implements ModelView, Cloneable {
     private List<Switch> switches;
     private Routing routing;
     private String viewId;
+    private SwitchBuilder swBuilder;
 
-    /**
-     * The base of the view identifier. Once instantiated, it is completed
-     * by the network identifier.
-     */
     public static final String VIEW_ID = "Network";
 
-    public Network() {
-        this(new DefaultRouting());
-    }
+    public Network() {  this(new DefaultRouting(), new DefaultSwitchBuilder()); }
 
-    public Network(Routing routing) {
+    public Network(SwitchBuilder sb) { this(new DefaultRouting(), sb); }
+
+    public Network(Routing routing) { this(routing, new DefaultSwitchBuilder()); }
+
+    public Network(Routing routing, SwitchBuilder sb) {
         this.viewId = VIEW_ID;
         switches = new ArrayList<>();
         setRouting(routing);
+        swBuilder = sb;
     }
 
     public Switch newSwitch(int capacity) {
-        Switch s = new Switch(capacity);
+        Switch s = swBuilder.newSwitch(capacity);
         switches.add(s);
         return s;
+    }
+
+    public Switch newSwitch() {
+        return newSwitch(-1);
     }
 
     public void setRouting(Routing routing) {
@@ -45,31 +51,31 @@ public class Network implements ModelView, Cloneable {
         return switches;
     }
 
-    public List<Switch.Interface> getPath(Node n1, Node n2) {
+    public List<Port> getPath(Node n1, Node n2) {
         return routing.getPath(n1, n2);
     }
 
     public int getMaxBW(Node n1, Node n2) {
         int maxBW = Integer.MAX_VALUE;
-        for (Switch.Interface swif : getPath(n1, n2)) {
+        for (Port swif : getPath(n1, n2)) {
             if(swif.getBandwidth() < maxBW) { maxBW = swif.getBandwidth(); }
         }
         return maxBW;
     }
 
-    public List<Switch.Interface> getAllInterfaces() {
-        List<Switch.Interface> list = new ArrayList<>();
+    public List<Port> getAllInterfaces() {
+        List<Port> list = new ArrayList<>();
         for (Switch s : switches) {
-            for (Switch.Interface si : s.getInterfaces()) {
+            for (Port si : s.getPorts()) {
                 if(!list.contains(si)) list.add(si);
             }
         }
         return list;
     }
 
-    public Switch.Interface getSwitchInterface(Node n) {
+    public Port getSwitchInterface(Node n) {
         for (Switch sw : switches) {
-            for (Switch.Interface swif : sw.getInterfaces()) {
+            for (Port swif : sw.getPorts()) {
                 if (swif.getRemote().equals(n)) { return swif; }
             }
         }
