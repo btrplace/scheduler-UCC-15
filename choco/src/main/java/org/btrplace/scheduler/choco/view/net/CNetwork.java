@@ -10,7 +10,6 @@ import org.btrplace.model.view.net.Network;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
-import org.btrplace.scheduler.choco.transition.MigrateVM;
 import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.view.ChocoModelViewBuilder;
 import org.btrplace.scheduler.choco.view.ChocoView;
@@ -70,7 +69,7 @@ public class CNetwork implements ChocoView {
                 for (VM vm : rp.getVMs()) {
                     VMTransition a = rp.getVMAction(vm);
 
-                    if (a != null && a instanceof MigrateVM &&
+                    if (a != null && a instanceof MigrateVMTransition &&
                             (a.getCSlice().getHoster().getValue() != a.getDSlice().getHoster().getValue())) {
 
                         Node src = source.getMapping().getVMLocation(vm);
@@ -78,7 +77,7 @@ public class CNetwork implements ChocoView {
 
                         if (net.getPath(src, dst).contains(si)) {
                             tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
-                            heightsList.add(((MigrateVM) a).getBandwidth());
+                            heightsList.add(((MigrateVMTransition) a).getBandwidth());
                         }
                     }
                 }
@@ -104,7 +103,7 @@ public class CNetwork implements ChocoView {
                 for (VM vm : rp.getVMs()) {
                     VMTransition a = rp.getVMAction(vm);
 
-                    if (a != null && a instanceof MigrateVM &&
+                    if (a != null && a instanceof MigrateVMTransition &&
                             (a.getCSlice().getHoster().getValue() != a.getDSlice().getHoster().getValue())) {
 
                         Node src = source.getMapping().getVMLocation(vm);
@@ -112,7 +111,7 @@ public class CNetwork implements ChocoView {
 
                         if (!Collections.disjoint(sw.getPorts(), net.getPath(src, dst))) {
                             tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
-                            heightsList.add(((MigrateVM) a).getBandwidth());
+                            heightsList.add(((MigrateVMTransition) a).getBandwidth());
                         }
                     }
                 }
