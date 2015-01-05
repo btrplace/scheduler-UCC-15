@@ -19,6 +19,7 @@
 package org.btrplace.scheduler.choco.view;
 
 import org.btrplace.model.view.ModelView;
+import org.btrplace.scheduler.choco.view.net.CNetwork;
 
 import java.util.HashMap;
 import java.util.Map;
