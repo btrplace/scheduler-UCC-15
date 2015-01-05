@@ -128,7 +128,6 @@ public class TransitionFactory {
         f.add(new ResumeVM.Builder());
         f.add(new KillVM.Builder());
         f.add(new RelocatableVM.Builder());
-        //f.add(new MigrateVM.Builder());
         f.add(new ForgeVM.Builder());
         f.add(new StayAwayVM.BuilderReady());
         f.add(new StayAwayVM.BuilderSleeping());
