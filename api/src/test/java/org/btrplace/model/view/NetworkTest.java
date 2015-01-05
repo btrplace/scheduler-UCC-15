@@ -1,6 +1,11 @@
 package org.btrplace.model.view;
 
-import org.btrplace.model.*;
+import org.btrplace.model.DefaultModel;
+import org.btrplace.model.Model;
+import org.btrplace.model.Node;
+import org.btrplace.model.view.net.DefaultRouting;
+import org.btrplace.model.view.net.Network;
+import org.btrplace.model.view.net.Switch;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
@@ -21,14 +26,12 @@ public class NetworkTest {
         Switch sm = net.newSwitch(5000);
         Switch s2 = net.newSwitch(2000);
 
-        s1.connect(n1, 1000);
-        s1.connect(sm, 1000);
-        s2.connect(n2, 1000);
-        s2.connect(sm, 1000);
+        s1.connect(1000, n1, sm);
+        s2.connect(1000, n2, sm);
 
-        Assert.assertTrue(net.getPath(n1, n2).containsAll(s1.getInterfaces()));
-        Assert.assertTrue(net.getPath(n1, n2).containsAll(sm.getInterfaces()));
-        Assert.assertTrue(net.getPath(n1, n2).containsAll(s2.getInterfaces()));
+        Assert.assertTrue(net.getPath(n1, n2).containsAll(s1.getPorts()));
+        Assert.assertTrue(net.getPath(n1, n2).containsAll(sm.getPorts()));
+        Assert.assertTrue(net.getPath(n1, n2).containsAll(s2.getPorts()));
     }
 
     @Test(dependsOnMethods = {"testPath"})
@@ -43,10 +46,9 @@ public class NetworkTest {
         Switch sm = net.newSwitch(5000);
         Switch s2 = net.newSwitch(2000);
 
-        s1.connect(n1, 1000);
-        s1.connect(sm, 1000);
-        s2.connect(n2, 500);
-        s2.connect(sm, 1000);
+        s1.connect(1000, n1, sm);
+        s2.connect(500, n2); // Bottleneck
+        s2.connect(1000, sm);
 
         Assert.assertEquals(net.getMaxBW(n1, n2), 500);
     }
