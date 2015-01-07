@@ -68,7 +68,6 @@ public class Network implements ModelView, Cloneable {
         for (Switch s : switches) {
             for (Port si : s.getPorts()) {
                 if(!list.contains(si)) list.add(si);
-                if(!list.contains(si.getRemote())) list.add(si.getRemote());
             }
         }
         return list;
@@ -76,8 +75,8 @@ public class Network implements ModelView, Cloneable {
 
     public Port getSwitchInterface(Node n) {
         for (Switch sw : switches) {
-            for (Port swif : sw.getPorts()) {
-                if (swif.getRemote().equals(n)) { return swif; }
+            for (Port p : sw.getPorts()) {
+                if (p.getRemote().getHost().equals(n)) { return p; }
             }
         }
         return null;
