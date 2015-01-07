@@ -1,6 +1,7 @@
 package org.btrplace.model.view.net;
 
 import org.btrplace.model.Element;
+import org.btrplace.model.Node;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,25 +27,31 @@ public class Switch implements Element,NetworkElement {
         capacity = c;
     }
 
-    public void connect(int bandwidth, NetworkElement ne) {
+    public void connect(int bandwidth, Element elt) {
+
+        if (!(elt instanceof Switch) && !(elt instanceof Node)) {
+            throw new ClassCastException("An object of the class '"+elt.getClass().getSimpleName()+
+                    "' can not be connected to the network");
+        }
+
         Port local = new Port(bandwidth, this);
         ports.add(local);
-        Port remote = new Port(bandwidth, ne);
-        ne.getPorts().add(remote);
+
+        Port remote = new Port(bandwidth, elt);
         local.connect(remote);
         remote.connect(local);
-    }
 
-    public void connect(int bandwidth, NetworkElement ...nes) {
-        for (NetworkElement ne : nes) {
-            connect(bandwidth, ne);
+        if (elt instanceof Switch) {
+            ((NetworkElement)elt).getPorts().add(remote);
         }
     }
 
-    public void connect(int bandwidth, List<NetworkElement> nes) {
-        for (NetworkElement ne : nes) {
-            connect(bandwidth, ne);
-        }
+    public void connect(int bandwidth, Element ...elts) {
+        for (Element ne : elts) {  connect(bandwidth, ne); }
+    }
+
+    public void connect(int bandwidth, List<Element> elts) {
+        connect(bandwidth, elts.toArray(new Element[elts.size()]));
     }
 
     @Override
