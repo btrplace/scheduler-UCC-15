@@ -73,6 +73,7 @@ public class DefaultConstraintsCatalog implements ConstraintsCatalog {
         c.add(new SeqBuilder());
         c.add(new MaxOnlineBuilder());
         c.add(new NoDelayBuilder());
+        c.add(new SyncEndConstraintBuilder());
         return c;
     }
 
