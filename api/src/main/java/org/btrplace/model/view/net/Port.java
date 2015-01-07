@@ -1,15 +1,17 @@
 package org.btrplace.model.view.net;
 
+import org.btrplace.model.Element;
+
 /**
  * Created by vkherbac on 05/01/15.
  */
 public class Port {
 
     private int bandwidth;
-    private NetworkElement host;
+    private Element host;
     private Port connectedTo;
 
-    public Port(int bw, NetworkElement ne) {
+    public Port(int bw, Element ne) {
         bandwidth=bw;
         host=ne;
     }
@@ -18,7 +20,7 @@ public class Port {
 
     public int getBandwidth() { return bandwidth; }
 
-    public NetworkElement getHost() { return host; }
+    public Element getHost() { return host; }
 
     public Port getRemote() { return connectedTo; }
 }
