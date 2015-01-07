@@ -91,6 +91,9 @@ public class MigrateVMTransition implements KeepRunningVM {
         Solver s = rp.getSolver();
         Model mo = rp.getSourceModel();
 
+        // Get src node
+        src = p.getSourceModel().getMapping().getVMLocation(e);
+
         // Do not migrate
         stay = VariableFactory.zero(rp.getSolver());
         if (!p.getManageableVMs().contains(e)) {
@@ -129,10 +132,6 @@ public class MigrateVMTransition implements KeepRunningVM {
         //DurationEvaluators dev = rp.getDurationEvaluators();
         //int migrateDuration = dev.evaluate(rp.getSourceModel(), org.btrplace.plan.event.MigrateVM.class, vm);
 
-        // Get src and dst nodes
-        src = p.getSourceModel().getMapping().getVMLocation(e);
-        Node dst = rp.getNode(dSlice.getHoster().getValue());
-
         // Get the networking view
         ModelView network = mo.getView(Network.VIEW_ID);
         if (network == null) {
@@ -149,8 +148,8 @@ public class MigrateVMTransition implements KeepRunningVM {
             memUsed = VF.fixed("memUsed_" + toString(), ((int) (double) (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
 
             // Min BW = Dirty page rate
-            //bandwidth = VF.bounded("bandwidth_" + toString(), (int) (double) (dirtyRate * 8), Integer.MAX_VALUE / 1000, s);
-            bandwidth = VF.bounded("bandwidth_" + toString(), (int) (double) (dirtyRate * 8), ((Network)network).getMaxBW(src,dst), s);
+            bandwidth = VF.bounded("bandwidth_" + toString(), (int) (double) (dirtyRate * 8),
+                    ((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
 
             // duration=(memUsed/(BW-DP))+DT => memUsed=(duration*(BW-DP))
             duration = VF.bounded("duration_" + toString(), start.getLB(), end.getUB(), s); // Duration max = deadline
