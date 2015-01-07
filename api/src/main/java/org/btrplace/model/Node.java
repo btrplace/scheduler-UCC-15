@@ -18,12 +18,6 @@
 
 package org.btrplace.model;
 
-import org.btrplace.model.view.net.NetworkElement;
-import org.btrplace.model.view.net.Port;
-
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Model a node.
  * A node should not be instantiated directly. Use {@link Model#newNode()} instead.
@@ -31,11 +25,9 @@ import java.util.List;
  * @author Fabien Hermenier
  * @see Model#newNode()
  */
-public class Node implements Element,NetworkElement {
+public class Node implements Element {
 
     private int id;
-    private int capacity;
-    private List<Port> ports;
 
     /**
      * Make a new node.
@@ -44,8 +36,6 @@ public class Node implements Element,NetworkElement {
      */
     public Node(int i) {
         this.id = i;
-        this.capacity = 0;
-        ports = new ArrayList<>();
     }
 
     @Override
@@ -75,21 +65,5 @@ public class Node implements Element,NetworkElement {
     @Override
     public int hashCode() {
         return id;
-    }
-
-    @Override
-    public int getCapacity() {
-        capacity = 0;
-        if (!ports.isEmpty()) {
-            for (Port p : ports) {
-                capacity += p.getBandwidth();
-            }
-        }
-        return capacity*2; // *2: IN+OUT
-    }
-
-    @Override
-    public List<Port> getPorts() {
-        return ports;
     }
 }
