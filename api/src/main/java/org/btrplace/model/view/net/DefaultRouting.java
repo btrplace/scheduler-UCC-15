@@ -30,12 +30,7 @@ public class DefaultRouting implements Routing {
         if (net == null) { return Collections.emptyList(); }
 
         // Return the first path found
-        List<Port> path = new ArrayList<>();
-        for (Port p : n1.getPorts()) {
-            path = getFirstPath(new ArrayList<>(Collections.singletonList(p.getRemote())), n2);
-            if (!path.isEmpty()) { break; }
-        }
-        return path;
+        return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
     }
 
     @Override
@@ -51,19 +46,27 @@ public class DefaultRouting implements Routing {
 
     private List<Port> getFirstPath(List<Port> currentPath, Node dst) {
 
-        for (Port p : currentPath.get(currentPath.size()-1).getHost().getPorts()) {
-            if(currentPath.contains(p)) { continue; }
-            currentPath.add(p);
-            if(p.getRemote().getHost() instanceof Node) {
-                if (p.getRemote().getHost().equals(dst)) { return currentPath; }
+        if (currentPath.get(currentPath.size()-1).getHost() instanceof Switch) {
+            for (Port p : ((Switch) currentPath.get(currentPath.size() - 1).getHost()).getPorts()) {
+                if (currentPath.contains(p)) {
+                    continue;
+                }
+                currentPath.add(p);
+                if (p.getRemote().getHost() instanceof Node) {
+                    if (p.getRemote().getHost().equals(dst)) {
+                        return currentPath;
+                    }
+                } else {
+                    currentPath.add(p.getRemote());
+                    return getFirstPath(currentPath, dst);
+                }
+                currentPath.remove(currentPath.size() - 1);
             }
-            else {
-                currentPath.add(p.getRemote());
-                return getFirstPath(currentPath, dst);
-            }
-            currentPath.remove(currentPath.size()-1);
+            currentPath.remove(currentPath.size() - 1);
+            return currentPath;
+
+        } else {
+            return Collections.emptyList();
         }
-        currentPath.remove(currentPath.size()-1);
-        return currentPath;
     }
 }
