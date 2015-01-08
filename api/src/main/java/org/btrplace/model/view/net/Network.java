@@ -28,8 +28,8 @@ public class Network implements ModelView, Cloneable {
     public Network(Routing routing, SwitchBuilder sb) {
         this.viewId = VIEW_ID;
         switches = new ArrayList<>();
-        setRouting(routing);
         swBuilder = sb;
+        setRouting(routing);
     }
 
     public Switch newSwitch(int capacity) {
@@ -54,6 +54,8 @@ public class Network implements ModelView, Cloneable {
     public List<Port> getPath(Node n1, Node n2) {
         return routing.getPath(n1, n2);
     }
+
+    public Routing getRouting() { return routing; }
 
     public int getMaxBW(Node n1, Node n2) {
         int maxBW = Integer.MAX_VALUE;

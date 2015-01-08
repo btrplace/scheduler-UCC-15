@@ -15,10 +15,6 @@ public class DefaultRouting implements Routing {
 
     public DefaultRouting() {}
 
-    public DefaultRouting(Network net) {
-        setNetwork(net);
-    }
-
     @Override
     public void setNetwork(Network net) {
         this.net = net;

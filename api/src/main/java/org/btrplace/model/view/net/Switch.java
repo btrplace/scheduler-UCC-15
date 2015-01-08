@@ -50,8 +50,8 @@ public class Switch implements Element,NetworkElement {
         for (Element ne : elts) {  connect(bandwidth, ne); }
     }
 
-    public void connect(int bandwidth, List<Element> elts) {
-        connect(bandwidth, elts.toArray(new Element[elts.size()]));
+    public void connect(int bandwidth, List<Node> nodes) {
+        connect(bandwidth, nodes.toArray(new Element[nodes.size()]));
     }
 
     @Override

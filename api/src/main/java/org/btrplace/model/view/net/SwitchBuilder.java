@@ -15,18 +15,18 @@ public interface SwitchBuilder {
     /**
      * Generate a new Switch.
      *
-     * @param capacity the maximal BW capacity of the switch
-     * @return {@code null} if no identifiers are available for the Switch.
-     */
-    Switch newSwitch(int capacity);
-
-    /**
-     * Generate a new Switch.
-     *
      * @param id    the identifier to use for the Switch.
      * @return      a Switch or {@code null} if the identifier is already used.
      */
     Switch newSwitch(int id, int capacity);
+
+    /**
+     * Generate a new Switch.
+     *
+     * @param capacity the maximal BW capacity of the switch
+     * @return {@code null} if no identifiers are available for the Switch.
+     */
+    Switch newSwitch(int capacity);
 
     /**
      * Check if a given Switch has been defined fot this network view.

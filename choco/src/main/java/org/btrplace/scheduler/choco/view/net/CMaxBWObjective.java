@@ -46,7 +46,7 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
         Solver s = rp.getSolver();
 
         // Set objective: Terminate all actions ASAP
-        List<IntVar> ends = new ArrayList<>();
+        List<IntVar> ends = new ArrayList<IntVar>();
         for (Transition m : rp.getVMActions()) { ends.add(m.getEnd()); }
         for (Transition m : rp.getNodeActions()) { ends.add(m.getEnd()); }
         IntVar[] costs = ends.toArray(new IntVar[ends.size()]);
