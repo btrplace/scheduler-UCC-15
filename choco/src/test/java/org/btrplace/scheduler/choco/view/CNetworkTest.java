@@ -5,6 +5,7 @@ import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.Network;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.SyncEndConstraint;
+import org.btrplace.model.view.net.VHPCStaticRouting;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
@@ -22,6 +23,9 @@ import org.chocosolver.solver.variables.Variable;
 import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by vkherbac on 30/12/14.
@@ -347,8 +351,7 @@ public class CNetworkTest {
     public void SyncEndTest() throws SchedulerException,ContradictionException {
 
         // Init bandwidth, memoryUsed and dirtyRate for each VM
-        int     bw_vm1 = 0,     bw_vm2 = 0;
-        int     mem_vm1 = 10000, mem_vm2 = 10000;
+        int     mem_vm1 = 1000, mem_vm2 = 1500;
         double  dr_vm1 = 21.44, dr_vm2 = 19.28;
 
         Model mo = new DefaultModel();
@@ -423,20 +426,86 @@ public class CNetworkTest {
 
         // Solve
         ReconfigurationPlan p = rp.solve(0, false);
-
         Assert.assertNotNull(p);
 
-        int end_vm1 = 0, end_vm2 = 0;
-
-        // Verify migrations duration
+        // Verify that migrations complete at the same time
+        int end_vm1 = -1, end_vm2 = -2;
         for (Action a : p.getActions()) {
             if (a.toString().contains("migrate")) {
                 if (a.toString().contains("vm#0")) { end_vm1 = a.getEnd(); }
                 if (a.toString().contains("vm#1")) { end_vm2 = a.getEnd(); }
             }
         }
-
-        // Verify that migrations complete at the same time
         Assert.assertEquals(end_vm1, end_vm2);
+    }
+
+    @Test
+    public void VHPCTest() throws SchedulerException,ContradictionException {
+
+        // Init mem + cpu for VMs and Nodes
+        int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
+        int cpu_vm = 2, cpu_node = 8;  // VMs: 2 VCPUs, Nodes: 8 CPUs
+
+        // Init memoryUsed and dirtyRate (for all VMs)
+        int memUsed = 1000; // 1 GB
+        double dirtyRate = 21.44; // 21.44 B/s
+
+        // New default model
+        Model mo = new DefaultModel();
+        Mapping ma = mo.getMapping();
+
+        // Create 15 online source nodes + 15 offline destination nodes
+        List<Node> srcNodes = new ArrayList<>();
+        List<Node> dstNodes = new ArrayList<>();
+        for (int i=0; i<15; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
+        for (int i=0; i<15; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+
+        // Create 60 running VMs: 4 per source node
+        List<VM> vms = new ArrayList<>();
+        for (int i=0; i<60; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i/4)); }
+
+        // Put vm attributes
+        for (VM vm : vms) {
+            mo.getAttributes().put(vm, "memUsed", memUsed);
+            mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
+        }
+
+        // Add resource views
+        ShareableResource rcMem = new ShareableResource("mem", 0, 0);
+        ShareableResource rcCPU = new ShareableResource("cpu", 0, 0);
+        for (Node n : srcNodes) { rcMem.setCapacity(n, mem_node); rcCPU.setCapacity(n, cpu_node); }
+        for (Node n : dstNodes) { rcMem.setCapacity(n, mem_node); rcCPU.setCapacity(n, cpu_node); }
+        for (VM vm : vms) { rcMem.setConsumption(vm, mem_vm); rcCPU.setConsumption(vm, cpu_vm); }
+        mo.attach(rcMem);
+        mo.attach(rcCPU);
+
+        // Add a Network view using the static VHPC routing
+        Network net = new Network(new VHPCStaticRouting(srcNodes, dstNodes));
+        mo.attach(net);
+
+        // Set the custom migration transition
+        Parameters ps = new DefaultParameters().setVerbosity(10);
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+
+        // New reconfiguration problem
+        ReconfigurationProblem rp = new DefaultReconfigurationProblemBuilder(mo)
+                .setParams(ps)
+                .build();
+
+        // Migrate all VMs to destination nodes
+        for (VM vm : vms) {
+            rp.getVMAction(vm).getDSlice().getHoster().instantiateTo(rp.getNode(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm)))), Cause.Null);
+        }
+
+        // Set custom objective
+        CMinMTTR obj = new CMinMTTR();
+        //CMaxBWObjective obj = new CMaxBWObjective();
+        obj.inject(rp);
+
+        // Solve
+        ReconfigurationPlan p = rp.solve(0, false);
+
+        Assert.assertNotNull(p);
     }
 }
