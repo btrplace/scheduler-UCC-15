@@ -55,26 +55,32 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
         rp.setObjective(true, cost);
 
         // Add migration strategies
+        List<IntVar> start = new ArrayList<IntVar>();
+        List<IntVar> bw = new ArrayList<IntVar>();
         Set<VM> manageableVMs = new HashSet<>(rp.getManageableVMs());
         for (VMTransition vmt : rp.getVMActions(manageableVMs)) {
             if (vmt instanceof MigrateVMTransition) {
-
-                // Strategy for min migration start time
-                strategies.add(ISF.custom(
-                        IntStrategyFactory.minDomainSize_var_selector(),
-                        IntStrategyFactory.mid_value_selector(),//.min_value_selector(),
-                        IntStrategyFactory.split(), // Split from min
-                        vmt.getStart()
-                ));
-
-                // Strategy for max migration BW
-                strategies.add(ISF.custom(
-                        IntStrategyFactory.minDomainSize_var_selector(),
-                        IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
-                        IntStrategyFactory.reverse_split(), // Split from max
-                        ((MigrateVMTransition) vmt).getBandwidth()
-                ));
+                start.add(vmt.getStart());
+                bw.add(((MigrateVMTransition) vmt).getBandwidth());
             }
+        }
+        // Strategy for min migration start time
+        if (! start.isEmpty()) {
+            strategies.add(ISF.custom(
+                    IntStrategyFactory.minDomainSize_var_selector(),
+                    IntStrategyFactory.mid_value_selector(),//.min_value_selector(),
+                    IntStrategyFactory.split(), // Split from min
+                    start.toArray(new IntVar[start.size()])
+            ));
+        }
+        // Strategy for max migration BW
+        if (! bw.isEmpty()) {
+            strategies.add(ISF.custom(
+                    IntStrategyFactory.minDomainSize_var_selector(),
+                    IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                    IntStrategyFactory.reverse_split(), // Split from max
+                    bw.toArray(new IntVar[bw.size()])
+            ));
         }
 
         // Add strategy for the cost constraint
