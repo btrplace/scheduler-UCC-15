@@ -145,21 +145,52 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             // Get attribute vars
             dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
-            memUsed = VF.fixed("memUsed_" + toString(), ((int) (double) (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
+            memUsed = VF.fixed("memUsed_" + toString(), ( (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
 
             // Min BW = Dirty page rate
-            bandwidth = VF.bounded("bandwidth_" + toString(), (int) (double) (dirtyRate * 8),
-                    ((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
+            bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
+                   ((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
 
-            // duration=(memUsed/(BW-DP))+DT => memUsed=(duration*(BW-DP))
             duration = VF.bounded("duration_" + toString(), start.getLB(), end.getUB(), s); // Duration max = deadline
 
-            // tmpDuration = BW-DP
+            // memUsed=(duration*(BW-DP))
             tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
-            s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", ((int) (double) (dirtyRate * 8))));
-
-            //s.post(ICF.eucl_div(memUsed, tmpDuration, duration)); // Using division
+            s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
             s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
+            //s.post(ICF.eucl_div(memUsed, duration, tmpDuration)); // Using division
+
+            // BW=(memUsed/duration)+DP
+            //tmpDuration = VF.bounded("memU/dur_" + toString(), 0, bandwidth.getUB(), s);
+            //s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
+            //s.post(ICF.eucl_div(memUsed, duration, tmpDuration)); // Using division
+            //s.post(ICF.arithm(bandwidth, "=", tmpDuration, "+", ((dirtyRate * 8))));
+
+            /* Enumerated BW
+            int step = 10;
+            int bwEnum[] = new int[((((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth()-(dirtyRate * 8))/step)+1]; int j=0;
+            int td[] = new int[bwEnum.length];
+            for (int i=(dirtyRate * 8); i<=((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(); i+=step, j++) {
+                bwEnum[j] = i;
+                td[j] = i - dirtyRate;
+            }
+            System.err.println(Arrays.toString(bwEnum));
+            System.err.println(Arrays.toString(td));
+            bandwidth = VF.enumerated("bandwidth_enum", bwEnum, s);
+            tmpDuration = VF.enumerated("bw-dr_" + toString(), td, s);
+            s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", ((dirtyRate * 8))));
+            s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
+            */
+
+            /* Real
+            double precision = 1.0e-2;
+            //RealVar realDuration = VF.real("realDuration_" + toString(), start.getLB(), end.getUB(), precision, s);
+            RealVar realDuration = VF.real(duration, precision);
+            RealVar realBandwidth = VF.real(bandwidth, precision);
+            RealVar realMemUsed = VF.real(memUsed, precision);
+            RealVar[] realVars = new RealVar[]{realBandwidth, realMemUsed, realDuration, };
+            s.post(new RealConstraint("realCstrDuration" , "{0}=({1}/{2})+"+dirtyRate, Ibex.HC4, realVars));
+            duration = (IntVar) realDuration;
+            */
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");

@@ -1,18 +1,14 @@
 package org.btrplace.scheduler.choco.view;
 
 import org.btrplace.model.*;
+import org.btrplace.model.constraint.Fence;
+import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.Network;
-import org.btrplace.model.view.net.Switch;
-import org.btrplace.model.view.net.SyncEndConstraint;
-import org.btrplace.model.view.net.VHPCStaticRouting;
+import org.btrplace.model.view.net.*;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
-import org.btrplace.scheduler.choco.DefaultParameters;
-import org.btrplace.scheduler.choco.DefaultReconfigurationProblemBuilder;
-import org.btrplace.scheduler.choco.Parameters;
-import org.btrplace.scheduler.choco.ReconfigurationProblem;
+import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
 import org.btrplace.scheduler.choco.view.net.CMaxBWObjective;
 import org.btrplace.scheduler.choco.view.net.CSyncEndConstraint;
@@ -25,6 +21,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -445,10 +442,11 @@ public class CNetworkTest {
         // Init mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
         int cpu_vm = 2, cpu_node = 8;  // VMs: 2 VCPUs, Nodes: 8 CPUs
-
+        int nbSrcNodes = 15 ;
+        int nbVMs = nbSrcNodes *4;
         // Init memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
-        double dirtyRate = 21.44; // 21.44 B/s
+        int dirtyRate = 21; // 21.44 mB/s
 
         // New default model
         Model mo = new DefaultModel();
@@ -457,12 +455,12 @@ public class CNetworkTest {
         // Create 15 online source nodes + 15 offline destination nodes
         List<Node> srcNodes = new ArrayList<>();
         List<Node> dstNodes = new ArrayList<>();
-        for (int i=0; i<15; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
-        for (int i=0; i<15; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+        for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
+        for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
 
         // Create 60 running VMs: 4 per source node
         List<VM> vms = new ArrayList<>();
-        for (int i=0; i<60; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i/4)); }
+        for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
 
         // Put vm attributes
         for (VM vm : vms) {
@@ -484,7 +482,11 @@ public class CNetworkTest {
         mo.attach(net);
 
         // Set the custom migration transition
-        Parameters ps = new DefaultParameters().setVerbosity(10);
+        DefaultParameters ps = new DefaultParameters();
+        ps.setVerbosity(10);
+        ps.setTimeLimit(5);
+        ps.setMaxEnd(100);
+        ps.doOptimize(false);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
@@ -493,19 +495,108 @@ public class CNetworkTest {
                 .setParams(ps)
                 .build();
 
+
+        List<SatConstraint> cstrs = new ArrayList<>();
         // Migrate all VMs to destination nodes
         for (VM vm : vms) {
-            rp.getVMAction(vm).getDSlice().getHoster().instantiateTo(rp.getNode(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm)))), Cause.Null);
+            cstrs.add(new Fence(vm, Collections.singleton(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm))))));
+         //   rp.getVMAction(vm).getDSlice().getHoster().instantiateTo(rp.getNode(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm)))), Cause.Null);
         }
 
         // Set custom objective
-        CMinMTTR obj = new CMinMTTR();
-        //CMaxBWObjective obj = new CMaxBWObjective();
+        //CMinMTTR obj = new CMinMTTR();
+        CMaxBWObjective obj = new CMaxBWObjective();
         obj.inject(rp);
+        DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
+        sc.getConstraintMapper().register(new CMaxBWObjective.Builder());
+        Instance i = new Instance(mo, cstrs,  new MaxBWObjective());
+        try {
+            ReconfigurationPlan p = sc.solve(i);
+            Assert.assertNotNull(p);
+            System.err.println(p);
+            System.err.flush();
 
-        // Solve
-        ReconfigurationPlan p = rp.solve(0, false);
+        } finally {
+            System.err.println(sc.getStatistics());
+        }
+        Assert.fail();
+    }
 
-        Assert.assertNotNull(p);
+    @Test
+    public void VHPCTest2() throws SchedulerException,ContradictionException {
+
+        // Init mem + cpu for VMs and Nodes
+        int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
+        int cpu_vm = 2, cpu_node = 8;  // VMs: 2 VCPUs, Nodes: 8 CPUs
+        int nbSrcNodes = 15;
+        int nbVMs = nbSrcNodes * 4;
+        // Init memoryUsed and dirtyRate (for all VMs)
+        int memUsed = 1000; // 1 GB
+        double dirtyRate = 21.44; // 21.44 mB/s
+
+        // New default model
+        Model mo = new DefaultModel();
+        Mapping ma = mo.getMapping();
+
+        // Create 15 online source nodes + 15 offline destination nodes
+        List<Node> srcNodes = new ArrayList<>();
+        List<Node> dstNodes = new ArrayList<>();
+        for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
+        for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+
+        // Create running VMs: 4 per source node
+        List<VM> vms = new ArrayList<>();
+        for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
+
+        // Put vm attributes
+        for (VM vm : vms) {
+            mo.getAttributes().put(vm, "memUsed", memUsed);
+            mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
+        }
+
+        // Add resource views
+        ShareableResource rcMem = new ShareableResource("mem", 0, 0);
+        ShareableResource rcCPU = new ShareableResource("cpu", 0, 0);
+        for (Node n : srcNodes) { rcMem.setCapacity(n, mem_node); rcCPU.setCapacity(n, cpu_node); }
+        for (Node n : dstNodes) { rcMem.setCapacity(n, mem_node); rcCPU.setCapacity(n, cpu_node); }
+        for (VM vm : vms) { rcMem.setConsumption(vm, mem_vm); rcCPU.setConsumption(vm, cpu_vm); }
+        mo.attach(rcMem);
+        mo.attach(rcCPU);
+
+        // Add a Network view using the static VHPC routing
+        Network net = new Network(new VHPCStaticRouting(srcNodes, dstNodes));
+        mo.attach(net);
+
+        // Set the custom migration transition
+        DefaultParameters ps = new DefaultParameters();
+        ps.setVerbosity(1);
+        ps.setTimeLimit(5);
+        //ps.setMaxEnd(100);
+        ps.doOptimize(true);
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+
+        List<SatConstraint> cstrs = new ArrayList<>();
+        // Migrate all VMs to destination nodes
+        for (VM vm : vms) {
+            cstrs.add(new Fence(vm, Collections.singleton(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm))))));
+            //rp.getVMAction(vm).getDSlice().getHoster().instantiateTo(rp.getNode(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm)))), Cause.Null);
+        }
+
+        // Set custom objective
+        DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
+        sc.getConstraintMapper().register(new CMaxBWObjective.Builder());
+        Instance i = new Instance(mo, cstrs,  new MaxBWObjective());
+
+        try {
+            ReconfigurationPlan p = sc.solve(i);
+            Assert.assertNotNull(p);
+            System.err.println(p);
+            System.err.flush();
+
+        } finally {
+            System.err.println(sc.getStatistics());
+        }
+        Assert.fail();
     }
 }

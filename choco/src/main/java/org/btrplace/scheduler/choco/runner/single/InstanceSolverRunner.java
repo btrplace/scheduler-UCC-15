@@ -38,6 +38,7 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.trace.Chatterbox;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -138,6 +139,10 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
 
         //State the logging level for the solver
         //TODO: log stuff
+        if (params.getVerbosity() > 1) {
+            Chatterbox.showDecisions(rp.getSolver());
+        }
+
         //SMF.log(rp.getSolver(), params.getVerbosity() >= 2, params.getVerbosity() >= 3);
 
         //The actual solving process

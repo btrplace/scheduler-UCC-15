@@ -36,9 +36,11 @@ public class VHPCStaticRouting implements Routing {
 
         // Init random static routes
         useCable = new HashMap<NodesMap, Integer>();
+        int i = 0;
         for(Node src : srcNodes) {
             for (Node dst : dstNodes) {
                 useCable.put(new NodesMap(src, dst), new Random().nextInt(3));
+                //useCable.put(new NodesMap(src, dst), i++%dstNodes.size());
             }
         }
     }

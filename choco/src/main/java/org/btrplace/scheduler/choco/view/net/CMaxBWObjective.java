@@ -48,10 +48,11 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
         // Set objective: Terminate all actions ASAP
         List<IntVar> ends = new ArrayList<IntVar>();
         for (Transition m : rp.getVMActions()) { ends.add(m.getEnd()); }
-        for (Transition m : rp.getNodeActions()) { ends.add(m.getEnd()); }
+        //for (Transition m : rp.getNodeActions()) { ends.add(m.getEnd()); }
         IntVar[] costs = ends.toArray(new IntVar[ends.size()]);
         IntVar cost = VariableFactory.bounded(rp.makeVarLabel("costEndVars"), 0, Integer.MAX_VALUE / 100, s);
         costConstraint = IntConstraintFactory.sum(costs, cost);
+        rp.getSolver().post(costConstraint);
         rp.setObjective(true, cost);
 
         // Add migration strategies
@@ -64,15 +65,7 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
                 bw.add(((MigrateVMTransition) vmt).getBandwidth());
             }
         }
-        // Strategy for min migration start time
-        if (! start.isEmpty()) {
-            strategies.add(ISF.custom(
-                    IntStrategyFactory.minDomainSize_var_selector(),
-                    IntStrategyFactory.mid_value_selector(),//.min_value_selector(),
-                    IntStrategyFactory.split(), // Split from min
-                    start.toArray(new IntVar[start.size()])
-            ));
-        }
+
         // Strategy for max migration BW
         if (! bw.isEmpty()) {
             strategies.add(ISF.custom(
@@ -80,6 +73,16 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
                     IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
                     IntStrategyFactory.reverse_split(), // Split from max
                     bw.toArray(new IntVar[bw.size()])
+            ));
+        }
+
+        // Strategy for min migration start time
+        if (! start.isEmpty()) {
+            strategies.add(ISF.custom(
+                    IntStrategyFactory.minDomainSize_var_selector(),
+                    IntStrategyFactory.mid_value_selector(),//.min_value_selector(),
+                    IntStrategyFactory.split(), // Split from min
+                    start.toArray(new IntVar[start.size()])
             ));
         }
 
@@ -97,11 +100,7 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
 
     @Override
     public void postCostConstraints() {
-        if (!costActivated) {
-            rp.getLogger().debug("Post the cost-oriented constraint");
-            costActivated = true;
-            rp.getSolver().post(costConstraint);
-        }
+
     }
 
     @Override

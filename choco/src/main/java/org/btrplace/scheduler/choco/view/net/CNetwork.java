@@ -81,13 +81,14 @@ public class CNetwork implements ChocoView {
                         }
                     }
                 }
-
-                solver.post(ICF.cumulative(
-                        tasksList.toArray(new Task[tasksList.size()]),
-                        heightsList.toArray(new IntVar[heightsList.size()]),
-                        VF.fixed(si.getBandwidth(), solver),
-                        true
-                ));
+                if (!tasksList.isEmpty()) {
+                    solver.post(ICF.cumulative(
+                            tasksList.toArray(new Task[tasksList.size()]),
+                            heightsList.toArray(new IntVar[heightsList.size()]),
+                            VF.fixed(si.getBandwidth(), solver),
+                            true
+                    ));
+                }
 
                 tasksList.clear();
                 heightsList.clear();
