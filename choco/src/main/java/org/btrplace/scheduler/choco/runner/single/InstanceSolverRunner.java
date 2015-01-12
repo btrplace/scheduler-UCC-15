@@ -137,14 +137,19 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
             }
         });
 
-        //State the logging level for the solver
-        //TODO: log stuff
-        if (params.getVerbosity() > 1) {
+        if (params.getVerbosity() >=1) {
+            Chatterbox.showSolutions(rp.getSolver());
+        }
+        if (params.getVerbosity() >= 2) {
+            //every second
+            Chatterbox.showStatisticsDuringResolution(rp.getSolver(), 1000);
+        }
+        if (params.getVerbosity() >= 3) {
             Chatterbox.showDecisions(rp.getSolver());
         }
-
-        //SMF.log(rp.getSolver(), params.getVerbosity() >= 2, params.getVerbosity() >= 3);
-
+        if (params.getVerbosity() >= 4) {
+            Chatterbox.showContradiction(rp.getSolver());
+        }
         //The actual solving process
         ReconfigurationPlan p = rp.solve(params.getTimeLimit(), params.doOptimize());
         return new InstanceResult(p, makeStatistics());

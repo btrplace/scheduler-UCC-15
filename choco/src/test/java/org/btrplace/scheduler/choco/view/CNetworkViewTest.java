@@ -532,7 +532,7 @@ public class CNetworkViewTest {
         int nbVMs = nbSrcNodes * 4;
         // Init memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
-        double dirtyRate = 21.44; // 21.44 mB/s
+        double dirtyRate = 21.44; // 21.44 mB/s,
 
         // New default model
         Model mo = new DefaultModel();
@@ -569,9 +569,8 @@ public class CNetworkViewTest {
 
         // Set the custom migration transition
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(1);
+        ps.setVerbosity(2);
         ps.setTimeLimit(5);
-        //ps.setMaxEnd(100);
         ps.doOptimize(true);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
