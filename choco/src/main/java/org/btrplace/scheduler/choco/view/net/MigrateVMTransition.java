@@ -23,7 +23,7 @@ import org.btrplace.model.Node;
 import org.btrplace.model.VM;
 import org.btrplace.model.VMState;
 import org.btrplace.model.view.ModelView;
-import org.btrplace.model.view.net.Network;
+import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
@@ -133,9 +133,9 @@ public class MigrateVMTransition implements KeepRunningVM {
         //int migrateDuration = dev.evaluate(rp.getSourceModel(), org.btrplace.plan.event.MigrateVM.class, vm);
 
         // Get the networking view
-        ModelView network = mo.getView(Network.VIEW_ID);
+        ModelView network = mo.getView(NetworkView.VIEW_ID);
         if (network == null) {
-            throw new SchedulerException(rp.getSourceModel(), "View '" + Network.VIEW_ID + "' is required but missing");
+            throw new SchedulerException(rp.getSourceModel(), "View '" + NetworkView.VIEW_ID + "' is required but missing");
         }
 
         if (mo.getAttributes().isSet(vm, "dirtyRate") && mo.getAttributes().isSet(vm, "memUsed")) {
@@ -149,7 +149,7 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             // Min BW = Dirty page rate
             bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
-                   ((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
+                   ((NetworkView)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
 
             duration = VF.bounded("duration_" + toString(), start.getLB(), end.getUB(), s); // Duration max = deadline
 
@@ -167,9 +167,9 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             /* Enumerated BW
             int step = 10;
-            int bwEnum[] = new int[((((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth()-(dirtyRate * 8))/step)+1]; int j=0;
+            int bwEnum[] = new int[((((NetworkView)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth()-(dirtyRate * 8))/step)+1]; int j=0;
             int td[] = new int[bwEnum.length];
-            for (int i=(dirtyRate * 8); i<=((Network)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(); i+=step, j++) {
+            for (int i=(dirtyRate * 8); i<=((NetworkView)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(); i+=step, j++) {
                 bwEnum[j] = i;
                 td[j] = i - dirtyRate;
             }

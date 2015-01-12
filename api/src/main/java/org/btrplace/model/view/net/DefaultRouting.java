@@ -11,12 +11,12 @@ import java.util.List;
  */
 public class DefaultRouting implements Routing {
 
-    private Network net;
+    private NetworkView net;
 
     public DefaultRouting() {}
 
     @Override
-    public void setNetwork(Network net) {
+    public void setNetwork(NetworkView net) {
         this.net = net;
     }
 

@@ -10,22 +10,22 @@ import java.util.List;
 /**
  * Created by vkherbac on 08/12/14.
  */
-public class Network implements ModelView, Cloneable {
+public class NetworkView implements ModelView, Cloneable {
 
     private List<Switch> switches;
     private Routing routing;
     private String viewId;
     private SwitchBuilder swBuilder;
 
-    public static final String VIEW_ID = "Network";
+    public static final String VIEW_ID = "NetworkView";
 
-    public Network() {  this(new DefaultRouting(), new DefaultSwitchBuilder()); }
+    public NetworkView() {  this(new DefaultRouting(), new DefaultSwitchBuilder()); }
 
-    public Network(SwitchBuilder sb) { this(new DefaultRouting(), sb); }
+    public NetworkView(SwitchBuilder sb) { this(new DefaultRouting(), sb); }
 
-    public Network(Routing routing) { this(routing, new DefaultSwitchBuilder()); }
+    public NetworkView(Routing routing) { this(routing, new DefaultSwitchBuilder()); }
 
-    public Network(Routing routing, SwitchBuilder sb) {
+    public NetworkView(Routing routing, SwitchBuilder sb) {
         this.viewId = VIEW_ID;
         switches = new ArrayList<>();
         swBuilder = sb;
@@ -97,12 +97,12 @@ public class Network implements ModelView, Cloneable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        return this.viewId.equals(((Network) o).getIdentifier());
+        return this.viewId.equals(((NetworkView) o).getIdentifier());
     }
 
     @Override
     public ModelView clone() {
-        Network net = new Network(routing);
+        NetworkView net = new NetworkView(routing);
         net.getSwitches().addAll(switches);
         net.swBuilder = swBuilder.clone();
         return net;

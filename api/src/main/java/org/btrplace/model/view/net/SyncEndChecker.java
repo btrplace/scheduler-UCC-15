@@ -23,13 +23,13 @@ import org.btrplace.model.constraint.AllowAllConstraintChecker;
 /**
  * Created by vkherbac on 01/09/14.
  */
-public class SyncEndConstraintChecker extends AllowAllConstraintChecker<SyncEndConstraint> {
+public class SyncEndChecker extends AllowAllConstraintChecker<SyncEnd> {
     /**
      * Make a new checker.
      *
      * @param se the constraint associated to the checker.
      */
-    public SyncEndConstraintChecker(SyncEndConstraint se) {
+    public SyncEndChecker(SyncEnd se) {
         super(se);
     }
 }

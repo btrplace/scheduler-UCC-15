@@ -2,11 +2,11 @@ package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.Model;
 import org.btrplace.model.Node;
+import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Port;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.VM;
 import org.btrplace.model.view.ModelView;
-import org.btrplace.model.view.net.Network;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
@@ -28,21 +28,21 @@ import java.util.List;
 /**
  * Created by vkherbac on 30/12/14.
  */
-public class CNetwork implements ChocoView {
+public class CNetworkView implements ChocoView {
 
     /**
      * The view identifier.
      */
-    public static final String VIEW_ID = "Network";
+    public static final String VIEW_ID = "NetworkView";
 
-    private Network net;
+    private NetworkView net;
     private ReconfigurationProblem rp;
     private Solver solver;
     private Model source;
     List<Task> tasksList;
     List<IntVar> heightsList;
 
-    public CNetwork(ReconfigurationProblem p, Network n) throws SchedulerException {
+    public CNetworkView(ReconfigurationProblem p, NetworkView n) throws SchedulerException {
         net = n;
         rp = p;
         solver = p.getSolver();
@@ -144,7 +144,7 @@ public class CNetwork implements ChocoView {
     public static class Builder implements ChocoModelViewBuilder {
         @Override
         public Class<? extends ModelView> getKey() {
-            return Network.class;
+            return NetworkView.class;
         }
 
         @Override
@@ -152,7 +152,7 @@ public class CNetwork implements ChocoView {
             return new DelegatedBuilder(v.getIdentifier(), Collections.emptyList()) {
                 @Override
                 public ChocoView build(ReconfigurationProblem r) throws SchedulerException {
-                    return new CNetwork(r, (Network) v);
+                    return new CNetworkView(r, (NetworkView) v);
                 }
             };
         }

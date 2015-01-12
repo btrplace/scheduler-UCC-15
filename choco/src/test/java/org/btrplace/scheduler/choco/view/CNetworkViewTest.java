@@ -11,7 +11,7 @@ import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
 import org.btrplace.scheduler.choco.view.net.CMaxBWObjective;
-import org.btrplace.scheduler.choco.view.net.CSyncEndConstraint;
+import org.btrplace.scheduler.choco.view.net.CSyncEnd;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -27,7 +27,7 @@ import java.util.List;
 /**
  * Created by vkherbac on 30/12/14.
  */
-public class CNetworkTest {
+public class CNetworkViewTest {
 
     @Test
     public void SwitchCapacityBottleneckTest() throws SchedulerException,ContradictionException {
@@ -68,7 +68,7 @@ public class CNetworkTest {
         mo.attach(rc);
 
         // Add a simple network
-        Network net = new Network();
+        NetworkView net = new NetworkView();
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(1000); // Bottleneck
         Switch s2 = net.newSwitch(2000);
@@ -168,7 +168,7 @@ public class CNetworkTest {
         mo.attach(rc);
 
         // Add a simple network
-        Network net = new Network();
+        NetworkView net = new NetworkView();
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(2000);
         Switch s2 = net.newSwitch(2000);
@@ -274,7 +274,7 @@ public class CNetworkTest {
         mo.attach(rc);
 
         // Add a simple network
-        Network net = new Network();
+        NetworkView net = new NetworkView();
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(2000);
         Switch s2 = net.newSwitch(2000);
@@ -382,7 +382,7 @@ public class CNetworkTest {
         mo.attach(rc);
 
         // Add a simple network
-        Network net = new Network();
+        NetworkView net = new NetworkView();
         Switch s1 = net.newSwitch(2000);
         Switch sm = net.newSwitch(2000);
         Switch s2 = net.newSwitch(2000);
@@ -400,7 +400,7 @@ public class CNetworkTest {
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register the constraint SyncEnd
-        ps.getConstraintMapper().register(new CSyncEndConstraint.Builder());
+        ps.getConstraintMapper().register(new CSyncEnd.Builder());
 
         // New reconfiguration problem
         ReconfigurationProblem rp = new DefaultReconfigurationProblemBuilder(mo)
@@ -414,7 +414,7 @@ public class CNetworkTest {
         mig2.getDSlice().getHoster().instantiateTo(rp.getNode(n3), Cause.Null);
 
         // DEBUG: manually add the SyncEnd constraint
-        new CSyncEndConstraint(new SyncEndConstraint(vm1, vm2)).inject(rp);
+        new CSyncEnd(new SyncEnd(vm1, vm2)).inject(rp);
 
         // Set objective
         //CMinMTTR obj = new CMinMTTR();
@@ -477,8 +477,8 @@ public class CNetworkTest {
         mo.attach(rcMem);
         mo.attach(rcCPU);
 
-        // Add a Network view using the static VHPC routing
-        Network net = new Network(new VHPCStaticRouting(srcNodes, dstNodes));
+        // Add a NetworkView view using the static VHPC routing
+        NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
         mo.attach(net);
 
         // Set the custom migration transition
@@ -563,8 +563,8 @@ public class CNetworkTest {
         mo.attach(rcMem);
         mo.attach(rcCPU);
 
-        // Add a Network view using the static VHPC routing
-        Network net = new Network(new VHPCStaticRouting(srcNodes, dstNodes));
+        // Add a NetworkView view using the static VHPC routing
+        NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
         mo.attach(net);
 
         // Set the custom migration transition

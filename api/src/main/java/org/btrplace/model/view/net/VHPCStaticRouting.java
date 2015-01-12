@@ -9,7 +9,7 @@ import java.util.*;
  */
 public class VHPCStaticRouting implements Routing {
 
-    private Network net;
+    private NetworkView net;
     private List<Node> srcNodes, dstNodes;
     private Switch srcSw, dstSw;
     private Map<NodesMap, Integer> useCable;
@@ -20,7 +20,7 @@ public class VHPCStaticRouting implements Routing {
     }
 
     @Override
-    public void setNetwork(Network net) {
+    public void setNetwork(NetworkView net) {
         this.net = net;
 
         // Create the switches
@@ -36,7 +36,6 @@ public class VHPCStaticRouting implements Routing {
 
         // Init random static routes
         useCable = new HashMap<NodesMap, Integer>();
-        int i = 0;
         for(Node src : srcNodes) {
             for (Node dst : dstNodes) {
                 useCable.put(new NodesMap(src, dst), new Random().nextInt(3));

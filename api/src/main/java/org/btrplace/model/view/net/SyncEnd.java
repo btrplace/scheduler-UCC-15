@@ -31,18 +31,18 @@ import java.util.*;
  * <p>
  * Created by vkherbac on 01/09/14.
  */
-public class SyncEndConstraint extends SatConstraint {
+public class SyncEnd extends SatConstraint {
 
     /**
      * Make a new constraint.
      *
      * @param vms the vms to sync
      */
-    public SyncEndConstraint(Collection<VM> vms) {
+    public SyncEnd(Collection<VM> vms) {
         super(vms, Collections.<Node>emptyList(), true);
     }
 
-    public SyncEndConstraint(VM... vms) {
+    public SyncEnd(VM... vms) {
         super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
     }
 
@@ -53,7 +53,7 @@ public class SyncEndConstraint extends SatConstraint {
 
     @Override
     public SatConstraintChecker getChecker() {
-        return new SyncEndConstraintChecker(this);
+        return new SyncEndChecker(this);
     }
 
     @Override

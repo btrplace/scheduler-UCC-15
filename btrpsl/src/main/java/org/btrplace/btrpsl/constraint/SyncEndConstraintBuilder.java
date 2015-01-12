@@ -22,7 +22,7 @@ import org.btrplace.btrpsl.element.BtrpOperand;
 import org.btrplace.btrpsl.tree.BtrPlaceTree;
 import org.btrplace.model.VM;
 import org.btrplace.model.constraint.SatConstraint;
-import org.btrplace.model.view.net.SyncEndConstraint;
+import org.btrplace.model.view.net.SyncEnd;
 
 import java.util.Collections;
 import java.util.List;
@@ -48,7 +48,7 @@ public class SyncEndConstraintBuilder extends DefaultSatConstraintBuilder {
     public List<SatConstraint> buildConstraint(BtrPlaceTree t, List<BtrpOperand> args) {
         if (checkConformance(t, args)) {
             List<VM> s = (List<VM>) params[0].transform(this, t, args.get(0));
-            return (s != null ? (List) Collections.singleton(new SyncEndConstraint(s)) : Collections.emptyList());
+            return (s != null ? (List) Collections.singleton(new SyncEnd(s)) : Collections.emptyList());
         }
         return Collections.emptyList();
     }

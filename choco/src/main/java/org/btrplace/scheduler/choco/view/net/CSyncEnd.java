@@ -21,7 +21,7 @@ package org.btrplace.scheduler.choco.view.net;
 import org.btrplace.model.Model;
 import org.btrplace.model.VM;
 import org.btrplace.model.constraint.Constraint;
-import org.btrplace.model.view.net.SyncEndConstraint;
+import org.btrplace.model.view.net.SyncEnd;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraint;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
@@ -37,9 +37,9 @@ import java.util.*;
 /**
  * Created by vkherbac on 01/09/14.
  */
-public class CSyncEndConstraint implements ChocoConstraint {
+public class CSyncEnd implements ChocoConstraint {
 
-    private SyncEndConstraint sec;
+    private SyncEnd sec;
     private List<MigrateVMTransition> migrationList;
 
     /**
@@ -47,7 +47,7 @@ public class CSyncEndConstraint implements ChocoConstraint {
      *
      * @param sec the SyncEnd constraint to rely on
      */
-    public CSyncEndConstraint(SyncEndConstraint sec) {
+    public CSyncEnd(SyncEnd sec) {
         this.sec = sec;
         migrationList = new ArrayList<>();
     }
@@ -103,12 +103,12 @@ public class CSyncEndConstraint implements ChocoConstraint {
     public static class Builder implements ChocoConstraintBuilder {
         @Override
         public Class<? extends Constraint> getKey() {
-            return SyncEndConstraint.class;
+            return SyncEnd.class;
         }
 
         @Override
-        public CSyncEndConstraint build(Constraint c) {
-            return new CSyncEndConstraint((SyncEndConstraint) c);
+        public CSyncEnd build(Constraint c) {
+            return new CSyncEnd((SyncEnd) c);
         }
     }
 }

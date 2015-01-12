@@ -9,7 +9,7 @@ import java.util.List;
  */
 public interface Routing {
 
-    void setNetwork(Network net);
+    void setNetwork(NetworkView net);
 
     List<Port> getPath(Node n1, Node n2);
 
