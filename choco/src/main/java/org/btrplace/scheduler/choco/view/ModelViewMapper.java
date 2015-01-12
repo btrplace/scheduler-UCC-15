@@ -20,6 +20,7 @@ package org.btrplace.scheduler.choco.view;
 
 import org.btrplace.model.view.ModelView;
 import org.btrplace.scheduler.choco.view.net.CNetworkView;
+import org.btrplace.scheduler.choco.view.power.CEnergyView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,7 @@ public class ModelViewMapper {
         ModelViewMapper map = new ModelViewMapper();
         map.register(new CShareableResource.Builder());
         map.register(new CNetworkView.Builder());
+        map.register(new CEnergyView.Builder());
         return map;
     }
 
