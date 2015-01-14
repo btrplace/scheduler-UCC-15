@@ -15,34 +15,47 @@ public class PowerBudget extends SatConstraint {
     private int budget, start, end;
 
     /**
-     * Make a new constraint.
+     * Make a new constraint (continuous version).
      *
      * @param budget    power budget allowed
      * @param start     the power restriction start at t=start
      * @param end       the end of power restriction
      */
-    public PowerBudget(int budget, int start, int end) {
+    public PowerBudget(int start, int end, int budget) {
         super(Collections.<VM>emptyList(), Collections.<Node>emptyList(), true);
         this.budget = budget;
         this.start = start;
         this.end = end;
     }
 
+    /**
+     * Make a new constraint (discrete version).
+     *
+     * @param budget    power budget allowed
+     */
+    public PowerBudget(int budget) {
+        super(Collections.<VM>emptyList(), Collections.<Node>emptyList(), false);
+        this.budget = budget;
+    }
+
+
     public int getBudget() {
         return budget;
     }
 
     public int getStart() {
-        return start;
+        if (isContinuous()) { return start; }
+        else { return -1; }
     }
 
     public int getEnd() {
-        return end;
+        if (isContinuous()) { return end; }
+        else { return -1; }
     }
 
     @Override
     public boolean setContinuous(boolean b) {
-        return b;
+        return b == isContinuous();
     }
 
     @Override

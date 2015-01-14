@@ -14,6 +14,7 @@ import org.btrplace.scheduler.choco.view.*;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
@@ -38,7 +39,9 @@ public class CEnergyView implements ChocoView {
     private Solver solver;
     private Model source;
     private List<Task> tasks;
-    private List<Integer> heights;
+    private List<IntVar> heights;
+    private CPowerView powerView;
+    private int maxDiscretePower = 0;
 
     public CEnergyView(ReconfigurationProblem p, EnergyView v) throws SchedulerException {
         ev = v;
@@ -47,16 +50,33 @@ public class CEnergyView implements ChocoView {
         source = p.getSourceModel();
         tasks = new ArrayList<>();
         heights = new ArrayList<>();
+
+        // Retrieve or create CPowerView
+        powerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
+        if (powerView == null) {
+            powerView = new CPowerView(rp);
+            if (!rp.addView(powerView)) {
+                throw new SchedulerException(rp.getSourceModel(), "Unable to attach view '" + CPowerView.VIEW_ID + "'");
+            }
+        }
     }
 
-    public void addRestriction(int start, int end, int power) {
+    public void cap(int start, int end, int power) {
         IntVar s, d, e;
         s = VF.fixed(start, solver);
         e = VF.fixed(end, solver);
-        d = VF.fixed(end-start, solver);
 
-        tasks.add(VariableFactory.task(s,d,e));
-        heights.add(ev.getMaxPower()-power);
+        IntVar eMin = VF.bounded("powerBudgetEnd", start, rp.getEnd().getUB(), solver);
+        solver.post(ICF.minimum(eMin, e, rp.getEnd()));
+        d = rp.makeUnboundedDuration();
+        solver.post(IntConstraintFactory.arithm(d, "<=", rp.getEnd()));
+
+        tasks.add(VariableFactory.task(s,d,eMin));
+        heights.add(VF.fixed(ev.getMaxPower()-power, solver));
+    }
+
+    public void cap(int power) {
+        maxDiscretePower = power;
     }
 
     @Override
@@ -69,74 +89,58 @@ public class CEnergyView implements ChocoView {
 
         Model mo = rp.getSourceModel();
 
-        CPowerView powerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
-        if (powerView == null) {
-            powerView = new CPowerView(rp);
-            if (!rp.addView(powerView)) {
-                throw new SchedulerException(rp.getSourceModel(), "Unable to attach view '" + CPowerView.VIEW_ID + "'");
-            }
-        }
-
-        // Add nodes consumption
-        for (Node n : rp.getNodes()) {
-
+        // Add constraints for continuous model
+        for (Node n : rp.getNodes()) {  // Add nodes consumption
             if (mo.getAttributes().isSet(n, "idlePower")) {
-                heights.add(mo.getAttributes().getInteger(n, "idlePower"));
                 IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", n, ")"));
                 solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
                 tasks.add(VariableFactory.task(powerView.getPowerStart(rp.getNode(n)), duration,
                         powerView.getPowerEnd(rp.getNode(n))));
+                heights.add(VF.fixed(mo.getAttributes().getInteger(n, "idlePower"), solver));
             }
             else {
                 throw new SchedulerException(null, "Unable to retrieve attribute 'idlePower' for the node '" + n + "'");
             }
         }
-
-        // Add VMs consumption
-        for (VM v : rp.getVMs()) {
-
+        for (VM v : rp.getVMs()) {  // Add VMs consumption
             if (mo.getAttributes().isSet(v, "power")) {
-
                 int vmPower = mo.getAttributes().getInteger(v, "power");
                 VMState currentState = rp.getSourceModel().getMapping().getState(v);
                 VMState futureState = rp.getNextState(v);
                 VMTransition vmt = rp.getVMAction(v);
 
+                IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
+                solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
+
+                // Relocate or Migrate
                 if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
+                    //TODO: in the case of a live migration, add the transfer overhead
+                    tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                    heights.add(VF.fixed(vmPower, solver));
 
-                    // No migration TODO: manage even if DSlice hoster is not instantiated
-                    if(rp.getNode(vmt.getCSlice().getHoster().getValue()).equals(rp.getNode(vmt.getDSlice().getHoster().getValue()))) {
-                        IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
-                        solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
-                        tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                        heights.add(vmPower);
-                    }
-                    else { //TODO: add energy overhead due to the live migration !
-                        // Consumption on the source node
-                        tasks.add(VariableFactory.task(vmt.getCSlice().getStart(), vmt.getCSlice().getDuration(), vmt.getCSlice().getEnd()));
-                        heights.add(vmPower);
+                // Boot / Resume
+                } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
+                           (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
+                    tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                    heights.add(VF.fixed(vmPower, solver));
 
-                        // Consumption on the destination node
-                        tasks.add(VariableFactory.task(vmt.getDSlice().getStart(), vmt.getDSlice().getDuration(), vmt.getDSlice().getEnd()));
-                        heights.add(vmPower);
-                    }
+                // Halt / Kill / Sleep
+                } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
+                           (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
+                           (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
+                    tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                    heights.add(VF.fixed(vmPower, solver));
 
-                } else if (!currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
-                    // Add consumption on the destination node
-                    tasks.add(VariableFactory.task(vmt.getDSlice().getStart(), vmt.getDSlice().getDuration(), vmt.getDSlice().getEnd()));
-                    heights.add(vmPower);
-
-                } else if (currentState.equals(VMState.RUNNING) && !futureState.equals(VMState.RUNNING)) {
-                    // Add consumption on the source node
-                    tasks.add(VariableFactory.task(vmt.getCSlice().getStart(), vmt.getCSlice().getDuration(), vmt.getCSlice().getEnd()));
-                    heights.add(vmPower);
+                // Resume
+                } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
+                    tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                    heights.add(VF.fixed(vmPower, solver));
                 }
             }
             else {
                 throw new SchedulerException(null, "Unable to retrieve attribute 'powerConsumption' for the vm '" + v + "'");
             }
         }
-
         // Post the resulting cumulative constraint
         if (!tasks.isEmpty()) {
             solver.post(ICF.cumulative(
@@ -145,6 +149,28 @@ public class CEnergyView implements ChocoView {
                     VF.fixed(ev.getMaxPower(), solver),
                     true
             ));
+        }
+
+        // Add constraints for discrete model
+        if (maxDiscretePower > 0) {
+            List<IntVar> powList = new ArrayList<>();
+            for (Node n : rp.getNodes()) {  // Nodes consumption
+                int idlePower = mo.getAttributes().getInteger(n, "idlePower");
+                IntVar cons = VF.bounded(rp.makeVarLabel("powerConsumption(" + n + ")"), 0, idlePower, rp.getSolver());
+                LCF.ifThenElse(rp.getNodeAction(n).getState(),
+                        ICF.arithm(cons, "=", idlePower),
+                        ICF.arithm(cons, "=", 0));
+                powList.add(cons);
+            }
+            int vmPow = 0;
+            for (VM v : rp.getFutureRunningVMs()) {  // VMs consumption
+                int pow = mo.getAttributes().getInteger(v, "power");
+                /*IntVar cons = VF.fixed(rp.makeVarLabel("powerConsumption(" + v + ")"), pow, rp.getSolver());
+                powList.add(cons);*/
+                vmPow += pow;
+            }
+            // Post the constraint
+            solver.post(ICF.sum(powList.toArray(new IntVar[powList.size()]), "<=", VF.fixed(maxDiscretePower - vmPow, solver)));
         }
 
         return true;
@@ -171,6 +197,7 @@ public class CEnergyView implements ChocoView {
 
         @Override
         public SolverViewBuilder build(final ModelView v) throws SchedulerException {
+            //return new DelegatedBuilder(v.getIdentifier(), Arrays.asList(CPowerView.VIEW_ID)) {
             return new DelegatedBuilder(v.getIdentifier(), Collections.emptyList()) {
                 @Override
                 public ChocoView build(ReconfigurationProblem r) throws SchedulerException {

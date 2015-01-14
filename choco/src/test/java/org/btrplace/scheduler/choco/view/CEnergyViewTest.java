@@ -1,11 +1,9 @@
 package org.btrplace.scheduler.choco.view;
 
 import org.btrplace.model.*;
-import org.btrplace.model.constraint.Ban;
 import org.btrplace.model.constraint.MinMTTR;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.model.view.power.PowerBudget;
 import org.btrplace.plan.ReconfigurationPlan;
@@ -25,7 +23,7 @@ import java.util.List;
 public class CEnergyViewTest {
 
     @Test
-    public void Test() {
+    public void DiscreteTest() {
 
         // Config
         int nbSrcNodes = 3;
@@ -38,7 +36,7 @@ public class CEnergyViewTest {
         // Define nodes and vms attributes in watts
         int nodeIdlePower = 110;
         int vmPower = 15;
-        int maxConsumption = ((nodeIdlePower + (vmPower*nbVMPerSrcNode)) * nbSrcNodes * 2) + 1;
+        int maxConsumption = ((nodeIdlePower + (vmPower*nbVMPerSrcNode)) * nbSrcNodes) + (nodeIdlePower*nbSrcNodes);
 
         // New default model
         Model mo = new DefaultModel();
@@ -72,26 +70,20 @@ public class CEnergyViewTest {
         EnergyView energyView = new EnergyView(maxConsumption);
         mo.attach(energyView);
 
-        NetworkView nv = new NetworkView();
-        mo.attach(nv);
-
         // Set resolution parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
         ps.setTimeLimit(5);
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Register new PowerBudget constraint
         ps.getConstraintMapper().register(new CPowerBudget.Builder());
 
-
         List<SatConstraint> cstrs = new ArrayList<>();
-        for (VM vm : vms) {
-            cstrs.add(new Ban(vm, srcNodes));
-        }
+        //for (VM vm : vms) { cstrs.add(new Ban(vm, srcNodes)); }
 
-        // Add a power budget
-        cstrs.add(new PowerBudget(0, 100, (2*(nodeIdlePower + (vmPower*3)))));
+        // Add a discrete power budget (2 nodes / 3 VMs per node)
+        cstrs.add(new PowerBudget((2*(nodeIdlePower + (vmPower*3)))));
 
         // Set the objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);

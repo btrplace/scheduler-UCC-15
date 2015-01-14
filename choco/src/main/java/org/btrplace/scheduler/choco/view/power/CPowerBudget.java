@@ -37,7 +37,12 @@ public class CPowerBudget implements ChocoConstraint {
             throw new SchedulerException(rp.getSourceModel(), "View '" + EnergyView.VIEW_ID + "' is required but missing");
         }
 
-        energyView.addRestriction(pb.getStart(), pb.getEnd(), pb.getBudget());
+        // Add the power budget restriction (discrete or continuous)
+        if (pb.isContinuous()) {
+            energyView.cap(pb.getStart(), pb.getEnd(), pb.getBudget());
+        } else {
+            energyView.cap(pb.getBudget());
+        }
 
         return true;
     }
