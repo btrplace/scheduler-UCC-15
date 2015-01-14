@@ -38,6 +38,7 @@ public class CEnergyViewTest {
         int vmPower = 15;
         int maxConsumption = ((nodeIdlePower + (vmPower*nbVMPerSrcNode)) * nbSrcNodes) + (nodeIdlePower*nbSrcNodes);
 
+
         // New default model
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
@@ -52,13 +53,6 @@ public class CEnergyViewTest {
         List<VM> vms = new ArrayList<>();
         for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
 
-        // Put vms attributes
-        for (VM vm : vms) { mo.getAttributes().put(vm, "power", vmPower); }
-
-        // Put nodes attributes
-        for (Node n : srcNodes) { mo.getAttributes().put(n, "idlePower", nodeIdlePower); }
-        for (Node n : dstNodes) { mo.getAttributes().put(n, "idlePower", nodeIdlePower); }
-
         // Add CPU resource view
         ShareableResource rcCPU = new ShareableResource("cpu", 0, 0);
         for (Node n : srcNodes) { rcCPU.setCapacity(n, cpu_srcNode); }
@@ -68,6 +62,10 @@ public class CEnergyViewTest {
 
         // Add the EnergyView
         EnergyView energyView = new EnergyView(maxConsumption);
+        // Set nodes & vms consumption
+        for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
+        for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }
+        for (VM vm : vms) { energyView.setConsumption(vm, vmPower); }
         mo.attach(energyView);
 
         // Set resolution parameters

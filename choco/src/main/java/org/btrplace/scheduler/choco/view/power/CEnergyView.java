@@ -40,7 +40,7 @@ public class CEnergyView implements ChocoView {
     private Model source;
     private List<Task> tasks;
     private List<IntVar> heights;
-    private CPowerView powerView;
+    private CPowerView cPowerView;
     private int maxDiscretePower = 0;
 
     public CEnergyView(ReconfigurationProblem p, EnergyView v) throws SchedulerException {
@@ -51,14 +51,15 @@ public class CEnergyView implements ChocoView {
         tasks = new ArrayList<>();
         heights = new ArrayList<>();
 
-        // Retrieve or create CPowerView
-        powerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
-        if (powerView == null) {
-            powerView = new CPowerView(rp);
-            if (!rp.addView(powerView)) {
+        // Retrieve or create the PowerView
+        cPowerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
+        if (cPowerView == null) {
+            cPowerView = new CPowerView(rp);
+            if (!rp.addView(cPowerView)) {
                 throw new SchedulerException(rp.getSourceModel(), "Unable to attach view '" + CPowerView.VIEW_ID + "'");
             }
         }
+
     }
 
     public void cap(int start, int end, int power) {
@@ -91,54 +92,44 @@ public class CEnergyView implements ChocoView {
 
         // Add constraints for continuous model
         for (Node n : rp.getNodes()) {  // Add nodes consumption
-            if (mo.getAttributes().isSet(n, "idlePower")) {
-                IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", n, ")"));
-                solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
-                tasks.add(VariableFactory.task(powerView.getPowerStart(rp.getNode(n)), duration,
-                        powerView.getPowerEnd(rp.getNode(n))));
-                heights.add(VF.fixed(mo.getAttributes().getInteger(n, "idlePower"), solver));
-            }
-            else {
-                throw new SchedulerException(null, "Unable to retrieve attribute 'idlePower' for the node '" + n + "'");
-            }
+            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", n, ")"));
+            solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
+            tasks.add(VariableFactory.task(cPowerView.getPowerStart(rp.getNode(n)), duration,
+                    cPowerView.getPowerEnd(rp.getNode(n))));
+            heights.add(VF.fixed(ev.getConsumption(n), solver));
         }
         for (VM v : rp.getVMs()) {  // Add VMs consumption
-            if (mo.getAttributes().isSet(v, "power")) {
-                int vmPower = mo.getAttributes().getInteger(v, "power");
-                VMState currentState = rp.getSourceModel().getMapping().getState(v);
-                VMState futureState = rp.getNextState(v);
-                VMTransition vmt = rp.getVMAction(v);
+            int vmPower = ev.getConsumption(v);
+            VMState currentState = rp.getSourceModel().getMapping().getState(v);
+            VMState futureState = rp.getNextState(v);
+            VMTransition vmt = rp.getVMAction(v);
 
-                IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
-                solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
+            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
+            solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
 
-                // Relocate or Migrate
-                if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
-                    //TODO: in the case of a live migration, add the transfer overhead
-                    tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                    heights.add(VF.fixed(vmPower, solver));
+            // Relocate or Migrate
+            if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
+                //TODO: in the case of a live migration, add the transfer overhead
+                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
 
-                // Boot / Resume
-                } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
-                           (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
-                    tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                    heights.add(VF.fixed(vmPower, solver));
+            // Boot / Resume
+            } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
+                       (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
+                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
 
-                // Halt / Kill / Sleep
-                } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
-                           (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
-                           (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
-                    tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                    heights.add(VF.fixed(vmPower, solver));
+            // Halt / Kill / Sleep
+            } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
+                       (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
+                       (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
+                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
 
-                // Resume
-                } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
-                    tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                    heights.add(VF.fixed(vmPower, solver));
-                }
-            }
-            else {
-                throw new SchedulerException(null, "Unable to retrieve attribute 'powerConsumption' for the vm '" + v + "'");
+            // Resume
+            } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
+                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
             }
         }
         // Post the resulting cumulative constraint
@@ -155,22 +146,19 @@ public class CEnergyView implements ChocoView {
         if (maxDiscretePower > 0) {
             List<IntVar> powList = new ArrayList<>();
             for (Node n : rp.getNodes()) {  // Nodes consumption
-                int idlePower = mo.getAttributes().getInteger(n, "idlePower");
+                int idlePower = ev.getConsumption(n);
                 IntVar cons = VF.bounded(rp.makeVarLabel("powerConsumption(" + n + ")"), 0, idlePower, rp.getSolver());
                 LCF.ifThenElse(rp.getNodeAction(n).getState(),
                         ICF.arithm(cons, "=", idlePower),
                         ICF.arithm(cons, "=", 0));
                 powList.add(cons);
             }
-            int vmPow = 0;
+            int vmsPow = 0;
             for (VM v : rp.getFutureRunningVMs()) {  // VMs consumption
-                int pow = mo.getAttributes().getInteger(v, "power");
-                /*IntVar cons = VF.fixed(rp.makeVarLabel("powerConsumption(" + v + ")"), pow, rp.getSolver());
-                powList.add(cons);*/
-                vmPow += pow;
+                vmsPow += ev.getConsumption(v);
             }
             // Post the constraint
-            solver.post(ICF.sum(powList.toArray(new IntVar[powList.size()]), "<=", VF.fixed(maxDiscretePower - vmPow, solver)));
+            solver.post(ICF.sum(powList.toArray(new IntVar[powList.size()]), "<=", VF.fixed(maxDiscretePower - vmsPow, solver)));
         }
 
         return true;
