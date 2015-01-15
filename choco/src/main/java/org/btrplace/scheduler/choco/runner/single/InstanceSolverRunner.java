@@ -38,7 +38,6 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.measure.IMeasures;
-import org.chocosolver.solver.trace.Chatterbox;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -137,19 +136,6 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
             }
         });
 
-        if (params.getVerbosity() >=1) {
-            Chatterbox.showSolutions(rp.getSolver());
-        }
-        if (params.getVerbosity() >= 2) {
-            //every second
-            Chatterbox.showStatisticsDuringResolution(rp.getSolver(), 1000);
-        }
-        if (params.getVerbosity() >= 3) {
-            Chatterbox.showDecisions(rp.getSolver());
-        }
-        if (params.getVerbosity() >= 4) {
-            Chatterbox.showContradiction(rp.getSolver());
-        }
         //The actual solving process
         ReconfigurationPlan p = rp.solve(params.getTimeLimit(), params.doOptimize());
         return new InstanceResult(p, makeStatistics());

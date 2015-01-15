@@ -29,6 +29,7 @@ import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.duration.DurationEvaluators;
 import org.btrplace.scheduler.choco.transition.*;
 import org.btrplace.scheduler.choco.view.*;
+import org.chocosolver.solver.trace.Chatterbox;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.chocosolver.solver.ResolutionPolicy;
@@ -104,6 +105,7 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
 
     private SolverViewsManager viewsManager;
 
+    private Parameters ps;
     /**
      * Make a new RP where the next state for every VM is indicated.
      * If the state for a VM is omitted, it is considered as unchanged
@@ -134,7 +136,7 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
         this.amFactory = ps.getTransitionFactory();
         model = m;
         durEval = ps.getDurationEvaluators();
-
+        this.ps = ps;
         solver = new Solver();
         solver.set(new AllSolutionsRecorder(solver));
         start = VariableFactory.fixed(makeVarLabel("RP.start"), 0, solver);
@@ -188,6 +190,20 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
         }
 
         appendNaiveBranchHeuristic();
+
+        if (ps.getVerbosity() >=1) {
+            Chatterbox.showSolutions(solver);
+        }
+        if (ps.getVerbosity() >= 2) {
+            //every second
+            Chatterbox.showStatisticsDuringResolution(solver, 1000);
+        }
+        if (ps.getVerbosity() >= 3) {
+            Chatterbox.showDecisions(solver);
+        }
+        if (ps.getVerbosity() >= 4) {
+            Chatterbox.showContradiction(solver);
+        }
 
         getLogger().debug("{} constraints; {} integers", solver.getNbCstrs(), solver.retrieveIntVars().length + solver.retrieveBoolVars().length);
 
