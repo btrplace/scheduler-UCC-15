@@ -41,14 +41,43 @@ public class CNetworkView implements ChocoView {
     private Model source;
     List<Task> tasksList;
     List<IntVar> heightsList;
+    List<List<Task>> tasksPerLink;
 
     public CNetworkView(ReconfigurationProblem p, NetworkView n) throws SchedulerException {
         net = n;
         rp = p;
         solver = p.getSolver();
         source = p.getSourceModel();
-        tasksList = new ArrayList<Task>();
-        heightsList = new ArrayList<IntVar>();
+        tasksList = new ArrayList<>();
+        heightsList = new ArrayList<>();
+        tasksPerLink = new ArrayList<>();
+    }
+
+    public List<List<Task>> getTasksPerLink() {
+
+        List<Port> links = new ArrayList<>();
+        for (Port si : net.getAllInterfaces()) {
+            if (!links.contains(si) && !links.contains(si.getRemote())) {
+                links.add(si);
+                for (VM vm : rp.getVMs()) {
+                    VMTransition a = rp.getVMAction(vm);
+
+                    if (a != null && a instanceof MigrateVMTransition &&
+                            (a.getCSlice().getHoster().getValue() != a.getDSlice().getHoster().getValue())) {
+
+                        Node src = source.getMapping().getVMLocation(vm);
+                        Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
+
+                        if (net.getPath(src, dst).contains(si)) {
+                            tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
+                        }
+                    }
+                }
+                if (!tasksList.isEmpty()) tasksPerLink.add(new ArrayList<Task>(tasksList));
+                tasksList.clear();
+            }
+        }
+        return tasksPerLink;
     }
 
     @Override
@@ -89,6 +118,7 @@ public class CNetworkView implements ChocoView {
                             true
                     ));
                 }
+                tasksPerLink.add(new ArrayList<Task>(tasksList));
 
                 tasksList.clear();
                 heightsList.clear();

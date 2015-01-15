@@ -18,7 +18,9 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.*;
@@ -66,17 +68,33 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
             }
         }
 
-        // Strategy for max migration BW
-        if (! bw.isEmpty()) {
-            strategies.add(ISF.custom(
-                    IntStrategyFactory.minDomainSize_var_selector(),
-                    IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
-                    IntStrategyFactory.reverse_split(), // Split from max
-                    bw.toArray(new IntVar[bw.size()])
-            ));
+        CNetworkView cnv = (CNetworkView) rp.getView(CNetworkView.VIEW_ID);
+        if (cnv == null) {
+            throw new SchedulerException(rp.getSourceModel(), "Solver View '" + CNetworkView.VIEW_ID + "' is required but missing");
+        }
+        List<List<Task>> tasksPerLink = cnv.getTasksPerLink();
+
+        if (!tasksPerLink.isEmpty()) {
+
+            Collections.sort(tasksPerLink, (tasks, tasks2) -> tasks2.size() - tasks.size());
+
+            for (List<Task> tasks : tasksPerLink) {
+                if (!tasks.isEmpty()) {
+                    List<IntVar> endVars = new ArrayList<>();
+                    for (Task t : tasks) {
+                        endVars.add(t.getEnd());
+                    }
+                    strategies.add(ISF.custom(
+                            IntStrategyFactory.minDomainSize_var_selector(),
+                            IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                            IntStrategyFactory.split(), // Split from max
+                            endVars.toArray(new IntVar[endVars.size()])
+                    ));
+                }
+            }
         }
 
-        // Strategy for min migration start time
+        /* Strategy for min migration start time
         if (! start.isEmpty()) {
             strategies.add(ISF.custom(
                     IntStrategyFactory.minDomainSize_var_selector(),
@@ -85,13 +103,14 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
                     start.toArray(new IntVar[start.size()])
             ));
         }
+        */
 
         // Add strategy for the cost constraint
         strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
 
         // Add all defined strategies
-        //s.getSearchLoop().set(new StrategiesSequencer(s.getEnvironment(),strategies.toArray(new AbstractStrategy[strategies.size()])));
-        s.set(strategies.toArray(new AbstractStrategy[strategies.size()]));
+        s.getSearchLoop().set(new StrategiesSequencer(s.getEnvironment(),strategies.toArray(new AbstractStrategy[strategies.size()])));
+        //s.set(strategies.toArray(new AbstractStrategy[strategies.size()]));
 
         postCostConstraints();
 
@@ -100,7 +119,6 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
 
     @Override
     public void postCostConstraints() {
-
     }
 
     @Override
