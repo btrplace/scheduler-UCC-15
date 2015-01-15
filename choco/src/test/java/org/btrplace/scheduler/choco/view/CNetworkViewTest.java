@@ -10,6 +10,7 @@ import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCStaticRouting;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
+import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
@@ -277,9 +278,9 @@ public class CNetworkViewTest {
 
         // Add a simple network
         NetworkView net = new NetworkView();
-        Switch s1 = net.newSwitch(2000);
-        Switch sm = net.newSwitch(2000);
-        Switch s2 = net.newSwitch(2000);
+        Switch s1 = net.newSwitch(10000);
+        Switch sm = net.newSwitch(10000);
+        Switch s2 = net.newSwitch(10000);
         mo.attach(net);
 
         // Connect switches and nodes
@@ -310,7 +311,7 @@ public class CNetworkViewTest {
         obj.inject(rp);
 
         // Solve
-        ReconfigurationPlan p = rp.solve(0, false);
+        ReconfigurationPlan p = rp.solve(60, false);
 
         Assert.assertNotNull(p);
 
@@ -366,16 +367,22 @@ public class CNetworkViewTest {
         List<Node> srcNodes = new ArrayList<>();
         List<Node> dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
-        for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+        for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOfflineNode(dstNodes.get(i)); }
 
         // Create running VMs: 4 per source node
         List<VM> vms = new ArrayList<>();
         for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
 
-        // Put vm attributes
+        // Put attributes
         for (VM vm : vms) {
             mo.getAttributes().put(vm, "memUsed", memUsed);
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
+        }
+        for (Node n : dstNodes) {
+            mo.getAttributes().put(n, "boot", 120); // ~2 minutes to boot
+        }
+        for (Node n : srcNodes) {
+            mo.getAttributes().put(n, "shutdown", 30); // ~30 seconds to shutdown
         }
 
         // Add resource views
@@ -395,6 +402,7 @@ public class CNetworkViewTest {
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
         ps.setTimeLimit(5);
+        //ps.setMaxEnd();
         ps.doOptimize(false);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
@@ -414,6 +422,7 @@ public class CNetworkViewTest {
             ReconfigurationPlan p = sc.solve(i);
             Assert.assertNotNull(p);
             System.err.println(p);
+            ActionsToCSV.convert(p.getActions(), "/user/vkherbac/home/Documents/btrplace/scheduler-network/api/src/main/java/org/btrplace/plan/gantt/test.csv");
             System.err.flush();
 
         } finally {
