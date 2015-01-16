@@ -3,12 +3,11 @@ package org.btrplace.scheduler.choco.view.net;
 import org.btrplace.model.Mapping;
 import org.btrplace.model.Model;
 import org.btrplace.model.VM;
-import org.btrplace.model.view.net.MaxBWObjective;
+import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
 import org.btrplace.scheduler.choco.transition.Transition;
-import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
@@ -23,7 +22,10 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VariableFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
 
 /**
  * Created by vkherbac on 07/01/15.
@@ -57,7 +59,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
         rp.getSolver().post(costConstraint);
         rp.setObjective(true, cost);
 
-        // Add migration strategies
+        /* Add migration strategies
         List<IntVar> start = new ArrayList<IntVar>();
         List<IntVar> bw = new ArrayList<IntVar>();
         Set<VM> manageableVMs = new HashSet<>(rp.getManageableVMs());
@@ -66,21 +68,22 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                 start.add(vmt.getStart());
                 bw.add(((MigrateVMTransition) vmt).getBandwidth());
             }
-        }
+        }*/
 
+        List<IntVar> endVars = new ArrayList<>();
+
+        // End vars per link
         CNetworkView cnv = (CNetworkView) rp.getView(CNetworkView.VIEW_ID);
         if (cnv == null) {
             throw new SchedulerException(rp.getSourceModel(), "Solver View '" + CNetworkView.VIEW_ID + "' is required but missing");
         }
         List<List<Task>> tasksPerLink = cnv.getTasksPerLink();
-
         if (!tasksPerLink.isEmpty()) {
-
             Collections.sort(tasksPerLink, (tasks, tasks2) -> tasks2.size() - tasks.size());
 
             for (List<Task> tasks : tasksPerLink) {
                 if (!tasks.isEmpty()) {
-                    List<IntVar> endVars = new ArrayList<>();
+                    endVars.clear();
                     for (Task t : tasks) {
                         endVars.add(t.getEnd());
                     }
@@ -92,22 +95,37 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                     ));
                 }
             }
+        }
 
-            for (VMTransition a : rp.getVMActions()) {
+        /* End vars for all VMs actions
+        endVars.clear();
+        for (VMTransition a : rp.getVMActions()) {
+            endVars.add(a.getEnd());
+        }
+        strategies.add(ISF.custom(
+                IntStrategyFactory.minDomainSize_var_selector(),
+                IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                IntStrategyFactory.split(), // Split from max
+                endVars.toArray(new IntVar[endVars.size()])
+        ));
+        */
 
+        /* End vars for all Nodes actions
+        endVars.clear();
+        for (NodeTransition a : rp.getNodeActions()) {
+            if (a instanceof ShutdownNode) {
+                endVars.add(a.getEnd());
             }
         }
-
-        /* Strategy for min migration start time
-        if (! start.isEmpty()) {
+        if (!endVars.isEmpty()) {
             strategies.add(ISF.custom(
                     IntStrategyFactory.minDomainSize_var_selector(),
-                    IntStrategyFactory.mid_value_selector(),//.min_value_selector(),
-                    IntStrategyFactory.split(), // Split from min
-                    start.toArray(new IntVar[start.size()])
+                    IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                    IntStrategyFactory.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
             ));
-        }
-        */
+        }*/
+
 
         // Add strategy for the cost constraint
         strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
@@ -137,7 +155,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
     public static class Builder implements ChocoConstraintBuilder {
         @Override
         public Class<? extends org.btrplace.model.constraint.Constraint> getKey() {
-            return MaxBWObjective.class;
+            return MinMTTRObjective.class;
         }
 
         @Override
