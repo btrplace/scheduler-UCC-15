@@ -4,7 +4,7 @@ import org.btrplace.model.*;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
-import org.btrplace.model.view.net.SyncEnd;
+import org.btrplace.model.constraint.SyncEnd;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
@@ -13,7 +13,6 @@ import org.btrplace.scheduler.choco.DefaultReconfigurationProblemBuilder;
 import org.btrplace.scheduler.choco.Parameters;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
-import org.btrplace.scheduler.choco.view.net.CSyncEnd;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -99,7 +98,7 @@ public class CSyncEndTest {
 
         // Set objective
         CMinMTTR obj = new CMinMTTR();
-        //CMaxBWObjective obj = new CMaxBWObjective();
+        //CMinMTTRObjective obj = new CMinMTTRObjective();
         obj.inject(rp);
 
         // Solve

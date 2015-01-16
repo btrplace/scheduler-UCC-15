@@ -20,9 +20,6 @@ package org.btrplace.model.constraint;
 
 import org.btrplace.model.Node;
 import org.btrplace.model.VM;
-import org.btrplace.model.constraint.SatConstraint;
-import org.btrplace.model.constraint.SatConstraintChecker;
-import org.btrplace.model.view.net.SyncEndChecker;
 
 import java.util.*;
 

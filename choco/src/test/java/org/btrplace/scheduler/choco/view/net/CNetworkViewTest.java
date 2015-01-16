@@ -2,9 +2,10 @@ package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
+import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.MaxBWObjective;
+import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCStaticRouting;
@@ -14,8 +15,6 @@ import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
-import org.btrplace.scheduler.choco.view.net.CMaxBWObjective;
-import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
@@ -23,6 +22,7 @@ import org.chocosolver.solver.variables.impl.IntervalIntVarImpl;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -307,7 +307,7 @@ public class CNetworkViewTest {
 
         // Set objective
         //CMinMTTR obj = new CMinMTTR();
-        CMaxBWObjective obj = new CMaxBWObjective();
+        CMinMTTRObjective obj = new CMinMTTRObjective();
         obj.inject(rp);
 
         // Solve
@@ -349,6 +349,8 @@ public class CNetworkViewTest {
 
     @Test
     public void VHPCTest() throws SchedulerException,ContradictionException {
+
+        String path = new File("").getAbsolutePath();
 
         // Init mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
@@ -397,11 +399,12 @@ public class CNetworkViewTest {
         // Add a NetworkView view using the static VHPC routing
         NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
         mo.attach(net);
+        net.generateDot(path + "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/topology.dot", false);
 
         // Set the custom migration transition
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
-        ps.setTimeLimit(5);
+        ps.setTimeLimit(50);
         //ps.setMaxEnd();
         ps.doOptimize(false);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
@@ -412,17 +415,25 @@ public class CNetworkViewTest {
         for (VM vm : vms) {
             cstrs.add(new Fence(vm, Collections.singleton(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm))))));
         }
+        // Shutdown source nodes
+        for (Node n : srcNodes) {
+            cstrs.add(new Offline(n));
+        }
+
+        // TODO: debug heuristics
+        //cstrs.add(new MaxOnline(mo.getMapping().getAllNodes(), nbSrcNodes + 4, true));
 
         // Set custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        sc.getConstraintMapper().register(new CMaxBWObjective.Builder());
-        Instance i = new Instance(mo, cstrs,  new MaxBWObjective());
+        sc.getConstraintMapper().register(new CMinMTTRObjective.Builder());
+        Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
 
         try {
             ReconfigurationPlan p = sc.solve(i);
             Assert.assertNotNull(p);
+            ActionsToCSV.convert(p.getActions(), path +
+                    "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/actions.csv");
             System.err.println(p);
-            ActionsToCSV.convert(p.getActions(), "src/test/java/org/btrplace/scheduler/choco/view/plan/gantt/test.csv");
             System.err.flush();
 
         } finally {

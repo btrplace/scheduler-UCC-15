@@ -21,7 +21,7 @@ package org.btrplace.scheduler.choco.constraint;
 import org.btrplace.model.Model;
 import org.btrplace.model.VM;
 import org.btrplace.model.constraint.Constraint;
-import org.btrplace.model.view.net.SyncEnd;
+import org.btrplace.model.constraint.SyncEnd;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
