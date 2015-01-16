@@ -28,14 +28,14 @@ import java.util.*;
 /**
  * Created by vkherbac on 07/01/15.
  */
-public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.CObjective {
+public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constraint.CObjective {
 
     private ReconfigurationProblem rp;
     private Constraint costConstraint;
     private boolean costActivated = false;
     private List <AbstractStrategy> strategies;
 
-    public CMaxBWObjective() {
+    public CMinMTTRObjective() {
         strategies = new ArrayList<>();
     }
 
@@ -92,6 +92,10 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
                     ));
                 }
             }
+
+            for (VMTransition a : rp.getVMActions()) {
+
+            }
         }
 
         /* Strategy for min migration start time
@@ -137,8 +141,8 @@ public class CMaxBWObjective implements org.btrplace.scheduler.choco.constraint.
         }
 
         @Override
-        public CMaxBWObjective build(org.btrplace.model.constraint.Constraint cstr) {
-            return new CMaxBWObjective();
+        public CMinMTTRObjective build(org.btrplace.model.constraint.Constraint cstr) {
+            return new CMinMTTRObjective();
         }
     }
 }

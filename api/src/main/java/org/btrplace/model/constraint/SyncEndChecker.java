@@ -16,20 +16,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.model.view.net;
+package org.btrplace.model.constraint;
 
-import org.btrplace.model.constraint.OptConstraint;
+import org.btrplace.model.constraint.AllowAllConstraintChecker;
+import org.btrplace.model.constraint.SyncEnd;
 
 /**
- * An optimization constraint that minimizes the time to repair a non-viable model.
- * In practice it minimizes the sum of the ending moment for each actions.
- *
- * @author Fabien Hermenier
+ * Created by vkherbac on 01/09/14.
  */
-public class MaxBWObjective extends OptConstraint {
-
-    @Override
-    public String id() {
-        return "maximizeBW";
+public class SyncEndChecker extends AllowAllConstraintChecker<SyncEnd> {
+    /**
+     * Make a new checker.
+     *
+     * @param se the constraint associated to the checker.
+     */
+    public SyncEndChecker(SyncEnd se) {
+        super(se);
     }
 }

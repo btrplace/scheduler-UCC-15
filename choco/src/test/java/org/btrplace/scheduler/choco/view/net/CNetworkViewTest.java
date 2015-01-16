@@ -1,4 +1,4 @@
-package org.btrplace.scheduler.choco.view;
+package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
@@ -422,7 +422,7 @@ public class CNetworkViewTest {
             ReconfigurationPlan p = sc.solve(i);
             Assert.assertNotNull(p);
             System.err.println(p);
-            ActionsToCSV.convert(p.getActions(), "/user/vkherbac/home/Documents/btrplace/scheduler-network/api/src/main/java/org/btrplace/plan/gantt/test.csv");
+            ActionsToCSV.convert(p.getActions(), "src/test/java/org/btrplace/scheduler/choco/view/plan/gantt/test.csv");
             System.err.flush();
 
         } finally {

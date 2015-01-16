@@ -18,18 +18,18 @@
 
 package org.btrplace.model.view.net;
 
-import org.btrplace.model.constraint.AllowAllConstraintChecker;
+import org.btrplace.model.constraint.OptConstraint;
 
 /**
- * Created by vkherbac on 01/09/14.
+ * An optimization constraint that minimizes the time to repair a non-viable model.
+ * In practice it minimizes the sum of the ending moment for each actions.
+ *
+ * @author Fabien Hermenier
  */
-public class SyncEndChecker extends AllowAllConstraintChecker<SyncEnd> {
-    /**
-     * Make a new checker.
-     *
-     * @param se the constraint associated to the checker.
-     */
-    public SyncEndChecker(SyncEnd se) {
-        super(se);
+public class MinMTTRObjective extends OptConstraint {
+
+    @Override
+    public String id() {
+        return "maximizeBW";
     }
 }
