@@ -2,6 +2,7 @@ package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
+import org.btrplace.model.constraint.MaxOnline;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
@@ -23,9 +24,7 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vkherbac on 30/12/14.
@@ -355,8 +354,8 @@ public class CNetworkViewTest {
         // Init mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
         int cpu_vm = 2, cpu_node = 8;  // VMs: 2 VCPUs, Nodes: 8 CPUs
-        int nbSrcNodes = 15;
-        int nbVMs = nbSrcNodes * 4;
+        int nbSrcNodes = 4;
+        int nbVMs = nbSrcNodes * 2;
         // Init memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
         double dirtyRate = 21.44; // 21.44 mB/s,
@@ -381,10 +380,10 @@ public class CNetworkViewTest {
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
         }
         for (Node n : dstNodes) {
-            mo.getAttributes().put(n, "boot", 120); // ~2 minutes to boot
+            mo.getAttributes().put(n, "boot", 1); // ~2 minutes to boot
         }
         for (Node n : srcNodes) {
-            mo.getAttributes().put(n, "shutdown", 30); // ~30 seconds to shutdown
+            mo.getAttributes().put(n, "shutdown", 1); // ~30 seconds to shutdown
         }
 
         // Add resource views
@@ -403,12 +402,13 @@ public class CNetworkViewTest {
 
         // Set the custom migration transition
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(50);
-        //ps.setMaxEnd();
+        ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
         ps.doOptimize(false);
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
-        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+
+        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         List<SatConstraint> cstrs = new ArrayList<>();
         // Migrate all VMs to destination nodes
@@ -421,7 +421,10 @@ public class CNetworkViewTest {
         }
 
         // TODO: debug heuristics
-        //cstrs.add(new MaxOnline(mo.getMapping().getAllNodes(), nbSrcNodes + 4, true));
+        Set<Node> nodesSet = new HashSet<Node>();
+        nodesSet.addAll(srcNodes);
+        nodesSet.addAll(dstNodes);
+        cstrs.add(new MaxOnline(nodesSet, nbSrcNodes + 1, true));
 
         // Set custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);

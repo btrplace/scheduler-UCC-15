@@ -116,7 +116,7 @@ public class NetworkView implements ModelView, Cloneable {
             for (Node n : nodes) {
                 dot.append("node").
                         append(String.valueOf(n.id())).
-                        append(" [shape=box, color=green, label=\"model.Node ").
+                        append(" [shape=box, color=green, label=\"Node ").
                         append(String.valueOf(n.id())).
                         append("\"];\n");
             }
@@ -125,10 +125,10 @@ public class NetworkView implements ModelView, Cloneable {
                 numLink = 0;
                 dot.append("switch").
                         append(String.valueOf(s.id())).
-                        append(" [shape=record, color=blue, label=\"model.Switch ").
+                        append(" [shape=record, color=blue, label=\"Switch ").
                         append(String.valueOf(s.id())).append("\\n[").
-                        append(bitsToString(s.getCapacity())).
-                        append("/s]");
+                        append(s.getCapacity() <= 0 ? "Unlimited" : bitsToString(s.getCapacity())+"/s").
+                        append("]");
                 for (Port p : s.getPorts()) {
                     numLink++;
                     dot.append("|<p").append(String.valueOf(numLink)).append(">/").append(String.valueOf(numLink));

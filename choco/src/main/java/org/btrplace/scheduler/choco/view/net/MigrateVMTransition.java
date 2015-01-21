@@ -180,17 +180,6 @@ public class MigrateVMTransition implements KeepRunningVM {
             s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", ((dirtyRate * 8))));
             s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
             */
-
-            /* Real
-            double precision = 1.0e-2;
-            //RealVar realDuration = VF.real("realDuration_" + toString(), start.getLB(), end.getUB(), precision, s);
-            RealVar realDuration = VF.real(duration, precision);
-            RealVar realBandwidth = VF.real(bandwidth, precision);
-            RealVar realMemUsed = VF.real(memUsed, precision);
-            RealVar[] realVars = new RealVar[]{realBandwidth, realMemUsed, realDuration, };
-            s.post(new RealConstraint("realCstrDuration" , "{0}=({1}/{2})+"+dirtyRate, Ibex.HC4, realVars));
-            duration = (IntVar) realDuration;
-            */
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
