@@ -7,6 +7,8 @@ import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
+import org.btrplace.scheduler.choco.transition.NodeTransition;
+import org.btrplace.scheduler.choco.transition.ShutdownableNode;
 import org.btrplace.scheduler.choco.transition.Transition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
@@ -16,6 +18,7 @@ import org.chocosolver.solver.search.strategy.IntStrategyFactory;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VariableFactory;
 
 import java.util.ArrayList;
@@ -49,14 +52,14 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
 
         // Set objective: Terminate all VM actions ASAP
         for (Transition m : rp.getVMActions()) { endVars.add(m.getEnd()); }
-        //for (Transition m : rp.getNodeActions()) { endVars.add(m.getEnd()); }
+        for (Transition m : rp.getNodeActions()) { endVars.add(m.getEnd()); }
         IntVar[] costs = endVars.toArray(new IntVar[endVars.size()]);
         IntVar cost = VariableFactory.bounded(rp.makeVarLabel("costEndVars"), 0, Integer.MAX_VALUE / 100, s);
         costConstraint = IntConstraintFactory.sum(costs, cost);
         rp.getSolver().post(costConstraint);
         rp.setObjective(true, cost);
 
-        /* End vars per link
+        // End vars per link
         endVars.clear();
         CNetworkView cnv = (CNetworkView) rp.getView(CNetworkView.VIEW_ID);
         if (cnv == null) {
@@ -81,8 +84,8 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                 }
             }
         }
-        */
 
+        /* End vars for all actions
         endVars.clear();
         for (Transition m : rp.getVMActions()) { endVars.add(m.getEnd()); }
         for (Transition m : rp.getNodeActions()) { endVars.add(m.getEnd()); }
@@ -92,44 +95,9 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                 IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
                 IntStrategyFactory.split(), // Split from max
                 endVars.toArray(new IntVar[endVars.size()])
-        ));*/
-        strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
-
-        /*
-         //Per Node migrations
-        for (Node n : rp.getNodes()) {
-            endVars.clear();
-            for (VMTransition a : rp.getVMActions()) {
-                if (rp.getNode(n) == (a.getCSlice().getHoster().getValue())) {
-                    endVars.add(a.getEnd());
-                }
-            }
-            if (!endVars.isEmpty()) {
-                //endVars.add(rp.getNodeAction(n).getHostingEnd());
-                strategies.add(ISF.custom(
-                        IntStrategyFactory.minDomainSize_var_selector(),
-                        IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
-                        IntStrategyFactory.split(), // Split from max
-                        endVars.toArray(new IntVar[endVars.size()])
-                ));
-            }
-        }
-
-        // End vars for all Nodes shutdown actions
-       // endVars.clear();
-        for (NodeTransition a : rp.getNodeActions()) {
-            if (a instanceof ShutdownableNode) {
-                endVars.add(a.getHostingEnd());
-            }
-        }
-        if (!endVars.isEmpty()) {
-            strategies.add(ISF.custom(
-                    IntStrategyFactory.minDomainSize_var_selector(),
-                    IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
-                    IntStrategyFactory.split(), // Split from max
-                    endVars.toArray(new IntVar[endVars.size()])
-            ));
-        }*/
+        ));
+        //strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
+        */
 
         /* End vars for all VMs actions
         endVars.clear();
@@ -142,6 +110,22 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                 IntStrategyFactory.split(), // Split from max
                 endVars.toArray(new IntVar[endVars.size()])
         ));*/
+
+        // End vars for all Nodes shutdown actions
+        endVars.clear();
+        for (NodeTransition a : rp.getNodeActions()) {
+            if (a instanceof ShutdownableNode) {
+                endVars.add(a.getHostingEnd());
+            }
+        }
+        if (!endVars.isEmpty()) {
+            strategies.add(ISF.custom(
+                    IntStrategyFactory.minDomainSize_var_selector(),
+                    IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                    IntStrategyFactory.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
+            ));
+        }
 
         /* End vars for all Nodes boot actions
         endVars.clear();
@@ -159,14 +143,33 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
             ));
         }*/
 
+        /* End vars for all VMs actions per node
+        for (Node n : rp.getNodes()) {
+            endVars.clear();
+            for (VMTransition a : rp.getVMActions()) {
+                if (rp.getNode(n) == (a.getCSlice().getHoster().getValue())) {
+                    endVars.add(a.getEnd());
+                }
+            }
+            if (!endVars.isEmpty()) {
+                //endVars.add(rp.getNodeAction(n).getHostingEnd());
+                strategies.add(ISF.custom(
+                        IntStrategyFactory.minDomainSize_var_selector(),
+                        IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                        IntStrategyFactory.split(), // Split from max
+                        endVars.toArray(new IntVar[endVars.size()])
+                ));
+            }
+        }*/
+
         // Add strategy for the cost constraint
         strategies.add(ISF.custom(
                 IntStrategyFactory.minDomainSize_var_selector(),
-                IntStrategyFactory.mid_value_selector(),//.max_value_selector(),
+                IntStrategyFactory.mid_value_selector(), //.max_value_selector(),
                 IntStrategyFactory.split(), // Split from max
                 new IntVar[]{rp.getEnd()}
         ));
-       // strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
+        //strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
 
         // Add all defined strategies
         s.getSearchLoop().set(new StrategiesSequencer(s.getEnvironment(),strategies.toArray(new AbstractStrategy[strategies.size()])));
