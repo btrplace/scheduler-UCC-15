@@ -16,10 +16,12 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.model.constraint;
+package org.btrplace.model.constraint.migration;
 
 import org.btrplace.model.Node;
 import org.btrplace.model.VM;
+import org.btrplace.model.constraint.SatConstraint;
+import org.btrplace.model.constraint.SatConstraintChecker;
 
 import java.util.*;
 
@@ -29,19 +31,41 @@ import java.util.*;
  * <p>
  * Created by vkherbac on 01/09/14.
  */
-public class SyncEnd extends SatConstraint {
+public class Sync extends SatConstraint {
+
+    private boolean postCopy = false;
+
+    /**
+     * Make a new constraint.
+     *
+     * @param postCopy to specify if the post-copy migration algorithm is used (pre-copy by default)
+     * @param vms the vms to sync
+     */
+    public Sync(boolean postCopy, Collection<VM> vms) {
+        super(vms, Collections.<Node>emptyList(), true);
+        this.postCopy = postCopy;
+    }
+
+    public Sync(boolean postCopy, VM... vms) {
+        super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
+        this.postCopy = postCopy;
+    }
 
     /**
      * Make a new constraint.
      *
      * @param vms the vms to sync
      */
-    public SyncEnd(Collection<VM> vms) {
+    public Sync(Collection<VM> vms) {
         super(vms, Collections.<Node>emptyList(), true);
     }
 
-    public SyncEnd(VM... vms) {
+    public Sync(VM... vms) {
         super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
+    }
+
+    public boolean usesPostCopy() {
+        return postCopy;
     }
 
     @Override
@@ -51,11 +75,13 @@ public class SyncEnd extends SatConstraint {
 
     @Override
     public SatConstraintChecker getChecker() {
-        return new SyncEndChecker(this);
+        return new SyncChecker(this);
     }
 
     @Override
     public String toString() {
-        return "syncEnd(" + "vm=" + getInvolvedVMs() + ", " + restrictionToString() + ")";
+        return "syncEnd(" + "vms=" + getInvolvedVMs() + ", " +
+                (postCopy ? "postCopy" : "preCopy") + " algorithm, " +
+                restrictionToString() + ")";
     }
 }

@@ -16,21 +16,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.model.constraint;
+package org.btrplace.model.constraint.migration;
 
 import org.btrplace.model.constraint.AllowAllConstraintChecker;
-import org.btrplace.model.constraint.SyncEnd;
 
 /**
  * Created by vkherbac on 01/09/14.
  */
-public class SyncEndChecker extends AllowAllConstraintChecker<SyncEnd> {
+public class SyncChecker extends AllowAllConstraintChecker<Sync> {
     /**
      * Make a new checker.
      *
      * @param se the constraint associated to the checker.
      */
-    public SyncEndChecker(SyncEnd se) {
+    public SyncChecker(Sync se) {
         super(se);
     }
 }

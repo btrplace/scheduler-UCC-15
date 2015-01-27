@@ -16,29 +16,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.scheduler.choco.constraint;
+package org.btrplace.scheduler.choco.constraint.migration;
 
 import org.btrplace.model.Model;
 import org.btrplace.model.VM;
 import org.btrplace.model.constraint.Constraint;
-import org.btrplace.model.constraint.SyncEnd;
+import org.btrplace.model.constraint.migration.Sync;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
+import org.btrplace.scheduler.choco.constraint.ChocoConstraint;
+import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
 import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.LCF;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.VF;
 
 import java.util.*;
 
 /**
  * Created by vkherbac on 01/09/14.
  */
-public class CSyncEnd implements ChocoConstraint {
+public class CSync implements ChocoConstraint {
 
-    private SyncEnd sec;
+    private Sync sec;
     private List<MigrateVMTransition> migrationList;
 
     /**
@@ -46,7 +45,7 @@ public class CSyncEnd implements ChocoConstraint {
      *
      * @param sec the SyncEnd constraint to rely on
      */
-    public CSyncEnd(SyncEnd sec) {
+    public CSync(Sync sec) {
         this.sec = sec;
         migrationList = new ArrayList<>();
     }
@@ -84,12 +83,18 @@ public class CSyncEnd implements ChocoConstraint {
         for (int i=0; i<migrationList.size(); i++) {
             for (int j=i+1; j<migrationList.size(); j++) {
 
-                BoolVar moveFirst = VF.not((migrationList.get(i)).isStaying());
-                BoolVar moveSecond = VF.not((migrationList.get(j)).isStaying());
+                //BoolVar moveFirst = VF.not((migrationList.get(i)).isStaying());
+                //BoolVar moveSecond = VF.not((migrationList.get(j)).isStaying());
 
-                // If moveFirst and moveSecond, then SyncEnd
-                LCF.ifThen(LCF.and(moveFirst, moveSecond),
-                        ICF.arithm(migrationList.get(i).getEnd(), "=", migrationList.get(j).getEnd()));
+                // If moveFirst and moveSecond, then Sync
+                if (sec.usesPostCopy()) {
+                    //LCF.ifThen(LCF.and(moveFirst, moveSecond),
+                    s.post(ICF.arithm(migrationList.get(i).getStart(), "=", migrationList.get(j).getStart()));
+                }
+                else {
+                    //LCF.ifThen(LCF.and(moveFirst, moveSecond),
+                    s.post(ICF.arithm(migrationList.get(i).getEnd(), "=", migrationList.get(j).getEnd()));
+                }
             }
         }
 
@@ -102,12 +107,12 @@ public class CSyncEnd implements ChocoConstraint {
     public static class Builder implements ChocoConstraintBuilder {
         @Override
         public Class<? extends Constraint> getKey() {
-            return SyncEnd.class;
+            return Sync.class;
         }
 
         @Override
-        public CSyncEnd build(Constraint c) {
-            return new CSyncEnd((SyncEnd) c);
+        public CSync build(Constraint c) {
+            return new CSync((Sync) c);
         }
     }
 }

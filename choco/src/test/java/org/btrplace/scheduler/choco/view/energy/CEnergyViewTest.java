@@ -1,4 +1,4 @@
-package org.btrplace.scheduler.choco.view;
+package org.btrplace.scheduler.choco.view.energy;
 
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.MinMTTR;
