@@ -7,6 +7,7 @@ import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.model.view.power.PowerBudget;
 import org.btrplace.plan.ReconfigurationPlan;
+import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.DefaultParameters;
@@ -14,6 +15,7 @@ import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,9 @@ public class CEnergyViewTest {
 
     @Test
     public void DiscreteTest() {
+
+        String path = new File("").getAbsolutePath() +
+                "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
         // Config
         int nbSrcNodes = 3;
@@ -38,14 +43,12 @@ public class CEnergyViewTest {
         int vmPower = 15;
         int maxConsumption = ((nodeIdlePower + (vmPower*nbVMPerSrcNode)) * nbSrcNodes) + (nodeIdlePower*nbSrcNodes);
 
-
         // New default model
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
 
-        // Create 15 online source nodes + 15 offline destination nodes
-        List<Node> srcNodes = new ArrayList<>();
-        List<Node> dstNodes = new ArrayList<>();
+        // Create source and destination nodes
+        List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
         for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
 
@@ -60,9 +63,8 @@ public class CEnergyViewTest {
         for (VM vm : vms) { rcCPU.setConsumption(vm, cpu_vm); }
         mo.attach(rcCPU);
 
-        // Add the EnergyView
+        // Add the EnergyView and set nodes & vms consumption
         EnergyView energyView = new EnergyView(maxConsumption);
-        // Set nodes & vms consumption
         for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (VM vm : vms) { energyView.setConsumption(vm, vmPower); }
@@ -77,10 +79,8 @@ public class CEnergyViewTest {
         // Register new PowerBudget constraint
         ps.getConstraintMapper().register(new CPowerBudget.Builder());
 
-        List<SatConstraint> cstrs = new ArrayList<>();
-        //for (VM vm : vms) { cstrs.add(new Ban(vm, srcNodes)); }
-
         // Add a discrete power budget (2 nodes / 3 VMs per node)
+        List<SatConstraint> cstrs = new ArrayList<>();
         cstrs.add(new PowerBudget((2*(nodeIdlePower + (vmPower*3)))));
 
         // Set the objective
@@ -91,6 +91,7 @@ public class CEnergyViewTest {
         try {
             ReconfigurationPlan p = sc.solve(i);
             Assert.assertNotNull(p);
+            ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             System.err.println(p);
             System.err.flush();
         } catch (SchedulerException e) {
