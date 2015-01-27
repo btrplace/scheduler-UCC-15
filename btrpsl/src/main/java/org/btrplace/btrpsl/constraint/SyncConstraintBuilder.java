@@ -22,7 +22,7 @@ import org.btrplace.btrpsl.element.BtrpOperand;
 import org.btrplace.btrpsl.tree.BtrPlaceTree;
 import org.btrplace.model.VM;
 import org.btrplace.model.constraint.SatConstraint;
-import org.btrplace.model.constraint.SyncEnd;
+import org.btrplace.model.constraint.migration.Sync;
 
 import java.util.Collections;
 import java.util.List;
@@ -30,13 +30,13 @@ import java.util.List;
 /**
  * Created by vkherbac on 05/09/14.
  */
-public class SyncEndConstraintBuilder extends DefaultSatConstraintBuilder {
+public class SyncConstraintBuilder extends DefaultSatConstraintBuilder {
 
     /**
      * Make a new builder.
      */
-    public SyncEndConstraintBuilder() {
-        super("syncEnd", new ConstraintParam[]{new ListOfParam("$vms", 1, BtrpOperand.Type.VM, false)});
+    public SyncConstraintBuilder() {
+        super("Sync", new ConstraintParam[]{new ListOfParam("$vms", 1, BtrpOperand.Type.VM, false)});
     }
 
     /**
@@ -48,7 +48,7 @@ public class SyncEndConstraintBuilder extends DefaultSatConstraintBuilder {
     public List<SatConstraint> buildConstraint(BtrPlaceTree t, List<BtrpOperand> args) {
         if (checkConformance(t, args)) {
             List<VM> s = (List<VM>) params[0].transform(this, t, args.get(0));
-            return (s != null ? (List) Collections.singleton(new SyncEnd(s)) : Collections.emptyList());
+            return (s != null ? (List) Collections.singleton(new Sync(s)) : Collections.emptyList());
         }
         return Collections.emptyList();
     }
