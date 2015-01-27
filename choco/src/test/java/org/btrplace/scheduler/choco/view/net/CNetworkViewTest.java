@@ -2,7 +2,6 @@ package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
-import org.btrplace.model.constraint.MaxOnline;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
@@ -349,14 +348,18 @@ public class CNetworkViewTest {
     @Test
     public void VHPCTest() throws SchedulerException,ContradictionException {
 
-        String path = new File("").getAbsolutePath();
+        String path = new File("").getAbsolutePath() +
+                "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
-        // Init mem + cpu for VMs and Nodes
+        // Set nb of nodes and vms
+        int nbSrcNodes = 50;
+        int nbVMs = nbSrcNodes * 4;
+
+        // Set mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
         int cpu_vm = 2, cpu_node = 8;  // VMs: 2 VCPUs, Nodes: 8 CPUs
-        int nbSrcNodes = 4;
-        int nbVMs = nbSrcNodes * 2;
-        // Init memoryUsed and dirtyRate (for all VMs)
+
+        // Set memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
         double dirtyRate = 21.44; // 21.44 mB/s,
 
@@ -364,13 +367,12 @@ public class CNetworkViewTest {
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
 
-        // Create 15 online source nodes + 15 offline destination nodes
-        List<Node> srcNodes = new ArrayList<>();
-        List<Node> dstNodes = new ArrayList<>();
+        // Create online source nodes and offline destination nodes
+        List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
         for (int i=0; i<nbSrcNodes; i++) { dstNodes.add(mo.newNode()); ma.addOfflineNode(dstNodes.get(i)); }
 
-        // Create running VMs: 4 per source node
+        // Create running VMs on src nodes
         List<VM> vms = new ArrayList<>();
         for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
 
@@ -379,12 +381,8 @@ public class CNetworkViewTest {
             mo.getAttributes().put(vm, "memUsed", memUsed);
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
         }
-        for (Node n : dstNodes) {
-            mo.getAttributes().put(n, "boot", 1); // ~2 minutes to boot
-        }
-        for (Node n : srcNodes) {
-            mo.getAttributes().put(n, "shutdown", 1); // ~30 seconds to shutdown
-        }
+        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
+        for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
 
         // Add resource views
         ShareableResource rcMem = new ShareableResource("mem", 0, 0);
@@ -398,50 +396,52 @@ public class CNetworkViewTest {
         // Add a NetworkView view using the static VHPC routing
         NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
         mo.attach(net);
-        net.generateDot(path + "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/topology.dot", false);
+        net.generateDot(path + "topology.dot", false);
 
-        // Set the custom migration transition
+        // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(1);
         ps.setTimeLimit(50);
-        ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
-        ps.doOptimize(false);
+        //ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
+        ps.doOptimize(true);
 
-        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
-        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        // Set the custom migration transition
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
-        List<SatConstraint> cstrs = new ArrayList<>();
+        // Register custom objective
+        ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
+
         // Migrate all VMs to destination nodes
+        List<SatConstraint> cstrs = new ArrayList<>();
         for (VM vm : vms) {
             cstrs.add(new Fence(vm, Collections.singleton(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm))))));
         }
-        // Shutdown source nodes
-        for (Node n : srcNodes) {
-            cstrs.add(new Offline(n));
-        }
 
-        // TODO: debug heuristics
+        // Shutdown source nodes
+        for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
+
+        /* TODO: debug heuristics
         Set<Node> nodesSet = new HashSet<Node>();
         nodesSet.addAll(srcNodes);
         nodesSet.addAll(dstNodes);
         cstrs.add(new MaxOnline(nodesSet, nbSrcNodes + 1, true));
+        */
 
-        // Set custom objective
+        // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        sc.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
 
+        ReconfigurationPlan p;
         try {
-            ReconfigurationPlan p = sc.solve(i);
+            p = sc.solve(i);
             Assert.assertNotNull(p);
-            ActionsToCSV.convert(p.getActions(), path +
-                    "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/actions.csv");
+            ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             System.err.println(p);
             System.err.flush();
 
         } finally {
             System.err.println(sc.getStatistics());
         }
-        //Assert.fail();
     }
 }
