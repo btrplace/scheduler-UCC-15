@@ -19,6 +19,7 @@
 
 package org.btrplace.scheduler.choco;
 
+import org.btrplace.plan.event.*;
 import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.map.hash.TObjectIntHashMap;
 import org.btrplace.model.*;
@@ -436,8 +437,14 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
     }
 
     private boolean checkConsistency(ReconfigurationPlan p) {
+
         if (p.getDuration() != end.getValue()) {
             LOGGER.error("The plan effective duration ({}) and the computed duration ({}) mismatch", p.getDuration(), end.getValue());
+            for (Action a : p.getActions()) {
+                if (a.getEnd() > end.getValue()) {
+                    LOGGER.error("Action {} terminates after the theoretical plan termination {}", a, end.getValue());
+                }
+            }
             return false;
         }
         return true;
