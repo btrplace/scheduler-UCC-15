@@ -9,12 +9,14 @@ import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCStaticRouting;
+import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
+import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.variables.Variable;
@@ -23,7 +25,9 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by vkherbac on 30/12/14.
@@ -352,7 +356,7 @@ public class CNetworkViewTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
         // Set nb of nodes and vms
-        int nbSrcNodes = 50;
+        int nbSrcNodes = 10;
         int nbVMs = nbSrcNodes * 4;
 
         // Set mem + cpu for VMs and Nodes
@@ -362,6 +366,12 @@ public class CNetworkViewTest {
         // Set memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
         double dirtyRate = 21.44; // 21.44 mB/s,
+
+        // Define nodes and vms attributes in watts
+        int nodeIdlePower = 110;
+        int vmPower = 15;
+        int maxConsumption = (nodeIdlePower*nbSrcNodes*2)+(vmPower*nbVMs)+170;
+        maxConsumption = 2800;
 
         // New default model
         Model mo = new DefaultModel();
@@ -381,7 +391,7 @@ public class CNetworkViewTest {
             mo.getAttributes().put(vm, "memUsed", memUsed);
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
         }
-        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
+        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 30); /*~2 minutes to boot*/ }
         for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
 
         // Add resource views
@@ -393,6 +403,15 @@ public class CNetworkViewTest {
         mo.attach(rcMem);
         mo.attach(rcCPU);
 
+        // Add the EnergyView and set nodes & vms consumption
+        EnergyView energyView = new EnergyView(maxConsumption);
+        energyView.setMigrationOverhead(40); // 40% energy overhead during migration
+        energyView.setBootOverhead(30); // 30% energy overhead during boot
+        for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
+        for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }
+        for (VM vm : vms) { energyView.setConsumption(vm, vmPower); }
+        mo.attach(energyView);
+
         // Add a NetworkView view using the static VHPC routing
         NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
         mo.attach(net);
@@ -401,9 +420,9 @@ public class CNetworkViewTest {
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(1);
-        ps.setTimeLimit(50);
+        ps.setTimeLimit(60);
         //ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Set the custom migration transition
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
@@ -421,6 +440,12 @@ public class CNetworkViewTest {
         // Shutdown source nodes
         for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
 
+        // Register new PowerBudget constraint and add continuous power budgets
+        ps.getConstraintMapper().register(new CPowerBudget.Builder());
+        //cstrs.add(new PowerBudget(125, 500, 1430));
+        //cstrs.add(new PowerBudget(325, 500, 1200));
+        //cstrs.add(new PowerBudget(120, 500, 2818));
+
         /* TODO: debug heuristics
         Set<Node> nodesSet = new HashSet<Node>();
         nodesSet.addAll(srcNodes);
@@ -437,6 +462,7 @@ public class CNetworkViewTest {
             p = sc.solve(i);
             Assert.assertNotNull(p);
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
+            energyView.plotConsumption(p, path + "energy.csv");
             System.err.println(p);
             System.err.flush();
 

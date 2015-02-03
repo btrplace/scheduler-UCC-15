@@ -152,7 +152,7 @@ public class CEnergyViewTest {
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
         ps.setTimeLimit(5);
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Force symmetric migrations
         List<SatConstraint> cstrs = new ArrayList<>();
