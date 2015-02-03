@@ -39,4 +39,4 @@ p <- p + theme(plot.title = element_text(lineheight=2, face=quote(bold)))
 
 #p
 #ggsave(p, file = "./plot.eps", width = 7, height = 7, device=cairo_ps)
-ggsave(p, file = "./plot.png", width = 7, height = 7)
+ggsave(p, file = "./actions.png", width = 7, height = 7)
