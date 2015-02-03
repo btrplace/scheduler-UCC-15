@@ -14,7 +14,7 @@ import java.util.Set;
 /**
  * Created by vkherbac on 15/01/15.
  */
-public class ActionsToCSV {
+public final class ActionsToCSV {
 
     public static char SEPARATOR = ',';
 

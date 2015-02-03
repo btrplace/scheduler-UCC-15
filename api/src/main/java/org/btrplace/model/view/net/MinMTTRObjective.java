@@ -30,6 +30,6 @@ public class MinMTTRObjective extends OptConstraint {
 
     @Override
     public String id() {
-        return "maximizeBW";
+        return "MinMTTR-Network";
     }
 }

@@ -25,6 +25,7 @@ public class Precedence extends SatConstraint {
     public Precedence(Collection<VM> v, Collection<Node> n, boolean c) {
         super(v, n, c);
     }
+
     public Precedence(Collection<VM> vms) {
         super(vms, Collections.<Node>emptyList(), true);
     }

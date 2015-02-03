@@ -43,6 +43,7 @@ public class CEnergyView implements ChocoView {
     private CPowerView cPowerView;
     private int maxDiscretePower = 0;
 
+
     public CEnergyView(ReconfigurationProblem p, EnergyView v) throws SchedulerException {
         ev = v;
         rp = p;

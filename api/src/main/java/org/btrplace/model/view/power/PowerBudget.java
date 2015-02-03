@@ -38,7 +38,6 @@ public class PowerBudget extends SatConstraint {
         this.budget = budget;
     }
 
-
     public int getBudget() {
         return budget;
     }
