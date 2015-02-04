@@ -2,11 +2,11 @@ package org.btrplace.scheduler.choco.view.net;
 
 import org.btrplace.model.Model;
 import org.btrplace.model.Node;
+import org.btrplace.model.VM;
+import org.btrplace.model.view.ModelView;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Port;
 import org.btrplace.model.view.net.Switch;
-import org.btrplace.model.VM;
-import org.btrplace.model.view.ModelView;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
@@ -17,6 +17,7 @@ import org.btrplace.scheduler.choco.view.DelegatedBuilder;
 import org.btrplace.scheduler.choco.view.SolverViewBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
@@ -111,11 +112,16 @@ public class CNetworkView implements ChocoView {
                     }
                 }
                 if (!tasksList.isEmpty()) {
-                    solver.post(ICF.cumulative(
+                    solver.post(new Cumulative(
                             tasksList.toArray(new Task[tasksList.size()]),
                             heightsList.toArray(new IntVar[heightsList.size()]),
                             VF.fixed(si.getBandwidth(), solver),
                             true
+                            ,Cumulative.Filter.TIME
+                            //,Cumulative.Filter.SWEEP
+                            //,Cumulative.Filter.SWEEP_HEI_SORT
+                            ,Cumulative.Filter.NRJ
+                            ,Cumulative.Filter.HEIGHTS
                     ));
                 }
                 tasksPerLink.add(new ArrayList<Task>(tasksList));
