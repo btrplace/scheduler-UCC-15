@@ -356,7 +356,7 @@ public class CNetworkViewTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
         // Set nb of nodes and vms
-        int nbSrcNodes = 10;
+        int nbSrcNodes = 15;
         int nbVMs = nbSrcNodes * 4;
 
         // Set mem + cpu for VMs and Nodes
@@ -371,7 +371,11 @@ public class CNetworkViewTest {
         int nodeIdlePower = 110;
         int vmPower = 15;
         int maxConsumption = (nodeIdlePower*nbSrcNodes*2)+(vmPower*nbVMs)+170;
-        maxConsumption = 2800;
+        maxConsumption = 5000;
+        maxConsumption = 4000;
+        maxConsumption = 3000;
+        maxConsumption = 2700;
+        maxConsumption = 2850;
 
         // New default model
         Model mo = new DefaultModel();
@@ -391,7 +395,7 @@ public class CNetworkViewTest {
             mo.getAttributes().put(vm, "memUsed", memUsed);
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
         }
-        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 30); /*~2 minutes to boot*/ }
+        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
         for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
 
         // Add resource views
@@ -419,7 +423,7 @@ public class CNetworkViewTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(1);
+        ps.setVerbosity(2);
         ps.setTimeLimit(60);
         //ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
         ps.doOptimize(false);
@@ -443,8 +447,6 @@ public class CNetworkViewTest {
         // Register new PowerBudget constraint and add continuous power budgets
         ps.getConstraintMapper().register(new CPowerBudget.Builder());
         //cstrs.add(new PowerBudget(125, 500, 1430));
-        //cstrs.add(new PowerBudget(325, 500, 1200));
-        //cstrs.add(new PowerBudget(120, 500, 2818));
 
         /* TODO: debug heuristics
         Set<Node> nodesSet = new HashSet<Node>();
