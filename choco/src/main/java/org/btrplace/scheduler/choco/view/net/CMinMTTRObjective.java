@@ -8,12 +8,17 @@ import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
-import org.btrplace.scheduler.choco.transition.*;
+import org.btrplace.scheduler.choco.transition.ShutdownableNode;
+import org.btrplace.scheduler.choco.transition.Transition;
+import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.search.strategy.ISF;
+import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
+import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
+import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -57,7 +62,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
         rp.setObjective(true, cost);
 
 
-        // Per src nodes behaviour (Boot dst node -> Migrate -> Shutdown src node)
+        // Per node decommissioning (Boot dst node -> Migrate -> Shutdown src node)
         for (Node n : rp.getNodes()) {
             endVars.clear();
 
@@ -84,7 +89,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
             if (!endVars.isEmpty()) {
                 //endVars.add(rp.getNodeAction(n).getHostingEnd());
                 strategies.add(ISF.custom(
-                        ISF.minDomainSize_var_selector(),
+                        ISF.maxDomainSize_var_selector(),
                         ISF.mid_value_selector(),//.max_value_selector(),
                         ISF.split(), // Split from max
                         endVars.toArray(new IntVar[endVars.size()])
@@ -92,33 +97,67 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
             }
         }
 
-        /* Per node (Boot -> Migrations -> Shutdown)
-        for (Node n : rp.getNodes()) {
-            endVars.clear();
+        /* End vars for all Nodes actions
+        endVars.clear();
+        for (NodeTransition a : rp.getNodeActions()) {
+            endVars.add(a.getEnd());
+        }
+        if (!endVars.isEmpty()) {
+            strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.mid_value_selector(),//.max_value_selector(),
+                    ISF.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
+            ));
+        }*/
 
-            if (rp.getNodeAction(n) instanceof BootableNode) {
-                //endVars.add(rp.getNodeAction(n).getHostingStart());
-                endVars.add(rp.getNodeAction(n).getEnd());
+        /* End vars for all Nodes shutdown actions
+        endVars.clear();
+        for (NodeTransition a : rp.getNodeActions()) {
+            if (a instanceof ShutdownableNode) {
+                endVars.add(a.getHostingEnd());
             }
-            for (VMTransition a : rp.getVMActions()) {
-                if (rp.getNode(n) == (a.getCSlice().getHoster().getValue())) {
-                    endVars.add(a.getEnd());
-                }
-            }
-            if (rp.getNodeAction(n) instanceof ShutdownableNode) {
-                //endVars.add(rp.getNodeAction(n).getHostingEnd());
-                endVars.add(rp.getNodeAction(n).getEnd());
-            }
+        }
+        if (!endVars.isEmpty()) {
+            /*strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.mid_value_selector(),//.max_value_selector(),
+                    ISF.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
+            ));*//*
+            strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
+        }*/
 
-            if (!endVars.isEmpty()) {
-                //endVars.add(rp.getNodeAction(n).getHostingEnd());
-                strategies.add(ISF.custom(
-                        ISF.minDomainSize_var_selector(),
-                        ISF.mid_value_selector(),//.max_value_selector(),
-                        ISF.split(), // Split from max
-                        endVars.toArray(new IntVar[endVars.size()])
-                ));
+        /* End vars for all Nodes boot actions
+        endVars.clear();
+        for (NodeTransition a : rp.getNodeActions()) {
+            if (a instanceof BootableNode) {
+                endVars.add(a.getHostingStart());
             }
+        }
+        if (!endVars.isEmpty()) {
+            /*strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.mid_value_selector(),//.max_value_selector(),
+                    ISF.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
+            ));*//*
+            strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
+        }*/
+
+        // End vars for all VMs actions
+        /*endVars.clear();
+        for (VMTransition a : rp.getVMActions()) {
+            endVars.add(a.getEnd());
+        }
+        if (!endVars.isEmpty()) {
+            /*strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.mid_value_selector(),//.max_value_selector(),
+                    ISF.split(), // Split from max
+                    endVars.toArray(new IntVar[endVars.size()])
+            ));*//*
+            strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
         }*/
 
         /* End vars per link
@@ -147,22 +186,6 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
             }
         }*/
 
-        /* End vars for all Nodes shutdown actions
-        endVars.clear();
-        for (NodeTransition a : rp.getNodeActions()) {
-            if (a instanceof ShutdownableNode) {
-                endVars.add(a.getHostingEnd());
-            }
-        }
-        if (!endVars.isEmpty()) {
-            strategies.add(ISF.custom(
-                    ISF.minDomainSize_var_selector(),
-                    ISF.mid_value_selector(),//.max_value_selector(),
-                    ISF.split(), // Split from max
-                    endVars.toArray(new IntVar[endVars.size()])
-            ));
-        }*/
-
         /* End vars for all actions
         endVars.clear();
         for (Transition m : rp.getVMActions()) { endVars.add(m.getEnd()); }
@@ -176,34 +199,6 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
         ));*/
         //strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
 
-
-        /* End vars for all VMs actions
-        endVars.clear();
-        for (VMTransition a : rp.getVMActions()) {
-            endVars.add(a.getEnd());
-        }
-        strategies.add(ISF.custom(
-                ISF.minDomainSize_var_selector(),
-                ISF.mid_value_selector(),//.max_value_selector(),
-                ISF.split(), // Split from max
-                endVars.toArray(new IntVar[endVars.size()])
-        ));*/
-
-        /* End vars for all Nodes boot actions
-        endVars.clear();
-        for (NodeTransition a : rp.getNodeActions()) {
-            if (a instanceof BootableNode) {
-                endVars.add(a.getHostingEnd());
-            }
-        }
-        if (!endVars.isEmpty()) {
-            strategies.add(ISF.custom(
-                    ISF.minDomainSize_var_selector(),
-                    ISF.mid_value_selector(),//.max_value_selector(),
-                    ISF.split(), // Split from max
-                    endVars.toArray(new IntVar[endVars.size()])
-            ));
-        }*/
 
         /* End vars for all VMs actions PER NODE
         for (Node n : rp.getNodes()) {
@@ -232,7 +227,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                 new IntVar[]{rp.getEnd()}
         ));*/
 
-        //strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
+        strategies.add(new IntStrategy(new IntVar[]{rp.getEnd(), cost}, new InputOrder<>(), new IntDomainMin()));
 
         // Add all defined strategies
         s.getSearchLoop().set(new StrategiesSequencer(s.getEnvironment(),strategies.toArray(new AbstractStrategy[strategies.size()])));
