@@ -2,7 +2,7 @@
 
 CSV_FILE="$1"
 
-gnuplot -persist <<PLOT
+gnuplot <<PLOT
 
 set terminal png
 
@@ -18,7 +18,6 @@ set output "energy.png"
 
 plot '$CSV_FILE' using 1:2 with lines title "Consumption", '$CSV_FILE' using 1:3 with lines title "Budget";
 
-quit
 PLOT
 
-eog energy.png
+eog energy.png &
