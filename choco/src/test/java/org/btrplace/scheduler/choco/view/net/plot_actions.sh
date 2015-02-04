@@ -49,4 +49,4 @@ ggsave(p, file = "./actions.png", width = 7, height = 7)
 
 PLOT
 
-eog actions.png
+eog actions.png &
