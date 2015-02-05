@@ -24,7 +24,7 @@ p <- p + geom_segment(aes(x=Start,xend=End,y=VM,yend=VM),size=1)
 p <- p + geom_point(aes(x=Start,y=VM),size=2)
 p <- p + geom_point(aes(x=End,y=VM),size=2)
 #p <- p + scale_x_continuous(breaks=round(seq(0,max(df\$End),by=5),1))
-p <- p + scale_x_continuous(breaks=round(seq(min(df\$Start),max(df\$End),by=100),1))
+p <- p + scale_x_continuous(breaks=round(seq(min(df\$Start),max(df\$End),by=300),1))
 #p <- p + scale_x_continuous(breaks=round(seq(min(df\$Start),max(df\$End),by=60),1),labels=c(0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24))
 
 #p <- p + geom_text(aes(x=(Start+End)/2,
