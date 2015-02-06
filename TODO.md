@@ -21,6 +21,7 @@
   - [ ] Serialize
   - [ ] Precedence
   - [ ] Deadline
+  - [ ] maxWatts
 
 ### DC4Cities
 - [P] Adapt the PowerBudget
