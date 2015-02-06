@@ -2,6 +2,7 @@
 
 ## Btrplace
 - [ ] Improve the decommissioning strategy
+- [ ] Adjust actions duration by comparing simulated VHPC results to effective results
 - [ ] Create a new objective: Minimizing energy consumption
 - [ ] Simplify the creation of static routes
 - [ ] Convert/Import g5k topology description files to static routes
