@@ -1,11 +1,19 @@
 # TO DO
 
 ## Btrplace
-- [ ] Improve the decommissioning strategy
-- [ ] Adjust actions duration by comparing simulated VHPC results to effective results
+- [P] Improve the decommissioning strategy
 - [ ] Create a new objective: Minimizing energy consumption
 - [ ] Simplify the creation of static routes
 - [ ] Convert/Import g5k topology description files to static routes
+- [ ] Define an evaluation protocol
+  - [ ] Flexibility
+  - [ ] Scale
+  - [ ] Performance (Define metrics)
+  - [ ] Efficiency
+- [ ] Create IaaS actuators
+  - [ ] G5k
+  - [P] OpenStack
+  - [P] OpenNebula
 
 ## Btrpsl
 - [ ] Implement constraints in Btrpsl
@@ -13,11 +21,10 @@
   - [ ] Serialize
   - [ ] Precedence
   - [ ] Deadline
-- [ ] Auto add Network and Energy views with default values (minimal impact)
 
-## DC4Cities
-- [ ] Adapt the PowerBudget
-- [ ] Convert a solution to an activity option
-- [ ] Create IaaS actuators
-  - [ ] OpenStack
-  - [ ] OpenNebula
+### DC4Cities
+- [P] Adapt the PowerBudget
+- [P] Convert a solution to an activity option
+
+### Packaging
+- [ ] Auto add Network and Energy views with default values (minimal impact)
