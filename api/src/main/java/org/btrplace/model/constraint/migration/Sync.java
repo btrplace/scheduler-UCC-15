@@ -33,24 +33,6 @@ import java.util.*;
  */
 public class Sync extends SatConstraint {
 
-    private boolean postCopy = false;
-
-    /**
-     * Make a new constraint.
-     *
-     * @param postCopy to specify if the post-copy migration algorithm is used (pre-copy by default)
-     * @param vms the vms to sync
-     */
-    public Sync(boolean postCopy, Collection<VM> vms) {
-        super(vms, Collections.<Node>emptyList(), true);
-        this.postCopy = postCopy;
-    }
-
-    public Sync(boolean postCopy, VM... vms) {
-        super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
-        this.postCopy = postCopy;
-    }
-
     /**
      * Make a new constraint.
      *
@@ -62,10 +44,6 @@ public class Sync extends SatConstraint {
 
     public Sync(VM... vms) {
         super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
-    }
-
-    public boolean usesPostCopy() {
-        return postCopy;
     }
 
     @Override
@@ -80,8 +58,6 @@ public class Sync extends SatConstraint {
 
     @Override
     public String toString() {
-        return "syncEnd(" + "vms=" + getInvolvedVMs() + ", " +
-                (postCopy ? "postCopy" : "preCopy") + " algorithm, " +
-                restrictionToString() + ")";
+        return "sync(" + "vms=" + getInvolvedVMs() + ", " + restrictionToString() + ")";
     }
 }

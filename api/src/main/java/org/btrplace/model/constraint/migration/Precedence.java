@@ -5,33 +5,60 @@ import org.btrplace.model.VM;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.constraint.SatConstraintChecker;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 
 /**
  * Created by vkherbac on 23/01/15.
  */
 public class Precedence extends SatConstraint {
 
+    /**
+     * Instantiate discrete constraints for a collection of VMs.
+     *
+     * @param vmBefore the (single) VM to migrate before the others (vmsAfter)
+     * @param vmsAfter the VMs to migrate after the other one (vmBefore)
+     * @return the associated list of constraints
+     */
+    public static List<Precedence> newPrecedence(VM vmBefore, Collection<VM> vmsAfter) {
+        return newPrecedence(Collections.singleton(vmBefore), vmsAfter);
+    }
+
+    /**
+     * Instantiate discrete constraints for a collection of VMs.
+     *
+     * @param vmsBefore the VMs to migrate before the other one (vmAfter)
+     * @param vmAfter the (single) VM to migrate after the others (vmsBefore)
+     * @return the associated list of constraints
+     */
+    public static List<Precedence> newPrecedence(Collection<VM> vmsBefore, VM vmAfter) {
+        return newPrecedence(vmsBefore, Collections.singleton(vmAfter));
+    }
+
+    /**
+     * Instantiate discrete constraints for a collection of VMs.
+     *
+     * @param vmsBefore the VMs to migrate before the others (vmsAfter)
+     * @param vmsAfter the VMs to migrate after the others (vmsBefore)
+     * @return the associated list of constraints
+     */
+    public static List<Precedence> newPrecedence(Collection<VM> vmsBefore, Collection<VM> vmsAfter) {
+        List<Precedence> l = new ArrayList<>(vmsBefore.size() * vmsAfter.size());
+        for (VM vmb : vmsBefore) {
+            for (VM vma : vmsAfter) {
+                l.add(new Precedence(vmb, vma));
+            }
+        }
+        return l;
+    }
 
     /**
      * Make a new constraint.
      *
-     * @param v the involved VMs
-     * @param n the involved nodes
-     * @param c {@code true} to indicate a continuous restriction
+     * @param vmBefore the vm to schedule before the other one
+     * @param vmAfter the vm to schedule after the other one
      */
-    public Precedence(Collection<VM> v, Collection<Node> n, boolean c) {
-        super(v, n, c);
-    }
-
-    public Precedence(Collection<VM> vms) {
-        super(vms, Collections.<Node>emptyList(), true);
-    }
-
-    public Precedence(VM... vms) {
-        super(Arrays.asList(vms), Collections.<Node>emptyList(), true);
+    public Precedence(VM vmBefore, VM vmAfter) {
+        super(Arrays.asList(vmBefore, vmAfter), Collections.<Node>emptyList(), true);
     }
 
     @Override
