@@ -75,6 +75,7 @@ public class MigrateVMTransition implements KeepRunningVM {
     private BoolVar stay;
     private Node src;
     private boolean manageable = true;
+    private boolean postCopy = false;
 
     /**
      * Make a new model.
@@ -138,6 +139,11 @@ public class MigrateVMTransition implements KeepRunningVM {
             throw new SchedulerException(rp.getSourceModel(), "View '" + NetworkView.VIEW_ID + "' is required but missing");
         }
 
+        // Set the migration algorithm
+        if (mo.getAttributes().isSet(vm, "postCopy")) {
+            if (mo.getAttributes().getBoolean(vm, "postCopy")) postCopy = true;
+        }
+
         if (mo.getAttributes().isSet(vm, "dirtyRate") && mo.getAttributes().isSet(vm, "memUsed")) {
 
             IntVar memUsed, tmpDuration;
@@ -187,6 +193,8 @@ public class MigrateVMTransition implements KeepRunningVM {
 
         //VariableFactory.task(start, duration, end);
     }
+
+    public boolean usesPostCopy() { return postCopy; }
 
     private static String prettyMethod(IntVar method) {
             return "migration";
