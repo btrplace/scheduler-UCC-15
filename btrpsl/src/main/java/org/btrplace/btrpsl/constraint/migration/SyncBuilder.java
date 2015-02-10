@@ -39,7 +39,7 @@ public class SyncBuilder extends DefaultSatConstraintBuilder {
      * Make a new builder.
      */
     public SyncBuilder() {
-        super("Sync", new ConstraintParam[]{new ListOfParam("$vms", 1, BtrpOperand.Type.VM, false)});
+        super("sync", new ConstraintParam[]{new ListOfParam("$vms", 1, BtrpOperand.Type.VM, false)});
     }
 
     /**
@@ -49,10 +49,19 @@ public class SyncBuilder extends DefaultSatConstraintBuilder {
      * @return a constraint
      */
     public List<SatConstraint> buildConstraint(BtrPlaceTree t, List<BtrpOperand> args) {
-        if (checkConformance(t, args)) {
-            List<VM> s = (List<VM>) params[0].transform(this, t, args.get(0));
-            return (s != null ? (List) Collections.singleton(new Sync(s)) : Collections.emptyList());
+        if (!checkConformance(t, args)) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+
+        List<VM> s = (List<VM>) params[0].transform(this, t, args.get(0));
+        if (s == null) {
+            return Collections.emptyList();
+        }
+
+        if (s.size() < 2) {
+            t.ignoreError("Parameter '" + params[0].getName() + "' expects a list of at least 2 VMs");
+            return Collections.emptyList();
+        }
+        return (List) Collections.singletonList(new Sync(s));
     }
 }
