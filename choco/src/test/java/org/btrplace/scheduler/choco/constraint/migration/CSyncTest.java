@@ -199,7 +199,7 @@ public class CSyncTest {
         }
 
         // Add the Sync Constraint
-        cstrs.add(new Sync(true, vms));
+        cstrs.add(new Sync(vms));
 
         // Set the custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
