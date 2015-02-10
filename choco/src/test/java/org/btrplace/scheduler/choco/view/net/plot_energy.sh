@@ -15,6 +15,7 @@ set timefmt "%s"
 set xdata time
 set xtics format "%M"
 
+set xrange ["0":"3000"]
 set yrange [2500:3000]
 
 set datafile separator ","
