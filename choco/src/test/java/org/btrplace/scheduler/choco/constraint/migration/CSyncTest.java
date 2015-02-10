@@ -180,7 +180,7 @@ public class CSyncTest {
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
         ps.setTimeLimit(50);
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Add the custom vm transition builder for migrations
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
