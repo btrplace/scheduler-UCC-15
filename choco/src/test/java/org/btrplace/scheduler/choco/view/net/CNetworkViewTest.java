@@ -85,7 +85,7 @@ public class CNetworkViewTest {
         sm.connect(2000, s1, s2);
 
         // Set the custom transition
-        Parameters ps = new DefaultParameters().setVerbosity(10);
+        Parameters ps = new DefaultParameters().setVerbosity(1);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
@@ -186,7 +186,7 @@ public class CNetworkViewTest {
         sm.connect(1000, s2); // Link bottleneck between two switches
 
         // Set the custom transition
-        Parameters ps = new DefaultParameters().setVerbosity(10);
+        Parameters ps = new DefaultParameters().setVerbosity(1);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
@@ -292,7 +292,7 @@ public class CNetworkViewTest {
         sm.connect(300, s2); // Link bottleneck between two switches (300/2)<(19.28*8)
 
         // Set the custom migration transition
-        Parameters ps = new DefaultParameters().setVerbosity(10);
+        Parameters ps = new DefaultParameters().setVerbosity(1);
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
@@ -423,7 +423,7 @@ public class CNetworkViewTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(60);
         //ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
         ps.doOptimize(false);

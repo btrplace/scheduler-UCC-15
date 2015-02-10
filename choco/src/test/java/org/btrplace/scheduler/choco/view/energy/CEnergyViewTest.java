@@ -80,7 +80,7 @@ public class CEnergyViewTest {
 
         // Set resolution parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(5);
         ps.doOptimize(false);
 
@@ -156,7 +156,7 @@ public class CEnergyViewTest {
 
         // Set resolution parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(5);
         ps.doOptimize(false);
 

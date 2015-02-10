@@ -76,7 +76,7 @@ public class CDeadlineTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(50);
         //ps.setMaxEnd(800);
         ps.doOptimize(false);

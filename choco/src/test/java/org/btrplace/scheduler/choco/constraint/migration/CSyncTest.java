@@ -76,7 +76,7 @@ public class CSyncTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(50);
         ps.doOptimize(false);
 
@@ -178,7 +178,7 @@ public class CSyncTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(1);
         ps.setTimeLimit(50);
         ps.doOptimize(false);
 
