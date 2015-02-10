@@ -17,11 +17,12 @@
 
 ## Btrpsl
 - [ ] Implement constraints in Btrpsl
-  - [ ] Sync
-  - [ ] Serialize
-  - [ ] Precedence
-  - [ ] Deadline
-  - [ ] maxWatts
+  - [X] Sync
+  - [X] Serialize
+  - [ ] Before; TODO: A single builder for both type (MultiType) 
+    - [X] BeforeAction
+    - [X] BeforeTime
+  - [X] maxWatts
 
 ### DC4Cities
 - [P] Adapt the PowerBudget
