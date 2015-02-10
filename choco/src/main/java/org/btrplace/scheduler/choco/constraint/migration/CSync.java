@@ -29,6 +29,7 @@ import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.variables.IntVar;
 
 import java.util.*;
 
@@ -39,6 +40,7 @@ public class CSync implements ChocoConstraint {
 
     private Sync sec;
     private List<MigrateVMTransition> migrationList;
+    private boolean postCopy = false;
 
     /**
      * Make a new constraint
@@ -83,18 +85,24 @@ public class CSync implements ChocoConstraint {
         for (int i=0; i<migrationList.size(); i++) {
             for (int j=i+1; j<migrationList.size(); j++) {
 
+                // If moveFirst and moveSecond, then Sync
                 //BoolVar moveFirst = VF.not((migrationList.get(i)).isStaying());
                 //BoolVar moveSecond = VF.not((migrationList.get(j)).isStaying());
 
-                // If moveFirst and moveSecond, then Sync
-                if (sec.usesPostCopy()) {
-                    //LCF.ifThen(LCF.and(moveFirst, moveSecond),
-                    s.post(ICF.arithm(migrationList.get(i).getStart(), "=", migrationList.get(j).getStart()));
-                }
-                else {
-                    //LCF.ifThen(LCF.and(moveFirst, moveSecond),
-                    s.post(ICF.arithm(migrationList.get(i).getEnd(), "=", migrationList.get(j).getEnd()));
-                }
+                // Sync the start or end depending of the migration algorithm
+                IntVar firstMigSync, secondMigSync;
+                if (migrationList.get(i).usesPostCopy())
+                    firstMigSync = migrationList.get(i).getStart();
+                else
+                    firstMigSync = migrationList.get(i).getEnd();
+
+                if (migrationList.get(j).usesPostCopy())
+                    secondMigSync = migrationList.get(j).getStart();
+                else
+                    secondMigSync = migrationList.get(j).getEnd();
+
+                //LCF.ifThen(LCF.and(moveFirst, moveSecond),
+                s.post(ICF.arithm(firstMigSync, "=", secondMigSync));
             }
         }
 
