@@ -24,8 +24,8 @@ public class EnergyView implements ModelView, Cloneable {
 
     public static final int DEFAULT_NODE_CONSUMPTION = 120; // 120 Watts
     public static final int DEFAULT_VM_CONSUMPTION = 20; // 20 Watts
-    private static final int DEFAULT_MIGRATION_OVERHEAD = 30; // Percentage of the VM consumption
-    private static final int DEFAULT_BOOT_OVERHEAD = 20; // Percentage of the Node consumption
+    public static final int DEFAULT_MIGRATION_OVERHEAD = 30; // Percentage of the VM consumption
+    public static final int DEFAULT_BOOT_OVERHEAD = 20; // Percentage of the Node consumption
 
     private String viewId;
     private int maxPower;
@@ -95,7 +95,7 @@ public class EnergyView implements ModelView, Cloneable {
     }
 
     public void addBudget(int start, int end, int power) {
-        tibList.add(new EnergyView.TimeIntervalBudget(start, end, power));
+        tibList.add(new TimeIntervalBudget(start, end, power));
     }
 
     public boolean plotConsumption(ReconfigurationPlan p, String outputFile) {
