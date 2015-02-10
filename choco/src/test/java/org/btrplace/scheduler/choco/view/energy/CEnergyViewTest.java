@@ -33,7 +33,7 @@ public class CEnergyViewTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
         // Config
-        int nbSrcNodes = 5;
+        int nbSrcNodes = 3;
         int nbVMPerSrcNode = 2;
         int nbVMs = nbSrcNodes * nbVMPerSrcNode;
 
@@ -65,8 +65,14 @@ public class CEnergyViewTest {
         for (VM vm : vms) { rcCPU.setConsumption(vm, cpu_vm); }
         mo.attach(rcCPU);
 
+        // Set custom boot and shutdown durations
+        for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 2); /*~2 minutes to boot*/ }
+        for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 2); /*~30 seconds to shutdown*/ }
+
         // Add the EnergyView and set nodes & vms consumption
         EnergyView energyView = new EnergyView(maxConsumption);
+        energyView.setMigrationOverhead(40); // 40% energy overhead during migration
+        energyView.setBootOverhead(30); // 30% energy overhead during boot
         for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (VM vm : vms) { energyView.setConsumption(vm, vmPower); }
@@ -81,9 +87,9 @@ public class CEnergyViewTest {
         // Register new PowerBudget constraint
         ps.getConstraintMapper().register(new CPowerBudget.Builder());
 
-        // Add a discrete power budget (2 nodes / 3 VMs per node)
+        // Add a discrete power budget (2 dst nodes / 3 VMs per node)
         List<SatConstraint> cstrs = new ArrayList<>();
-        cstrs.add(new PowerBudget((2*(nodeIdlePower + (vmPower*3)))));
+        cstrs.add(new PowerBudget((2*nodeIdlePower)+(vmPower*nbVMPerSrcNode*nbSrcNodes)));
 
         // Set the objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
