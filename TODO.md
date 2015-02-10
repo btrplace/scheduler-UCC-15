@@ -16,13 +16,11 @@
   - [P] OpenNebula
 
 ## Btrpsl
-- [ ] Implement constraints in Btrpsl
+- [X] Implement constraints in Btrpsl
   - [X] Sync
   - [X] Serialize
-  - [ ] Before; TODO: A single builder for both type (MultiType) 
-    - [X] BeforeAction
-    - [X] BeforeTime
-  - [X] maxWatts
+  - [X] Before
+  - [X] MaxWatts
 
 ### DC4Cities
 - [P] Adapt the PowerBudget
