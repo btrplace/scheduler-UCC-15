@@ -16,8 +16,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.btrplace.btrpsl.constraint;
+package org.btrplace.btrpsl.constraint.migration;
 
+import org.btrplace.btrpsl.constraint.ConstraintParam;
+import org.btrplace.btrpsl.constraint.DefaultSatConstraintBuilder;
+import org.btrplace.btrpsl.constraint.ListOfParam;
 import org.btrplace.btrpsl.element.BtrpOperand;
 import org.btrplace.btrpsl.tree.BtrPlaceTree;
 import org.btrplace.model.VM;
@@ -30,12 +33,12 @@ import java.util.List;
 /**
  * Created by vkherbac on 05/09/14.
  */
-public class SyncConstraintBuilder extends DefaultSatConstraintBuilder {
+public class SyncBuilder extends DefaultSatConstraintBuilder {
 
     /**
      * Make a new builder.
      */
-    public SyncConstraintBuilder() {
+    public SyncBuilder() {
         super("Sync", new ConstraintParam[]{new ListOfParam("$vms", 1, BtrpOperand.Type.VM, false)});
     }
 
