@@ -18,6 +18,9 @@
 
 package org.btrplace.btrpsl.constraint;
 
+import org.btrplace.btrpsl.constraint.energy.MaxWattsBuilder;
+import org.btrplace.btrpsl.constraint.migration.*;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -73,7 +76,10 @@ public class DefaultConstraintsCatalog implements ConstraintsCatalog {
         c.add(new SeqBuilder());
         c.add(new MaxOnlineBuilder());
         c.add(new NoDelayBuilder());
-        c.add(new SyncConstraintBuilder());
+        c.add(new SyncBuilder());
+        c.add(new SerializeBuilder());
+        c.add(new MaxWattsBuilder());
+        c.add(new BeforeBuilder());
         return c;
     }
 

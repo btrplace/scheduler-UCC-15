@@ -48,6 +48,7 @@ public class DefaultConstraintsCatalogTest {
                 impls.add(cstr);
             }
         }
+        // This is NOT valid anymore (nb constraints choco > nb constraints btrpsl; see 'BeforeBuilder')
         //Assert.assertEquals(c.getAvailableConstraints().size(), impls.size());
         Assert.assertTrue(true);
     }
