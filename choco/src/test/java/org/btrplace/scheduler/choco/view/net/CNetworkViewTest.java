@@ -5,17 +5,18 @@ import org.btrplace.model.constraint.Fence;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCStaticRouting;
 import org.btrplace.model.view.power.EnergyView;
+import org.btrplace.model.view.power.MinEnergyObjective;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.*;
 import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
+import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -434,6 +435,7 @@ public class CNetworkViewTest {
 
         // Register custom objective
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
+        ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
 
         // Migrate all VMs to destination nodes
         List<SatConstraint> cstrs = new ArrayList<>();
@@ -457,7 +459,7 @@ public class CNetworkViewTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
         try {

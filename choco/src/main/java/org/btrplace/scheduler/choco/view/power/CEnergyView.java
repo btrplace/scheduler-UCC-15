@@ -17,16 +17,13 @@ import org.btrplace.scheduler.choco.view.*;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.IntConstraintFactory;
 import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vins on 11/01/15.
@@ -84,6 +81,76 @@ public class CEnergyView implements ChocoView {
         heights.add(VF.fixed(power, solver));
     }
 
+    public Map<String, List> computeEnergy() {
+
+        Map<String, List> energy = new HashMap<>();
+        List<Task> tasks = new ArrayList<>();
+        List<IntVar> heights = new ArrayList<>();
+
+        // Add nodes/vms consumptions for continuous model
+        for (Node n : rp.getNodes()) {  // Add nodes consumption
+            int nodePower = ev.getConsumption(n);
+            NodeTransition nt = rp.getNodeAction(n);
+
+            // Add boot peak consumption
+            if (nt instanceof BootableNode) {
+                tasks.add(VariableFactory.task(nt.getStart(), nt.getDuration(), nt.getEnd()));
+                heights.add(VF.fixed(nodePower*ev.getBootOverhead()/100, solver));
+            }
+
+            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", n, ")"));
+            //solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
+            tasks.add(VariableFactory.task(cPowerView.getPowerStart(rp.getNode(n)), duration,
+                    cPowerView.getPowerEnd(rp.getNode(n))));
+            heights.add(VF.fixed(ev.getConsumption(n), solver));
+        }
+        for (VM v : rp.getVMs()) {  // Add VMs consumption
+            int vmPower = ev.getConsumption(v);
+            VMState currentState = rp.getSourceModel().getMapping().getState(v);
+            VMState futureState = rp.getNextState(v);
+            VMTransition vmt = rp.getVMAction(v);
+
+            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
+            //solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
+
+            // Relocate or Migrate
+            if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
+
+                //  In the case of a live migration, add the transfer overhead
+                if (vmt instanceof MigrateVMTransition || vmt instanceof RelocatableVM) {
+                    tasks.add(VariableFactory.task(vmt.getStart(), vmt.getDuration(), vmt.getEnd()));
+                    heights.add(VF.fixed((vmPower*ev.getMigrationOverhead()/100), solver));
+                }
+
+                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
+
+                // Boot / Resume
+            } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
+                    (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
+                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
+
+                // Halt / Kill / Sleep
+            } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
+                    (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
+                    (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
+                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
+
+                // Resume
+            } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
+                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
+                heights.add(VF.fixed(vmPower, solver));
+            }
+        }
+
+        energy.put("tasks", tasks);
+        energy.put("heights", heights);
+
+        return energy;
+    }
+
     @Override
     public String getIdentifier() {
         return ev.getIdentifier();
@@ -125,62 +192,12 @@ public class CEnergyView implements ChocoView {
         }
 
         // Add nodes/vms consumptions for continuous model
-        for (Node n : rp.getNodes()) {  // Add nodes consumption
-            int nodePower = ev.getConsumption(n);
-            NodeTransition nt = rp.getNodeAction(n);
-
-            // Add boot peak consumption
-            if (nt instanceof BootableNode) {
-                tasks.add(VariableFactory.task(nt.getStart(), nt.getDuration(), nt.getEnd()));
-                heights.add(VF.fixed(nodePower*ev.getBootOverhead()/100, solver));
-            }
-
-            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", n, ")"));
-            solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
-            tasks.add(VariableFactory.task(cPowerView.getPowerStart(rp.getNode(n)), duration,
-                    cPowerView.getPowerEnd(rp.getNode(n))));
-            heights.add(VF.fixed(ev.getConsumption(n), solver));
+        Map<String, List> energy = computeEnergy();
+        if (!energy.isEmpty()) {
+            tasks.addAll(energy.get("tasks"));
+            heights.addAll(energy.get("heights"));
         }
-        for (VM v : rp.getVMs()) {  // Add VMs consumption
-            int vmPower = ev.getConsumption(v);
-            VMState currentState = rp.getSourceModel().getMapping().getState(v);
-            VMState futureState = rp.getNextState(v);
-            VMTransition vmt = rp.getVMAction(v);
 
-            IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
-            solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
-
-            // Relocate or Migrate
-            if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
-
-                //  In the case of a live migration, add the transfer overhead
-                if (vmt instanceof MigrateVMTransition || vmt instanceof RelocatableVM) {
-                    tasks.add(VariableFactory.task(vmt.getStart(), vmt.getDuration(), vmt.getEnd()));
-                    heights.add(VF.fixed((vmPower*ev.getMigrationOverhead()/100), solver));
-                }
-
-                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
-
-            // Boot / Resume
-            } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
-                       (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
-                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
-
-            // Halt / Kill / Sleep
-            } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
-                       (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
-                       (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
-                tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
-
-            // Resume
-            } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
-                tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
-            }
-        }
         // Post the resulting cumulative constraint
         if (!tasks.isEmpty()) {
             solver.post(ICF.cumulative(
