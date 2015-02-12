@@ -98,7 +98,7 @@ public class CDeadlineTest {
         }
 
         // Add the Deadline Constraint (migrate the 'last' VM at the beginning)
-        cstrs.add(new Deadline(vms.get(vms.size()-1), 10));
+        cstrs.add(new Deadline(vms.get(vms.size()-1), "00:00:10"));
 
         // Set the custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);

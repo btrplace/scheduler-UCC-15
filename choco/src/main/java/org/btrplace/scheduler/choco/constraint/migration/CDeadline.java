@@ -15,6 +15,8 @@ import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.LCF;
 import org.chocosolver.solver.variables.VF;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -30,19 +32,55 @@ public class CDeadline implements ChocoConstraint {
         migrationList = new ArrayList<>();
     }
 
+    private int convertTimestamp(String timestamp) throws ParseException {
+
+        // Get the deadline from timestamp
+        int deadline;
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss");
+        Date parsedDate = null;
+
+        // Relative timestamp
+        if (timestamp.startsWith("+")) {
+            parsedDate = dateFormat.parse(timestamp.replace("+", ""));
+            Calendar c = Calendar.getInstance();
+            c.setTime(parsedDate);
+            deadline = (c.get(Calendar.SECOND) + c.get(Calendar.MINUTE) * 60 + c.get(Calendar.HOUR_OF_DAY) * 3600);
+        }
+        // Absolute timestamp
+        else {
+            Calendar c = Calendar.getInstance();
+            c.setTime(new Date());
+            Date now = dateFormat.parse(c.get(Calendar.HOUR_OF_DAY)+":"+c.get(Calendar.MINUTE)+":"+c.get(Calendar.SECOND));
+            parsedDate = dateFormat.parse(timestamp);
+            deadline = (int) ((parsedDate.getTime() - now.getTime()) / 1000);
+            if (deadline < 0) {
+                // Timestamp is for tomorrow
+                deadline = (int) (long) ((parsedDate.getTime() + (24 * 3600 * 1000) - now.getTime()) / 1000);
+            }
+        }
+
+        return deadline;
+    }
+
     @Override
     public boolean inject(ReconfigurationProblem rp) throws SchedulerException {
 
         // Get the solver
         Solver s = rp.getSolver();
 
+        int deadline = 0;
+        try {
+            deadline = convertTimestamp(dl.getTimestamp());
+        } catch (ParseException e) {
+            throw new SchedulerException(rp.getSourceModel(), "Unable to parse the timestamp '" + dl.getTimestamp() + "'");
+        }
+
         // Get all migrations involved
         for (Iterator<VM> ite = dl.getInvolvedVMs().iterator(); ite.hasNext();) {
             VM vm = ite.next();
             VMTransition vt = rp.getVMAction(vm);
             if (vt instanceof MigrateVMTransition) {
-                LCF.ifThen(VF.not(((MigrateVMTransition)vt).isStaying()),
-                        ICF.arithm(vt.getEnd(), "<=", dl.getDeadline()));
+                LCF.ifThen(VF.not(((MigrateVMTransition)vt).isStaying()), ICF.arithm(vt.getEnd(), "<=", deadline));
             }
         }
 

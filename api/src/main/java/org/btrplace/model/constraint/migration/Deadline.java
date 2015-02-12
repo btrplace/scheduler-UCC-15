@@ -15,7 +15,7 @@ import java.util.List;
  */
 public class Deadline extends SatConstraint {
 
-    private int deadline;
+    private String timestamp;
 
     /**
      * Instantiate discrete constraints for a collection of VMs.
@@ -24,7 +24,7 @@ public class Deadline extends SatConstraint {
      * @param deadline the desired deadline
      * @return the associated list of constraints
      */
-    public static List<Deadline> newDeadline(Collection<VM> vms, int deadline) {
+    public static List<Deadline> newDeadline(Collection<VM> vms, String deadline) {
         List<Deadline> l = new ArrayList<>(vms.size());
         for (VM v : vms) {
             l.add(new Deadline(v, deadline));
@@ -36,19 +36,19 @@ public class Deadline extends SatConstraint {
      * Make a new constraint.
      *
      * @param vm the VM to contraint
-     * @param deadline the desired deadline
+     * @param timestamp the desired deadline
      */
-    public Deadline(VM vm, int deadline) {
+    public Deadline(VM vm, String timestamp) {
         super(Collections.singletonList(vm), Collections.<Node>emptyList(), true);
-        this.deadline = deadline;
+        this.timestamp = timestamp;
     }
 
-    public int getDeadline() {
-        return deadline;
+    public String getTimestamp() {
+        return timestamp;
     }
 
-    public void setDeadline(int deadline) {
-        this.deadline = deadline;
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     @Override
@@ -63,6 +63,6 @@ public class Deadline extends SatConstraint {
 
     @Override
     public String toString() {
-        return "deadline(" + "vm=" + getInvolvedVMs() + ", deadline=" + deadline + ", " + restrictionToString() + ")";
+        return "deadline(" + "vm=" + getInvolvedVMs() + ", deadline='" + timestamp + "', " + restrictionToString() + ")";
     }
 }

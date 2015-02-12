@@ -62,7 +62,7 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
         rp.setObjective(true, cost);
 
 
-        // Per node decommissioning (Boot dst node -> Migrate -> Shutdown src node)
+        // Per node decommissioning (Boot dst node -> Migrate -> Shutdown src node) strategy
         for (Node n : rp.getNodes()) {
             endVars.clear();
 

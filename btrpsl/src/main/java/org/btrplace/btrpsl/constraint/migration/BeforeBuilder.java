@@ -79,7 +79,7 @@ public class BeforeBuilder extends DefaultSatConstraintBuilder {
                 t.ignoreError("Parameter '" + params[1].getName() + "' expects a non-empty string");
                 return Collections.emptyList();
             }
-            return (List) Deadline.newDeadline(s, Integer.parseInt(timestamp));
+            return (List) Deadline.newDeadline(s, timestamp);
         }
         else {
             return Collections.emptyList();
