@@ -1,4 +1,4 @@
-package org.btrplace.model.view;
+package org.btrplace.model.view.net;
 
 import org.btrplace.model.DefaultModel;
 import org.btrplace.model.Model;

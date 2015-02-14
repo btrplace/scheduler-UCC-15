@@ -31,9 +31,9 @@ public class DefaultRouting implements Routing {
 
     @Override
     public int getMaxBW(Node n1, Node n2) {
-        int max = 0;
+        int max = Integer.MAX_VALUE;
         for (Port inf : getPath(n1, n2)) {
-            if (inf.getBandwidth() > max) {
+            if (inf.getBandwidth() < max) {
                 max = inf.getBandwidth();
             }
         }
