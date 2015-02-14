@@ -1,0 +1,667 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE platform SYSTEM "http://simgrid.gforge.inria.fr/simgrid.dtd">
+
+<platform version="3">
+    <AS id="grid5000.fr" routing="Floyd">
+        <AS id="grenoble.grid5000.fr" routing="Floyd">
+            <router id="gw-grenoble.grenoble.grid5000.fr"/>
+            <host core="8" id="adonis-1.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-2.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-3.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-4.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-5.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-6.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-7.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-8.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-9.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="adonis-10.grenoble.grid5000.fr" power="7139000000"/>
+            <host core="8" id="edel-1.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-2.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-3.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-4.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-5.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-6.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-7.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-8.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-9.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-10.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-11.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-12.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-13.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-14.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-15.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-16.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-17.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-18.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-19.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-20.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-21.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-22.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-23.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-24.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-25.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-26.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-27.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-28.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-29.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-30.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-31.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-32.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-33.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-34.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-35.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-36.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-37.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-38.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-39.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-40.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-41.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-42.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-43.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-44.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-45.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-46.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-47.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-48.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-49.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-50.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-51.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-52.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-53.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-54.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-55.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-56.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-57.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-58.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-59.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-60.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-61.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-62.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-63.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-64.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-65.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-66.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-67.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-68.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-69.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-70.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-71.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="edel-72.grenoble.grid5000.fr" power="71394000000"/>
+            <host core="8" id="genepi-1.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-2.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-3.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-4.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-5.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-6.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-7.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-8.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-9.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-10.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-11.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-12.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-13.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-14.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-15.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-16.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-17.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-18.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-19.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-20.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-21.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-22.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-23.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-24.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-25.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-26.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-27.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-28.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-29.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-30.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-31.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-32.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-33.grenoble.grid5000.fr" power="7651000000"/>
+            <host core="8" id="genepi-34.grenoble.grid5000.fr" power="7651000000"/>
+            <link bandwidth="1000000000" id="adonis-5.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-23.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-60.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-30.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-21.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-10.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-50.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="3000000000" id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-53.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-44.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-41.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-48.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-39.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-45.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-42.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-43.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-40.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-49.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-46.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-47.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-37.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-38.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-54.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-52.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-51.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-7.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-30.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-31.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-2.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-6.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-7.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-8.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-27.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-1.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-7.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-6.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-19.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-18.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-8.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-34.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-65.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-28.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-57.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-33.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-34.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-13.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-22.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-9.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-25.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-24.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-28.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-27.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-13.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-20.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-61.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-5.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-10.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-72.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-24.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-11.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-10.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-4.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-16.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-31.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-63.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-62.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="10000000000" id="gw-grenoble.grenoble.grid5000.fr_renater.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-5.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-17.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-26.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-19.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-69.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-9.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-29.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-66.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-12.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-36.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-32.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-33.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-56.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-11.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-3.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-55.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="3000000000" id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-9.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="3000000000" id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="3000000000" id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-15.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-32.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-16.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-14.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-12.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-29.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="adonis-6.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="genepi-26.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-20.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-22.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-21.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-23.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-25.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-35.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-15.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-67.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-17.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-18.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-14.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-8.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-68.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-59.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-70.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-58.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-71.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <link bandwidth="1000000000" id="edel-64.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr" latency="0.00225"/>
+            <route dst="adonis-1.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-2.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-3.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-4.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-5.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-5.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-6.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-6.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-7.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-7.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-8.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-8.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-9.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-9.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="adonis-10.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="adonis-10.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-1.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-1.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-2.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-2.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-3.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-3.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-4.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-4.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-5.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-5.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-6.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-6.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-7.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-7.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-8.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-8.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-9.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-9.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-10.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-10.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-11.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-11.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-12.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-12.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-13.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-13.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-14.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-14.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-15.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-15.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-16.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-16.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-17.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-17.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-18.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-18.grenoble.grid5000.fr_edel-sw-1.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-19.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-19.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-20.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-20.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-21.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-21.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-22.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-22.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-23.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-23.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-24.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-24.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-25.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-25.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-26.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-26.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-27.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-27.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-28.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-28.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-29.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-29.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-30.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-30.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-31.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-31.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-32.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-32.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-33.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-33.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-34.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-34.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-35.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-35.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-36.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-36.grenoble.grid5000.fr_edel-sw-2.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-37.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-37.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-38.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-38.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-39.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-39.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-40.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-40.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-41.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-41.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-42.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-42.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-43.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-43.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-44.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-44.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-45.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-45.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-46.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-46.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-47.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-47.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-48.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-48.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-49.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-49.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-50.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-50.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-51.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-51.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-52.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-52.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-53.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-53.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-54.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-54.grenoble.grid5000.fr_edel-sw-3.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-55.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-55.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-56.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-56.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-57.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-57.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-58.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-58.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-59.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-59.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-60.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-60.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-61.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-61.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-62.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-62.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-63.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-63.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-64.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-64.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-65.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-65.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-66.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-66.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-67.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-67.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-68.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-68.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-69.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-69.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-70.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-70.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-71.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-71.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="edel-72.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="edel-sw-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+                <link_ctn id="edel-72.grenoble.grid5000.fr_edel-sw-4.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-1.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-1.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-2.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-2.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-3.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-3.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-4.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-4.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-5.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-5.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-6.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-6.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-7.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-7.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-8.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-8.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-9.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-9.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-10.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-10.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-11.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-11.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-12.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-12.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-13.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-13.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-14.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-14.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-15.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-15.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-16.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-16.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-17.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-17.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-18.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-18.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-19.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-19.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-20.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-20.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-21.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-21.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-22.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-22.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-23.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-23.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-24.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-24.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-25.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-25.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-26.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-26.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-27.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-27.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-28.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-28.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-29.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-29.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-30.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-30.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-31.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-31.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-32.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-32.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-33.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-33.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+            <route dst="genepi-34.grenoble.grid5000.fr" src="gw-grenoble.grenoble.grid5000.fr">
+                <link_ctn id="genepi-34.grenoble.grid5000.fr_gw-grenoble.grenoble.grid5000.fr"/>
+            </route>
+        </AS>
+    </AS>
+</platform>

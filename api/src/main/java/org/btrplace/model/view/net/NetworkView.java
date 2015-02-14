@@ -182,7 +182,6 @@ public class NetworkView implements ModelView, Cloneable {
         return new DecimalFormat("#.##").format(megabits / Math.pow(unit, exp)) + "GTPE".charAt(exp-1) + "b";
     }
 
-
     @Override
     public String getIdentifier() {
         return viewId;
