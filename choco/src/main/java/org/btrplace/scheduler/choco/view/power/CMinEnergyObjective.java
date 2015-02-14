@@ -9,8 +9,11 @@ import org.btrplace.model.view.power.MinEnergyObjective;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.constraint.ChocoConstraintBuilder;
+import org.btrplace.scheduler.choco.transition.RelocatableVM;
 import org.btrplace.scheduler.choco.transition.ShutdownableNode;
 import org.btrplace.scheduler.choco.transition.VMTransition;
+import org.btrplace.scheduler.choco.view.CPowerView;
+import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Constraint;
 import org.chocosolver.solver.constraints.ICF;
@@ -20,6 +23,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
+import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -48,6 +52,16 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
         Mapping map = mo.getMapping();
         Solver solver = rp.getSolver();
 
+        // Retrieve or create the PowerView
+        CPowerView cPowerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
+        if (cPowerView == null) {
+            cPowerView = new CPowerView(rp);
+            if (!rp.addView(cPowerView)) {
+                throw new SchedulerException(rp.getSourceModel(), "Unable to attach view '" + CPowerView.VIEW_ID + "'");
+            }
+        }
+
+        // Retrieve the EnergyView
         CEnergyView cEnergyView = (CEnergyView) rp.getView(CEnergyView.VIEW_ID);
         EnergyView energyView = ((EnergyView)mo.getView(EnergyView.VIEW_ID));
         if (cEnergyView == null || energyView == null) {
@@ -73,40 +87,39 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
         solver.post(costConstraint);
         rp.setObjective(true, cost);
 
-        // Per node decommissioning (Boot dst node -> Migrate -> Shutdown src node) strategy
-        List<IntVar> endVars = new ArrayList<>();
+        // Prefer staying migrations
+        List<BoolVar> stayVars = new ArrayList<>();
+        for (VM vm : rp.getVMs()) {
+            if (rp.getVMAction(vm) instanceof RelocatableVM) {
+                stayVars.add(((RelocatableVM) rp.getVMAction(vm)).isStaying());
+            }
+            if (rp.getVMAction(vm) instanceof MigrateVMTransition) {
+                stayVars.add(((MigrateVMTransition) rp.getVMAction(vm)).isStaying());
+            }
+        }
+        if (!stayVars.isEmpty()) {
+            //endVars.add(rp.getNodeAction(n).getHostingEnd());
+            strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.max_value_selector(),
+                    ISF.assign(),
+                    stayVars.toArray(new IntVar[stayVars.size()])
+            ));
+        }
+
+        // Shutdown nodes ASAP
+        List<IntVar> endPowerVars = new ArrayList<>();
         for (Node n : rp.getNodes()) {
-            endVars.clear();
-
-            if (rp.getNodeAction(n) instanceof ShutdownableNode) {
-
-                for (VMTransition a : rp.getVMActions()) {
-
-                    if (rp.getNode(n) == (a.getCSlice().getHoster().getValue())) {
-
-                        // Boot dst
-                        if (!endVars.contains(rp.getNodeAction(rp.getNode(a.getDSlice().getHoster().getValue())).getEnd())) {
-                            endVars.add(rp.getNodeAction(rp.getNode(a.getDSlice().getHoster().getValue())).getEnd());
-                        }
-
-                        // Migrate all
-                        endVars.add(a.getEnd());
-                    }
-                }
-
-                // Shutdown
-                endVars.add(rp.getNodeAction(n).getEnd());
-            }
-
-            if (!endVars.isEmpty()) {
-                //endVars.add(rp.getNodeAction(n).getHostingEnd());
-                strategies.add(ISF.custom(
-                        ISF.maxDomainSize_var_selector(),
-                        ISF.mid_value_selector(),//.max_value_selector(),
-                        ISF.split(), // Split from max
-                        endVars.toArray(new IntVar[endVars.size()])
-                ));
-            }
+            endPowerVars.add(cPowerView.getPowerEnd(rp.getNode(n)));
+        }
+        if (!endPowerVars.isEmpty()) {
+            //endVars.add(rp.getNodeAction(n).getHostingEnd());
+            strategies.add(ISF.custom(
+                    ISF.maxDomainSize_var_selector(),
+                    ISF.min_value_selector(),
+                    ISF.split(),
+                    endPowerVars.toArray(new IntVar[endPowerVars.size()])
+            ));
         }
 
         // Set cost first in the strategy
