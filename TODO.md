@@ -1,10 +1,12 @@
 # TO DO
 
 ## Btrplace
-- [P] Improve the decommissioning strategy
-- [ ] Create a new objective: Minimizing energy consumption
-- [ ] Simplify the creation of static routes
-- [ ] Convert/Import g5k topology description files to static routes
+- [X] Create a new objective: Minimizing energy consumption
+- [X] Custom search strategies for MinEnergy objective
+- [X] Simplify the creation of static routes(done from input XML file)
+- [X] Convert/Import g5k topology description files to static routes
+  - [X] Import G5k XML topology description files
+  - [P] Manage AS routes (inter-sites routing)
 - [ ] Define an evaluation protocol
   - [ ] Flexibility
   - [ ] Scale
