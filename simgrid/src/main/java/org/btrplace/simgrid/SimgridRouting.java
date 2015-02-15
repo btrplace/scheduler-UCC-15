@@ -1,6 +1,7 @@
-package org.btrplace.model.view.net;
+package org.btrplace.simgrid;
 
 import org.btrplace.model.Node;
+import org.btrplace.model.view.net.*;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -14,17 +15,19 @@ import java.util.*;
 /**
  * Created by vkherbac on 08/01/15.
  */
-public class G5kStaticRouting extends StaticRouting {
+public class SimgridRouting implements Routing {
 
+    private NetworkView net;
     private Map<String, Node> nodes;
     private Map<String, Switch> switches;
     private Map<String, List<Port>> links;
+    private File xml;
 
-    public G5kStaticRouting(List<Node> nodes, File g5kXML) {
-        super(nodes, g5kXML);
-        this.nodes = new HashMap<>();
+    public SimgridRouting(Map<String, Node> nodes, File xml) {
+        this.nodes = nodes;
         switches = new HashMap<>();
         links = new HashMap<>();
+        this.xml = xml;
     }
 
     public Switch getSwitch(String name) {
@@ -65,6 +68,17 @@ public class G5kStaticRouting extends StaticRouting {
         return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
     }
 
+    @Override
+    public int getMaxBW(Node n1, Node n2) {
+        int max = Integer.MAX_VALUE;
+        for (Port inf : getPath(n1, n2)) {
+            if (inf.getBandwidth() < max) {
+                max = inf.getBandwidth();
+            }
+        }
+        return max;
+    }
+
     public List<Port> getPath(String n1, String n2) {
 
         // Return the first path found
@@ -73,11 +87,11 @@ public class G5kStaticRouting extends StaticRouting {
 
     private void importRoutes() throws Exception {
 
-        if (!routingXML.exists()) throw new FileNotFoundException("File '" + routingXML.getName() + "' not found");
+        if (!xml.exists()) throw new FileNotFoundException("File '" + xml.getName() + "' not found");
 
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(routingXML);
+        Document doc = dBuilder.parse(xml);
         doc.getDocumentElement().normalize();
 
         // Get the list of sites
@@ -107,7 +121,6 @@ public class G5kStaticRouting extends StaticRouting {
                         // Create the new switch
                         String id = router.getAttribute("id").replace("." + siteId, "");
                         Switch sw = net.newSwitch();
-                        super.switches.add(sw);
                         switches.put(id, sw);
                     }
                 }
@@ -120,11 +133,13 @@ public class G5kStaticRouting extends StaticRouting {
                     if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
                         Element host = (Element) node;
 
-                        // Assign id to the next node
+                        // Just check if the node exists
                         String id = host.getAttribute("id").replace("." + siteId, "");
                         int core = Integer.valueOf(host.getAttribute("core"));
                         long power = Long.valueOf(host.getAttribute("power"));
-                        nodes.put(id, super.nodes.get(nodes.size()));
+                        if (!nodes.containsKey(id)) {
+                            throw new Exception("Node '" + id + "' not found");
+                        }
                     }
                 }
 
@@ -152,14 +167,12 @@ public class G5kStaticRouting extends StaticRouting {
                         if (src.contains("-sw")) {
                             if (!switches.containsKey(src)) {
                                 Switch sw = net.newSwitch();
-                                super.switches.add(sw);
                                 switches.put(src, sw);
                             }
                         }
                         if (dst.contains("-sw")) {
                             if (!switches.containsKey(dst)) {
                                 Switch sw = net.newSwitch();
-                                super.switches.add(sw);
                                 switches.put(dst, sw);
                             }
                         }
@@ -167,27 +180,27 @@ public class G5kStaticRouting extends StaticRouting {
                         if (switches.containsKey(src)) {
                             // Connect two switches
                             if (switches.containsKey(dst)) {
-                                switches.get(src).connect(bandwidth / 1000000, switches.get(dst));
+                                switches.get(src).connect(bandwidth, switches.get(dst));
                                 links.put(id, Arrays.asList(switches.get(src).getPorts().get(switches.get(src).getPorts().size() - 1),
                                         switches.get(dst).getPorts().get(switches.get(dst).getPorts().size() - 1)));
                             }
                             // Switch to node
                             else {
-                                switches.get(src).connect(bandwidth / 1000000, nodes.get(dst));
+                                switches.get(src).connect(bandwidth, nodes.get(dst));
                                 links.put(id, Arrays.asList(switches.get(src).getPorts().get(switches.get(src).getPorts().size() - 1),
                                         net.getSwitchInterface(nodes.get(dst))));
                             }
                         } else if (switches.containsKey(dst)) {
 
                             // Node to switch
-                            switches.get(dst).connect(bandwidth / 1000000, nodes.get(src));
+                            switches.get(dst).connect(bandwidth, nodes.get(src));
                             links.put(id, Arrays.asList(net.getSwitchInterface(nodes.get(src)),
                                     switches.get(dst).getPorts().get(switches.get(dst).getPorts().size() - 1)));
                         }
                     }
                 }
 
-                /* TODO: routes that are not between two end nodes are useswitchesless
+                /* TODO: routes that are not between two end nodes are useless
                 // Parse routes
                 nList = site.getElementsByTagName("route");
                 for (int j=0; j<nList.getLength(); j++) {
@@ -243,6 +256,32 @@ public class G5kStaticRouting extends StaticRouting {
                 }
                 */
             }
+        }
+    }
+
+    protected List<Port> getFirstPath(List<Port> currentPath, Node dst) {
+
+        if (currentPath.get(currentPath.size()-1).getHost() instanceof Switch) {
+            for (Port p : ((Switch) currentPath.get(currentPath.size() - 1).getHost()).getPorts()) {
+                if (currentPath.contains(p)) {
+                    continue;
+                }
+                currentPath.add(p);
+                if (p.getRemote().getHost() instanceof Node) {
+                    if (p.getRemote().getHost().equals(dst)) {
+                        return currentPath;
+                    }
+                } else {
+                    currentPath.add(p.getRemote());
+                    return getFirstPath(currentPath, dst);
+                }
+                currentPath.remove(currentPath.size() - 1);
+            }
+            currentPath.remove(currentPath.size() - 1);
+            return currentPath;
+
+        } else {
+            return Collections.emptyList();
         }
     }
 }

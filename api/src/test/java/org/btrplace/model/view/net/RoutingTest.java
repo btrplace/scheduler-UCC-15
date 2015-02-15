@@ -40,28 +40,4 @@ public class RoutingTest {
         Assert.assertEquals(net.getPath(nodes.get(0), nodes.get(2)).size(), 4);
         Assert.assertEquals(net.getPath(nodes.get(1), nodes.get(3)).size(), 4);
     }
-
-    @Test
-    public void g5kTest() {
-
-        String path = new File("").getAbsolutePath() + "/api/src/test/resources/net/";
-
-        Model mo = new DefaultModel();
-
-        List<Node> nodes = new ArrayList<>();
-        for (int i=0; i<(10+72+34); i++) {
-            nodes.add(mo.newNode());
-        }
-
-        File g5kXML = new File(getClass().getClassLoader().getResource("net/g5k_grenoble.xml").getFile());
-
-        NetworkView net = new NetworkView(new G5kStaticRouting(nodes, g5kXML));
-        mo.attach(net);
-
-        net.generateDot(path + "g5k_grenoble.dot", false);
-
-        // Test different routes
-        Assert.assertEquals(net.getPath(nodes.get(0), nodes.get(1)).size(), 2);
-        Assert.assertEquals(net.getPath(nodes.get(10), nodes.get(1)).size(), 4);
-    }
 }
