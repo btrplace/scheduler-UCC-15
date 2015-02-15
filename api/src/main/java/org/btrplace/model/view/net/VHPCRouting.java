@@ -7,14 +7,14 @@ import java.util.*;
 /**
  * Created by vkherbac on 08/01/15.
  */
-public class VHPCStaticRouting implements Routing {
+public class VHPCRouting implements Routing {
 
     private NetworkView net;
     private List<Node> srcNodes, dstNodes;
     private Switch srcSw, dstSw;
     private Map<NodesMap, Integer> useCable;
 
-    public VHPCStaticRouting(List<Node> srcNodes, List<Node> dstNodes) {
+    public VHPCRouting(List<Node> srcNodes, List<Node> dstNodes) {
         this.srcNodes = srcNodes;
         this.dstNodes = dstNodes;
     }
