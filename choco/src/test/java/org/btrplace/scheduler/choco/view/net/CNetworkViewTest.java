@@ -5,6 +5,7 @@ import org.btrplace.model.constraint.Fence;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
+import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCRouting;
@@ -459,7 +460,7 @@ public class CNetworkViewTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
+        Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
 
         ReconfigurationPlan p;
         try {
