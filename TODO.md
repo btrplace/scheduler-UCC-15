@@ -7,6 +7,7 @@
 - [X] Convert/Import g5k topology description files to static routes
   - [X] Import G5k XML topology description files
   - [P] Manage AS routes (inter-sites routing)
+- [ ] Export networkView to XML
 - [ ] Define an evaluation protocol
   - [ ] Flexibility
   - [ ] Scale
