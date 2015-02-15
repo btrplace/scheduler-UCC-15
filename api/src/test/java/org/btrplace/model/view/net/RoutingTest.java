@@ -27,7 +27,7 @@ public class RoutingTest {
             nodes.add(mo.newNode());
         }
 
-        File routingXML = new File(path + "routing-test.xml");
+        File routingXML = new File(getClass().getClassLoader().getResource("net/routing-test.xml").getFile());
 
         NetworkView net = new NetworkView(new StaticRouting(nodes, routingXML));
         mo.attach(net);
@@ -53,7 +53,7 @@ public class RoutingTest {
             nodes.add(mo.newNode());
         }
 
-        File g5kXML = new File(path + "g5k_grenoble.xml");
+        File g5kXML = new File(getClass().getClassLoader().getResource("net/g5k_grenoble.xml").getFile());
 
         NetworkView net = new NetworkView(new G5kStaticRouting(nodes, g5kXML));
         mo.attach(net);
