@@ -27,7 +27,8 @@ public class VHPCRouting implements Routing {
         srcSw = net.newSwitch();
         dstSw = net.newSwitch();
 
-        // Connect them together with 3*1Gb Links (Corresponds to the 3 first ports of each Switch)
+
+        // Connect them together with 3*1Gb Links (Corresponding to the 3 first ports of each Switch)
         srcSw.connect(1000, dstSw, dstSw, dstSw);
 
         // Connect to nodes

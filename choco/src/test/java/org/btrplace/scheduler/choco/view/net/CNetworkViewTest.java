@@ -7,7 +7,7 @@ import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
-import org.btrplace.model.view.net.VHPCStaticRouting;
+import org.btrplace.model.view.net.VHPCRouting;
 import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.model.view.power.MinEnergyObjective;
 import org.btrplace.plan.ReconfigurationPlan;
@@ -418,7 +418,7 @@ public class CNetworkViewTest {
         mo.attach(energyView);
 
         // Add a NetworkView view using the static VHPC routing
-        NetworkView net = new NetworkView(new VHPCStaticRouting(srcNodes, dstNodes));
+        NetworkView net = new NetworkView(new VHPCRouting(srcNodes, dstNodes));
         mo.attach(net);
         net.generateDot(path + "topology.dot", false);
 

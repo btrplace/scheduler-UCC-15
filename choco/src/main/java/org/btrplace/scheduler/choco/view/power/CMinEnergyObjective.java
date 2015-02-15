@@ -98,7 +98,6 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
             }
         }
         if (!stayVars.isEmpty()) {
-            //endVars.add(rp.getNodeAction(n).getHostingEnd());
             strategies.add(ISF.custom(
                     ISF.maxDomainSize_var_selector(),
                     ISF.max_value_selector(),
@@ -113,7 +112,6 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
             endPowerVars.add(cPowerView.getPowerEnd(rp.getNode(n)));
         }
         if (!endPowerVars.isEmpty()) {
-            //endVars.add(rp.getNodeAction(n).getHostingEnd());
             strategies.add(ISF.custom(
                     ISF.maxDomainSize_var_selector(),
                     ISF.min_value_selector(),
