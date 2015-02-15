@@ -8,10 +8,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by vkherbac on 08/12/14.
@@ -38,6 +35,12 @@ public class NetworkView implements ModelView, Cloneable {
         setRouting(routing);
     }
 
+    public Switch newSwitch(int id, int capacity) {
+        Switch s = swBuilder.newSwitch(id, capacity);
+        switches.add(s);
+        return s;
+    }
+
     public Switch newSwitch(int capacity) {
         Switch s = swBuilder.newSwitch(capacity);
         switches.add(s);
@@ -58,7 +61,7 @@ public class NetworkView implements ModelView, Cloneable {
     }
 
     public List<Port> getPath(Node n1, Node n2) {
-        return routing.getPath(n1, n2);
+        return new ArrayList<>(new LinkedHashSet<>(routing.getPath(n1, n2)));
     }
 
     public Routing getRouting() { return routing; }
