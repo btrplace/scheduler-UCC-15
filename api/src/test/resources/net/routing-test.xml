@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<network>
+
+    <!-- Nodes -->
+    <node id="0" cpu="4" ram="8096"/>
+    <node id="1" cpu="4" ram="8096"/>
+    <node id="2" cpu="4" ram="8096"/>
+    <node id="3" cpu="4" ram="8096"/>
+
+    <!-- Switches -->
+    <switch id="0" capacity="20000" />
+    <switch id="1" capacity="20000" />
+
+    <!-- Src nodes to switch -->
+    <link bandwidth="1000" id="0" left="node_0" right="switch_0" />
+    <link bandwidth="1000" id="1" left="node_1" right="switch_0" />
+
+    <!-- Aggregation -->
+    <link bandwidth="1000" id="2" left="switch_0" right="switch_1" />
+    <link bandwidth="1000" id="3" left="switch_0" right="switch_1" />
+
+    <!-- Dst nodes to switch -->
+    <link bandwidth="1000" id="4" left="node_2" right="switch_1" />
+    <link bandwidth="1000" id="5" left="node_3" right="switch_1" />
+
+    <!-- Static routes -->
+    <route src="0" dst="1">
+        <lnk id="0" />
+        <lnk id="1" />
+    </route>
+    <route src="2" dst="3">
+        <lnk id="4" />
+        <lnk id="5" />
+    </route>
+    <route src="0" dst="2">
+        <lnk id="0" />
+        <lnk id="2" />
+        <lnk id="4" />
+    </route>
+    <route src="0" dst="3">
+        <lnk id="0" />
+        <lnk id="3" />
+        <lnk id="5" />
+    </route>
+    <route src="1" dst="2">
+        <lnk id="1" />
+        <lnk id="3" />
+        <lnk id="4" />
+    </route>
+    <route src="1" dst="3">
+        <lnk id="1" />
+        <lnk id="2" />
+        <lnk id="5" />
+    </route>
+
+</network>
