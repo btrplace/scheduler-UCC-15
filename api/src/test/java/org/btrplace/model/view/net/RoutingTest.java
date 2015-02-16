@@ -7,7 +7,6 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,15 +21,12 @@ public class RoutingTest {
 
         Model mo = new DefaultModel();
 
-        List<Node> nodes = new ArrayList<>();
-        for (int i=0; i<4; i++) {
-            nodes.add(mo.newNode());
-        }
-
         File routingXML = new File(getClass().getClassLoader().getResource("net/routing-test.xml").getFile());
 
-        NetworkView net = new NetworkView(new StaticRouting(nodes, routingXML));
+        NetworkView net = new NetworkView(new StaticRouting());
         mo.attach(net);
+
+        List<Node> nodes = ((StaticRouting) net.getRouting()).importXML(mo, routingXML);
 
         net.generateDot(path + "routing-test.dot", false);
 

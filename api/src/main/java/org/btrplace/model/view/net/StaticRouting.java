@@ -1,5 +1,6 @@
 package org.btrplace.model.view.net;
 
+import org.btrplace.model.Model;
 import org.btrplace.model.Node;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -17,18 +18,14 @@ import java.util.*;
 public class StaticRouting implements Routing {
 
     protected NetworkView net;
-    protected File routingXML;
-    protected List<Node> nodes;
+    protected File xml;
 
     protected List<Switch> switches;
     protected Map<Integer, List<Port>> links;
     protected Map<NodesMap, List<Port>> routes;
 
 
-    public StaticRouting(List<Node> nodes, File routingXML) {
-        this.nodes = nodes;
-        this.routingXML = routingXML;
-
+    public StaticRouting() {
         switches = new ArrayList<>();
         links = new HashMap<>();
         routes = new HashMap<>();
@@ -36,16 +33,7 @@ public class StaticRouting implements Routing {
 
     @Override
     public void setNetwork(NetworkView net) {
-
         this.net = net;
-
-        // Import static routes from XML file
-        try {
-            importRoutes();
-        } catch(Exception e) {
-            System.err.println("Error during static routes' import: " + e.toString());
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -75,151 +63,188 @@ public class StaticRouting implements Routing {
         return max;
     }
 
-    private void importRoutes() throws Exception {
+    public void addStaticRoute(NodesMap nm, List<Port> ports) {
+        routes.put(nm, ports);
+    }
 
-        if (!routingXML.exists()) throw new FileNotFoundException("File '" + routingXML.getName() + "' not found");
+    public List<Node> importXML(Model mo, File xml) {
 
-        DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-        Document doc = dBuilder.parse(routingXML);
-        doc.getDocumentElement().normalize();
+        List<Node> nodes = new ArrayList<>();
 
-        org.w3c.dom.Node root = doc.getDocumentElement();
-        NodeList nList;
+        try {
+            if (!xml.exists()) throw new FileNotFoundException("File '" + xml.getName() + "' not found");
 
-        boolean found;
+            DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
+            DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+            Document doc = dBuilder.parse(xml);
+            doc.getDocumentElement().normalize();
 
-        // Parse nodes
-        nList = ((Element) root).getElementsByTagName("node");
-        for (int i=0; i<nList.getLength(); i++) {
-            org.w3c.dom.Node node = nList.item(i);
+            org.w3c.dom.Node root = doc.getDocumentElement();
+            NodeList nList;
 
-            if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                Element elt = (Element) node;
+            boolean found;
 
-                // Just check if the node exists
-                int id = Integer.valueOf(elt.getAttribute("id"));
-                int cpu = Integer.valueOf(elt.getAttribute("cpu"));
-                int ram = Integer.valueOf(elt.getAttribute("ram"));
-                found = false;
+            // Parse nodes
+            nList = ((Element) root).getElementsByTagName("node");
+            for (int i = 0; i < nList.getLength(); i++) {
+                org.w3c.dom.Node node = nList.item(i);
+
+                if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                    Element elt = (Element) node;
+
+                    // Create the node and add it to the list
+                    int id = Integer.valueOf(elt.getAttribute("id"));
+                    int cpu = Integer.valueOf(elt.getAttribute("cpu"));
+                    int ram = Integer.valueOf(elt.getAttribute("ram"));
+                    if (!mo.contains(new Node(id))) {
+                        Node n = mo.newNode(id);
+                        nodes.add(n);
+                    }
+                /*found = false;
                 for (Node n : nodes) { if (n.id() == id) { found = true; break; } }
-                if (!found) throw new Exception("Node with id '"+ id +"' not found");
-            }
-        }
-
-        // Parse switches
-        nList = ((Element) root).getElementsByTagName("switch");
-        for (int i=0; i<nList.getLength(); i++) {
-            org.w3c.dom.Node node = nList.item(i);
-
-            if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                Element elt = (Element) node;
-
-                // Create the new Switch
-                int id = Integer.valueOf(elt.getAttribute("id"));
-                int capacity = Integer.valueOf(elt.getAttribute("capacity"));
-                switches.add(net.newSwitch(id, capacity));
-            }
-        }
-
-        // Parse links
-        nList = ((Element) root).getElementsByTagName("link");
-        for (int i=0; i<nList.getLength(); i++) {
-            org.w3c.dom.Node node = nList.item(i);
-
-            if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                Element elt = (Element) node;
-
-                // Connect elements
-                int id = Integer.valueOf(elt.getAttribute("id"));
-                int bandwidth = Integer.valueOf(elt.getAttribute("bandwidth"));
-                String leftType = elt.getAttribute("left").split("_")[0];
-                int leftId = Integer.valueOf(elt.getAttribute("left").split("_")[1]);
-                String rightType = elt.getAttribute("right").split("_")[0];
-                int rightId = Integer.valueOf(elt.getAttribute("right").split("_")[1]);
-
-                if (leftType.equals("switch")) {
-                    Switch leftSwitch = null;
-                    for (Switch sw : switches) { if (sw.id() == leftId) leftSwitch = sw; }
-                    if (leftSwitch == null) throw new Exception("Cannot find the switch with id '"+ leftId +"'");
-
-                    if (rightType.equals("switch")) {
-                        Switch rightSwitch = null;
-                        for (Switch sw : switches) { if (sw.id() == rightId) rightSwitch = sw; }
-                        if (rightSwitch == null) throw new Exception("Cannot find the switch with id '"+ rightId +"'");
-
-                        // Connect two switches
-                        leftSwitch.connect(bandwidth, rightSwitch);
-                        links.put(id, Arrays.asList(leftSwitch.getPorts().get(leftSwitch.getPorts().size()-1),
-                                rightSwitch.getPorts().get(rightSwitch.getPorts().size()-1)));
-                    }
-                    else {
-                        Node rightNode = null;
-                        for (Node n : nodes) { if (n.id() == rightId) rightNode = n; }
-                        if (rightNode == null) throw new Exception("Cannot find the node with id '"+ rightId +"'");
-
-                        // Connect switch to node
-                        leftSwitch.connect(bandwidth, rightNode);
-                        links.put(id, Arrays.asList((net.getSwitchInterface(rightNode))));
-                    }
-                }
-                else {
-                    Node leftNode = null;
-                    for (Node n : nodes) { if (n.id() == leftId) leftNode = n; }
-                    if (leftNode == null) throw new Exception("Cannot find the node with id '"+ leftId +"'");
-
-                    if (rightType.equals("switch")) {
-                        Switch rightSwitch = null;
-                        for (Switch sw : switches) { if (sw.id() == rightId) rightSwitch = sw; }
-                        if (rightSwitch == null) throw new Exception("Cannot find the switch with id '"+ rightId +"'");
-
-                        // Connect node to switch
-                        rightSwitch.connect(bandwidth, leftNode);
-                        links.put(id, Arrays.asList(net.getSwitchInterface(leftNode)));
-                    }
-                    else { throw new Exception("Cannot link two nodes together !"); }
+                if (!found) throw new Exception("Node with id '"+ id +"' not found");*/
                 }
             }
-        }
 
-        // Parse routes
-        nList = ((Element) root).getElementsByTagName("route");
-        for (int i=0; i<nList.getLength(); i++) {
-            org.w3c.dom.Node node = nList.item(i);
+            // Parse switches
+            nList = ((Element) root).getElementsByTagName("switch");
+            for (int i = 0; i < nList.getLength(); i++) {
+                org.w3c.dom.Node node = nList.item(i);
 
-            if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                Element elt = (Element) node;
+                if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                    Element elt = (Element) node;
 
-                int src = Integer.valueOf(elt.getAttribute("src"));
-                Node srcNode = null;
-                for (Node n : nodes) { if (n.id() == src) srcNode = n; }
-                if (srcNode == null) throw new Exception("Cannot find the node with id '"+ src +"'");
-
-                int dst = Integer.valueOf(elt.getAttribute("dst"));
-                Node dstNode = null;
-                for (Node n : nodes) { if (n.id() == dst) dstNode = n; }
-                if (dstNode == null) throw new Exception("Cannot find the node with id '"+ dst +"'");
-
-                NodesMap nodesMap = new NodesMap(srcNode, dstNode);
-                List<Port> ports = new ArrayList<>();
-
-                // Parse route's links
-                NodeList lnks = elt.getElementsByTagName("lnk");
-                for (int j=0; j<lnks.getLength(); j++) {
-                    Element lnk = (Element) lnks.item(j);
-                    int id = Integer.valueOf(lnk.getAttribute("id"));
-
-                    // Get all the link's ports
-                    if (links.containsKey(id)) {
-                        ports.addAll(links.get(id));
-                    }
-                    else { throw new Exception("Cannot find the link with id '"+ id +"'"); }
+                    // Create the new Switch
+                    int id = Integer.valueOf(elt.getAttribute("id"));
+                    int capacity = Integer.valueOf(elt.getAttribute("capacity"));
+                    switches.add(net.newSwitch(id, capacity));
                 }
+            }
 
-                // Add the new route
-                routes.put(nodesMap, ports);
+            // Parse links
+            nList = ((Element) root).getElementsByTagName("link");
+            for (int i = 0; i < nList.getLength(); i++) {
+                org.w3c.dom.Node node = nList.item(i);
+
+                if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                    Element elt = (Element) node;
+
+                    // Connect elements
+                    int id = Integer.valueOf(elt.getAttribute("id"));
+                    int bandwidth = Integer.valueOf(elt.getAttribute("bandwidth"));
+                    String leftType = elt.getAttribute("left").split("_")[0];
+                    int leftId = Integer.valueOf(elt.getAttribute("left").split("_")[1]);
+                    String rightType = elt.getAttribute("right").split("_")[0];
+                    int rightId = Integer.valueOf(elt.getAttribute("right").split("_")[1]);
+
+                    if (leftType.equals("switch")) {
+                        Switch leftSwitch = null;
+                        for (Switch sw : switches) {
+                            if (sw.id() == leftId) leftSwitch = sw;
+                        }
+                        if (leftSwitch == null)
+                            throw new Exception("Cannot find the switch with id '" + leftId + "'");
+
+                        if (rightType.equals("switch")) {
+                            Switch rightSwitch = null;
+                            for (Switch sw : switches) {
+                                if (sw.id() == rightId) rightSwitch = sw;
+                            }
+                            if (rightSwitch == null)
+                                throw new Exception("Cannot find the switch with id '" + rightId + "'");
+
+                            // Connect two switches
+                            leftSwitch.connect(bandwidth, rightSwitch);
+                            links.put(id, Arrays.asList(leftSwitch.getPorts().get(leftSwitch.getPorts().size() - 1),
+                                    rightSwitch.getPorts().get(rightSwitch.getPorts().size() - 1)));
+                        } else {
+                            Node rightNode = null;
+                            for (Node n : nodes) {
+                                if (n.id() == rightId) rightNode = n;
+                            }
+                            if (rightNode == null)
+                                throw new Exception("Cannot find the node with id '" + rightId + "'");
+
+                            // Connect switch to node
+                            leftSwitch.connect(bandwidth, rightNode);
+                            links.put(id, Arrays.asList((net.getSwitchInterface(rightNode))));
+                        }
+                    } else {
+                        Node leftNode = null;
+                        for (Node n : nodes) {
+                            if (n.id() == leftId) leftNode = n;
+                        }
+                        if (leftNode == null) throw new Exception("Cannot find the node with id '" + leftId + "'");
+
+                        if (rightType.equals("switch")) {
+                            Switch rightSwitch = null;
+                            for (Switch sw : switches) {
+                                if (sw.id() == rightId) rightSwitch = sw;
+                            }
+                            if (rightSwitch == null)
+                                throw new Exception("Cannot find the switch with id '" + rightId + "'");
+
+                            // Connect node to switch
+                            rightSwitch.connect(bandwidth, leftNode);
+                            links.put(id, Arrays.asList(net.getSwitchInterface(leftNode)));
+                        } else {
+                            throw new Exception("Cannot link two nodes together !");
+                        }
+                    }
+                }
+            }
+
+            // Parse routes
+            nList = ((Element) root).getElementsByTagName("route");
+            for (int i = 0; i < nList.getLength(); i++) {
+                org.w3c.dom.Node node = nList.item(i);
+
+                if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                    Element elt = (Element) node;
+
+                    int src = Integer.valueOf(elt.getAttribute("src"));
+                    Node srcNode = null;
+                    for (Node n : nodes) {
+                        if (n.id() == src) srcNode = n;
+                    }
+                    if (srcNode == null) throw new Exception("Cannot find the node with id '" + src + "'");
+
+                    int dst = Integer.valueOf(elt.getAttribute("dst"));
+                    Node dstNode = null;
+                    for (Node n : nodes) {
+                        if (n.id() == dst) dstNode = n;
+                    }
+                    if (dstNode == null) throw new Exception("Cannot find the node with id '" + dst + "'");
+
+                    NodesMap nodesMap = new NodesMap(srcNode, dstNode);
+                    List<Port> ports = new ArrayList<>();
+
+                    // Parse route's links
+                    NodeList lnks = elt.getElementsByTagName("lnk");
+                    for (int j = 0; j < lnks.getLength(); j++) {
+                        Element lnk = (Element) lnks.item(j);
+                        int id = Integer.valueOf(lnk.getAttribute("id"));
+
+                        // Get all the link's ports
+                        if (links.containsKey(id)) {
+                            ports.addAll(links.get(id));
+                        } else {
+                            throw new Exception("Cannot find the link with id '" + id + "'");
+                        }
+                    }
+
+                    // Add the new route
+                    routes.put(nodesMap, ports);
+                }
             }
         }
+        catch (Exception e) {
+            System.err.println("Error during XML import: " + e.toString());
+            e.printStackTrace();
+            return null;
+        }
+
+        return nodes;
     }
 
     protected List<Port> getFirstPath(List<Port> currentPath, Node dst) {
