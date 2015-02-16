@@ -21,6 +21,7 @@ package org.btrplace.model.view;
 import org.btrplace.model.Element;
 import org.btrplace.model.Node;
 import org.btrplace.model.VM;
+import org.btrplace.model.view.net.Switch;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -65,9 +66,18 @@ public final class NamingService<E extends Element> implements ModelView {
     }
 
     /**
+     * Make a naming service dedicated to Switches.
+     *
+     * @return a new naming service
+     */
+    public static NamingService<Switch> newSwitchNS() {
+        return new NamingService<>("switch");
+    }
+
+    /**
      * Make a new service.
      *
-     * @param eId "vm" or "node"
+     * @param eId "vm", "node" or "switch"
      */
     private NamingService(String eId) {
         resolve = new HashMap<>();
