@@ -1,7 +1,16 @@
 Release notes
 ======================
 
-version ????????
+??????
+----------------------
+- The API allows know to indicate a bandwidth to allocate for VM migration (#52)
+
+0.41 - 12 Feb 2015
+----------------------
+- Speed up tasks scheduling. This improves the resolution of problems that manipulate the node states. See #62
+- Refer to the associated [issue tracker](https://github.com/btrplace/scheduler/issues?q=milestone%3A%22release+0.41%22+is%3Aclosed) to get the closed issues
+
+version 0.40 - 16 Jan 2015
 ----------------------
 - update to choco 3.3.0
 
