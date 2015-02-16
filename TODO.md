@@ -6,15 +6,16 @@
 - [X] Simplify the creation of static routes(done from input XML file)
 - [X] Convert/Import g5k topology description files to static routes
   - [X] Import G5k XML topology description files
-  - [P] Manage AS routes (inter-sites routing)
-- [ ] Export networkView to XML
+  - [X] Manage AS routes (inter-sites routing)
+- [ ] Create a new btrplace-g5k module which will act as an actuator for g5k experiments
 - [ ] Define an evaluation protocol
   - [ ] Flexibility
   - [ ] Scale
   - [ ] Performance (Define metrics)
   - [ ] Efficiency
-- [ ] Create IaaS actuators
-  - [ ] G5k
+- [ ] Patch/Improve topo5k and update SimgridModelBuilder accordingly
+- [P] Export networkView to XML
+- [P] Create IaaS actuators
   - [P] OpenStack
   - [P] OpenNebula
 
