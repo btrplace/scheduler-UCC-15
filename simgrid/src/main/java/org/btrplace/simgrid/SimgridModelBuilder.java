@@ -42,15 +42,15 @@ import java.util.*;
  *
  * @author Vincent Kherbache
  */
-public final class SimgridModelBuilder {
+public class SimgridModelBuilder {
 
-    private static NamingService<Node> nsNodes;
-    private static NamingService<Switch> nsSwitches;
-    private static ShareableResource rcCPU;
-    private static List<Node> nodes;
-    private static Map<String, List<Port>> links;
+    private NamingService<Node> nsNodes;
+    private NamingService<Switch> nsSwitches;
+    private ShareableResource rcCPU;
+    private List<Node> nodes;
+    private Map<String, List<Port>> links;
 
-    public static Model build(File xml) {
+    public Model build(File xml) {
 
         nodes = new ArrayList<>();
         links = new HashMap<>();
@@ -66,7 +66,7 @@ public final class SimgridModelBuilder {
         mo.attach(nsSwitches);
 
         // Create and attach the shareableResource view
-        rcCPU = new ShareableResource("cpu", 1, 1);
+        rcCPU = new ShareableResource("core", 1, 1);
         mo.attach(rcCPU);
 
         // Import nodes from Simgrid XML file
@@ -92,7 +92,7 @@ public final class SimgridModelBuilder {
         return mo;
     }
 
-    private static void importNodes(Model mo, File xml) throws Exception {
+    private void importNodes(Model mo, File xml) throws Exception {
 
         if (!xml.exists()) throw new FileNotFoundException("File '" + xml.getName() + "' not found");
 
@@ -101,24 +101,27 @@ public final class SimgridModelBuilder {
         Document doc = dBuilder.parse(xml);
         doc.getDocumentElement().normalize();
 
+        // Root is on the first AS (id='grid5000.fr')
+        Element root = (Element) doc.getElementsByTagName("AS").item(0);
+
         // Get the list of sites
-        NodeList nList = ((org.w3c.dom.Element) doc.getElementsByTagName("AS").item(0)).getElementsByTagName("AS");
+        NodeList sitesList = root.getElementsByTagName("AS");
 
         // For all sites
-        for (int i = 0; i < nList.getLength(); i++) {
+        for (int i=0; i<sitesList.getLength(); i++) {
 
-            org.w3c.dom.Node nNode = nList.item(i);
+            org.w3c.dom.Node nSite = sitesList.item(i);
 
-            if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+            if (nSite.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
 
-                org.w3c.dom.Element site = (org.w3c.dom.Element) nNode;
+                org.w3c.dom.Element eSite = (org.w3c.dom.Element) nSite;
 
-                String siteId = site.getAttribute("id");
+                String siteId = eSite.getAttribute("id");
 
                 // Parse host to assign names on provided nodes
-                nList = site.getElementsByTagName("host");
-                for (int j = 0; j < nList.getLength(); j++) {
-                    org.w3c.dom.Node node = nList.item(j);
+                NodeList hostsList = eSite.getElementsByTagName("host");
+                for (int j = 0; j < hostsList.getLength(); j++) {
+                    org.w3c.dom.Node node = hostsList.item(j);
 
                     if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
                         org.w3c.dom.Element host = (org.w3c.dom.Element) node;
@@ -126,7 +129,7 @@ public final class SimgridModelBuilder {
                         // Create a new node with the right name
                         String id = host.getAttribute("id").replace("." + siteId, "");
                         int core = Integer.valueOf(host.getAttribute("core"));
-                        long power = Long.valueOf(host.getAttribute("power"));
+                        double power = Double.valueOf(host.getAttribute("power"));
                         Node n = mo.newNode();
                         nsNodes.register(n, id);
                         nodes.add(n);
@@ -139,7 +142,7 @@ public final class SimgridModelBuilder {
         }
     }
 
-    private static void importRoutes(NetworkView nv, File xml) throws Exception {
+    private void importRoutes(NetworkView nv, File xml) throws Exception {
 
         if (!xml.exists()) throw new FileNotFoundException("File '" + xml.getName() + "' not found");
 
@@ -148,65 +151,68 @@ public final class SimgridModelBuilder {
         Document doc = dBuilder.parse(xml);
         doc.getDocumentElement().normalize();
 
+        // Root is on the first AS (id='grid5000.fr')
+        Element root = (Element) doc.getElementsByTagName("AS").item(0);
+
         // Get the list of sites
-        NodeList nList = ((Element) doc.getElementsByTagName("AS").item(0)).getElementsByTagName("AS");
+        NodeList sitesList = root.getElementsByTagName("AS");
 
         // For all sites
-        for (int i=0; i<nList.getLength(); i++) {
+        for (int i=0; i<sitesList.getLength(); i++) {
 
-            org.w3c.dom.Node nNode = nList.item(i);
+            org.w3c.dom.Node nSite = sitesList.item(i);
 
-            if (nNode.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+            if (nSite.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
 
-                Element site = (Element) nNode;
+                Element eSite = (Element) nSite;
 
-                String siteId = site.getAttribute("id");
+                String siteId = eSite.getAttribute("id");
 
                 boolean found;
 
                 // Parse router as a switch
-                nList = site.getElementsByTagName("router");
-                for (int j=0; j<nList.getLength(); j++) {
-                    org.w3c.dom.Node node = nList.item(j);
+                NodeList routersList = eSite.getElementsByTagName("router");
+                for (int j=0; j<routersList.getLength(); j++) {
+                    org.w3c.dom.Node nRouter = routersList.item(j);
 
-                    if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                        Element router = (Element) node;
+                    if (nRouter.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                        Element eRouter = (Element) nRouter;
 
                         // Create the new switch
-                        String id = router.getAttribute("id").replace("." + siteId, "");
+                        String id = eRouter.getAttribute("id").replace("." + siteId, "");
                         Switch sw = nv.newSwitch();
                         nsSwitches.register(sw, id);
                     }
                 }
 
                 // Parse links
-                nList = site.getElementsByTagName("link");
-                for (int j = 0; j < nList.getLength(); j++) {
-                    org.w3c.dom.Node node = nList.item(j);
+                NodeList linksList = eSite.getElementsByTagName("link");
+                for (int j = 0; j < linksList.getLength(); j++) {
+                    org.w3c.dom.Node nLink = linksList.item(j);
 
-                    if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                        Element linksList = (Element) node;
+                    if (nLink.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                        Element eLink = (Element) nLink;
 
                         // Connect elements
-                        String id = linksList.getAttribute("id");
+                        String id = eLink.getAttribute("id");
                         String src = id.split("_")[0].replace("." + siteId, "");
                         String dst = id.split("_")[1].replace("." + siteId, "");
-                        int bandwidth = (int) (Long.valueOf(linksList.getAttribute("bandwidth")) / 1000000);
-                        double latency = Double.valueOf(linksList.getAttribute("latency"));
+                        int bandwidth = (int) (Long.valueOf(eLink.getAttribute("bandwidth")) / 1000000);
+                        double latency = Double.valueOf(eLink.getAttribute("latency"));
 
-                        //TODO: just a temporary patch
-                        if (src.contains("renater") || dst.contains("renater")) {
-                            continue;
-                        }
+                        //TODO: just a temporary patch (doublon: already declared in root links)
+                        if (src.contains("renater") || dst.contains("renater")) { continue; }
 
                         // Create a new switch if detected (switch entry does not exists)
-                        if (src.contains("-sw")) {
+                        if (src.contains("-sw") || src.contains("force10") || src.contains("mxl1")
+                                || src.contains("edgeiron") || src.contains("sgriffon") || src.contains("sgraphene")) {
                             if (nsSwitches.resolve(src) == null) {
                                 Switch sw = nv.newSwitch();
                                 nsSwitches.register(sw, src);
                             }
                         }
-                        if (dst.contains("-sw")) {
+                        if (dst.contains("-sw") || dst.contains("force10") || dst.contains("mxl1")
+                                || dst.contains("edgeiron") || dst.contains("sgriffon") || dst.contains("sgraphene")) {
                             if (nsSwitches.resolve(dst) == null) {
                                 Switch sw = nv.newSwitch();
                                 nsSwitches.register(sw, dst);
@@ -245,12 +251,12 @@ public final class SimgridModelBuilder {
 
                 /* TODO: routes that are not between two end nodes are useless
                 // Parse routes
-                nList = site.getElementsByTagName("route");
-                for (int j=0; j<nList.getLength(); j++) {
-                    org.w3c.dom.Node node = nList.item(j);
+                NodeList routesList = site.getElementsByTagName("route");
+                for (int j=0; j<routesList.getLength(); j++) {
+                    org.w3c.dom.Node nRoute = routesList.item(j);
 
-                    if (node.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                        Element route = (Element) node;
+                    if (nRoute.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                        Element route = (Element) nRoute;
 
                         String src = route.getAttribute("src").replace("."+siteId, "");
                         String dst = route.getAttribute("dst").replace("."+siteId, "");
@@ -298,6 +304,48 @@ public final class SimgridModelBuilder {
                     }
                 }
                 */
+            }
+        }
+
+        // Add inter-sites links
+        NodeList linksList = root.getElementsByTagName("link");
+
+        // For all sites
+        for (int i=0; i<linksList.getLength(); i++) {
+
+            org.w3c.dom.Node nLink = linksList.item(i);
+
+            // Only look at first child
+            if (root.equals(nLink.getParentNode()) && nLink.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
+                Element eLink = (Element) nLink;
+
+                // Connect root switches
+                String id = eLink.getAttribute("id");
+                String src = id.split("_")[0].contains("gw-") ? id.split("_")[0].split("\\.")[0] : id.split("_")[0];
+                String dst = id.split("_")[1].contains("gw-") ? id.split("_")[1].split("\\.")[0] : id.split("_")[1];
+                int bandwidth = (int) (Long.valueOf(eLink.getAttribute("bandwidth")) / 1000000);
+                double latency = Double.valueOf(eLink.getAttribute("latency"));
+
+                // Replace '.' by '-' for consistency
+                if (src.contains("renater")) src = src.replace(".", "-");
+                if (dst.contains("renater")) dst = dst.replace(".", "-");
+
+                // We assumes they are all switches
+                if (nsSwitches.resolve(src) == null) {
+                    Switch sw = nv.newSwitch();
+                    nsSwitches.register(sw, src);
+                }
+                if (nsSwitches.resolve(dst) == null) {
+                    Switch sw = nv.newSwitch();
+                    nsSwitches.register(sw, dst);
+                }
+
+                // Connect them together
+                nsSwitches.resolve(src).connect(bandwidth, nsSwitches.resolve(dst));
+                links.put(id, Arrays.asList(
+                    nsSwitches.resolve(src).getPorts().get(nsSwitches.resolve(src).getPorts().size() - 1),
+                    nsSwitches.resolve(dst).getPorts().get(nsSwitches.resolve(dst).getPorts().size() - 1))
+                );
             }
         }
     }
