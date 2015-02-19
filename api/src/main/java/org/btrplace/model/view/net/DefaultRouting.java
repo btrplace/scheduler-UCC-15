@@ -59,7 +59,7 @@ public class DefaultRouting implements Routing {
                 currentPath.remove(currentPath.size() - 1);
             }
             currentPath.remove(currentPath.size() - 1);
-            return currentPath;
+            return getFirstPath(currentPath, dst);
 
         } else {
             return Collections.emptyList();

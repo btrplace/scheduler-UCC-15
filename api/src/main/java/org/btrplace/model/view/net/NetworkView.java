@@ -61,17 +61,14 @@ public class NetworkView implements ModelView, Cloneable {
     }
 
     public List<Port> getPath(Node n1, Node n2) {
-        return new ArrayList<>(new LinkedHashSet<>(routing.getPath(n1, n2)));
+        //return new ArrayList<>(new LinkedHashSet<>(routing.getPath(n1, n2)));
+        return routing.getPath(n1, n2);
     }
 
     public Routing getRouting() { return routing; }
 
     public int getMaxBW(Node n1, Node n2) {
-        int maxBW = Integer.MAX_VALUE;
-        for (Port swif : getPath(n1, n2)) {
-            if(swif.getBandwidth() < maxBW) { maxBW = swif.getBandwidth(); }
-        }
-        return maxBW;
+        return routing.getMaxBW(n1, n2);
     }
 
     public List<Port> getAllInterfaces() {
