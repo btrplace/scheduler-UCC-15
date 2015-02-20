@@ -67,7 +67,7 @@ public class DefaultReconfigurationPlanMonitor implements ReconfigurationPlanMon
             curModel = plan.getOrigin().clone();
             pre.clear();
             nbCommitted = 0;
-            for (Action a : plan) {
+            for (Action a : plan.getActions()) {
                 Set<Action> deps = plan.getDirectDependencies(a);
                 if (deps.isEmpty()) {
                     this.dependencies.put(a, new Dependency(a, Collections.<Action>emptySet()));
