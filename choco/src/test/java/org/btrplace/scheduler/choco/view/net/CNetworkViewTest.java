@@ -1,5 +1,8 @@
 package org.btrplace.scheduler.choco.view.net;
 
+import net.minidev.json.JSONObject;
+import org.btrplace.json.JSONConverterException;
+import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
 import org.btrplace.model.constraint.Offline;
@@ -10,7 +13,6 @@ import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCRouting;
 import org.btrplace.model.view.power.EnergyView;
-import org.btrplace.model.view.power.MinEnergyObjective;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
 import org.btrplace.plan.gantt.ActionsToCSV;
@@ -27,6 +29,8 @@ import org.testng.Assert;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -358,8 +362,8 @@ public class CNetworkViewTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
         // Set nb of nodes and vms
-        int nbSrcNodes = 15;
-        int nbVMs = nbSrcNodes * 4;
+        int nbSrcNodes = 2;
+        int nbVMs = nbSrcNodes * 2;
 
         // Set mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 24; // VMs: 2GB,     Nodes: 24GB
@@ -373,11 +377,7 @@ public class CNetworkViewTest {
         int nodeIdlePower = 110;
         int vmPower = 15;
         int maxConsumption = (nodeIdlePower*nbSrcNodes*2)+(vmPower*nbVMs)+170;
-        maxConsumption = 5000;
-        maxConsumption = 4000;
-        maxConsumption = 3000;
-        maxConsumption = 2700;
-        maxConsumption = 2850;
+        //maxConsumption = 2850;
 
         // New default model
         Model mo = new DefaultModel();
@@ -416,7 +416,7 @@ public class CNetworkViewTest {
         for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (VM vm : vms) { energyView.setConsumption(vm, vmPower); }
-        mo.attach(energyView);
+        //mo.attach(energyView);
 
         // Add a NetworkView view using the static VHPC routing
         NetworkView net = new NetworkView(new VHPCRouting(srcNodes, dstNodes));
@@ -466,6 +466,24 @@ public class CNetworkViewTest {
         try {
             p = sc.solve(i);
             Assert.assertNotNull(p);
+
+            ReconfigurationPlanConverter planConverter = new ReconfigurationPlanConverter();
+            JSONObject obj = null;
+            try {
+                obj =  planConverter.toJSON(p);
+            } catch (JSONConverterException e) {
+                System.err.println("Error while converting plan: " + e.toString());
+                e.printStackTrace();
+            }
+            try {
+                FileWriter file = new FileWriter(path + "4n-4v.json");
+                file.write(obj.toJSONString());
+                file.flush();
+                file.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             energyView.plotConsumption(p, path + "energy.csv");
             System.err.println(p);
