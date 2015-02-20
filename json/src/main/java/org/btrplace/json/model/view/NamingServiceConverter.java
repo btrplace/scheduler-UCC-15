@@ -73,6 +73,9 @@ public class NamingServiceConverter extends ModelViewConverter<NamingService> {
             case "node":
                 ns = NamingService.newNodeNS();
                 break;
+            case "switch":
+                ns = NamingService.newSwitchNS();
+                break;
             default:
                 throw new JSONConverterException("Unsupported type of element '" + type + "'");
         }

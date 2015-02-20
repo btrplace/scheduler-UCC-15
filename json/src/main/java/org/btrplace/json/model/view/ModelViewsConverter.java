@@ -26,6 +26,8 @@ import org.btrplace.json.AbstractJSONObjectConverter;
 import org.btrplace.json.JSONArrayConverter;
 import org.btrplace.json.JSONConverterException;
 import org.btrplace.model.view.ModelView;
+import org.btrplace.model.view.net.NetworkView;
+import org.btrplace.model.view.power.EnergyView;
 
 import java.io.*;
 import java.util.*;
@@ -111,6 +113,9 @@ public class ModelViewsConverter extends AbstractJSONObjectConverter<ModelView> 
 
     @Override
     public JSONObject toJSON(ModelView o) throws JSONConverterException {
+        if (o instanceof NetworkView || o instanceof EnergyView) {
+            return new JSONObject();
+        }
         ModelViewConverter c = java2json.get(o.getClass());
         if (c == null) {
             throw new JSONConverterException("No converter available for a view with the '" + o.getClass() + "' className");
