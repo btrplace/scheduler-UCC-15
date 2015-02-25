@@ -42,10 +42,6 @@ import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 
 /**
  * Model an action that allow a running VM to be relocate elsewhere if necessary.
@@ -158,21 +154,21 @@ public class MigrateVMTransition implements KeepRunningVM {
             //memUsed = VF.fixed("memUsed_" + toString(), ( (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
             memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 20),
                     ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 20 ), s);
-
+            
             // Min BW = Dirty page rate
             bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
                    ((NetworkView)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
             duration = VF.bounded("duration_" + toString(), start.getLB(), end.getUB(), s); // Duration max = deadline
 
             // memUsed=(duration*(BW-DP))
-            //tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
-            //s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
-            //s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
-
-            // duration=(memUsed/(BW-DP))
             tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
             s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
-            s.post(ICF.eucl_div(memUsed, tmpDuration, duration));
+            s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
+
+            // duration=(memUsed/(BW-DP))
+            //tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
+            //s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
+            //s.post(ICF.eucl_div(memUsed, tmpDuration, duration));
 
             // BW=(memUsed/duration)+DP
             //tmpDuration = VF.bounded("memU/dur_" + toString(), 0, bandwidth.getUB(), s);
