@@ -6,6 +6,7 @@ import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
 import org.btrplace.model.constraint.SatConstraint;
+import org.btrplace.model.constraint.migration.Sync;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
@@ -15,6 +16,7 @@ import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.DefaultParameters;
+import org.btrplace.scheduler.choco.constraint.migration.CSync;
 import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -49,9 +51,9 @@ public class MicroTest {
         int cpu_vm = 1, cpu_srcNode = 8, cpu_dstNode = 8;  // VMs: 1 VCPUs, Nodes: 4 to 8 CPUs
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int memUsedHigh = 1200; // 1.2 GB
-        double dirtyRateHigh = 22; // 21.44 mB/s,
-        int memUsedLow = 300; // 1 GB
+        int memUsedHigh = 800; // 1.2 GB
+        double dirtyRateHigh = 40; // 21.44 mB/s,
+        int memUsedLow = 550; // 1 GB
         double dirtyRateLow = 0; // 1.5 mB/s,
 
         /* Define nodes and vms attributes in watts
@@ -133,6 +135,9 @@ public class MicroTest {
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
+        // Register the Sync constraint
+        ps.getConstraintMapper().register(new CSync.Builder());
+
         // Register custom objective
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         //ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -142,6 +147,7 @@ public class MicroTest {
         for (VM vm : vms) {
             cstrs.add(new Fence(vm, Collections.singleton(dstNodes.get(srcNodes.indexOf(ma.getVMLocation(vm))))));
         }
+        //cstrs.add(new Sync(vms));
 
         // Shutdown src nodes
         //for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
@@ -200,13 +206,13 @@ public class MicroTest {
 
         // Set mem + cpu for VMs and Nodes
         int mem_vm = 2, mem_node = 16; // VMs: 2GB,     Nodes: 16GB
-        int cpu_vm = 1, cpu_srcNode = 4, cpu_dstNode = 8;  // VMs: 1 VCPUs, Nodes: 4 to 8 CPUs
+        int cpu_vm = 1, cpu_srcNode = 8, cpu_dstNode = 8;  // VMs: 1 VCPUs, Nodes: 4 to 8 CPUs
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int memUsedHigh = 1200; // 1.2 GB
-        double dirtyRateHigh = 22; // 21.44 mB/s,
-        int memUsedLow = 200; // 1 GB
-        double dirtyRateLow = 0; // 1.5 mB/s,
+        int memUsedHigh = 830; // 1.2 GB
+        double dirtyRateHigh = 10; // 21.44 mB/s,
+        int memUsedLow = 550; // 1 GB
+        double dirtyRateLow = 5; // 1.5 mB/s,
 
         /* Define nodes and vms attributes in watts
         int nodeIdlePower = 110;
@@ -217,20 +223,58 @@ public class MicroTest {
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
 
-        // Create online source nodes and offline destination nodes
+        // Create online source and destination nodes
         List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
         for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
 
         // Create running VMs on src nodes
         List<VM> vms = new ArrayList<>();
-        for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
+        //for (int i=0; i<nbVMs; i++) { vms.add(mo.newVM()); ma.addRunningVM(vms.get(i),srcNodes.get(i%nbSrcNodes)); }
 
         // Put attributes
-        for (VM vm : vms) {
-            mo.getAttributes().put(vm, "memUsed", memUsedHigh);
-            mo.getAttributes().put(vm, "dirtyRate", dirtyRateHigh);
-        }
+        VM v;
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(0));
+        mo.getAttributes().put(v, "memUsed", memUsedLow);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(0));
+        mo.getAttributes().put(v, "memUsed", memUsedHigh);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(1));
+        mo.getAttributes().put(v, "memUsed", memUsedLow);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(1));
+        mo.getAttributes().put(v, "memUsed", memUsedHigh);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(2));
+        mo.getAttributes().put(v, "memUsed", memUsedLow);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(2));
+        mo.getAttributes().put(v, "memUsed", memUsedHigh);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(3));
+        mo.getAttributes().put(v, "memUsed", memUsedLow);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        v = mo.newVM();
+        vms.add(v);
+        ma.addRunningVM(v, srcNodes.get(3));
+        mo.getAttributes().put(v, "memUsed", memUsedHigh);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+
 
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
         for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
@@ -256,15 +300,15 @@ public class MicroTest {
         // Add a NetworkView view using Nancy g5k topology
         NetworkView net = new NetworkView();
         Switch swMain = net.newSwitch();
-        swMain.connect(1000, srcNodes);
-        swMain.connect(2000, dstNodes);
+        swMain.connect(500, srcNodes);
+        swMain.connect(1000, dstNodes);
         mo.attach(net);
         net.generateDot(path + "topology.dot", false);
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
-        ps.setTimeLimit(30);
+        ps.setTimeLimit(120);
         ps.doOptimize(false);
 
         // Set the custom migration transition

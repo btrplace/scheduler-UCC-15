@@ -152,8 +152,8 @@ public class MigrateVMTransition implements KeepRunningVM {
             // Get attribute vars
             dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
             //memUsed = VF.fixed("memUsed_" + toString(), ( (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
-            memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 20),
-                    ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 20 ), s);
+            memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 40),
+                    ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 40 ), s);
             
             // Min BW = Dirty page rate
             bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
