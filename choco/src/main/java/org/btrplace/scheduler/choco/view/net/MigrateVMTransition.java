@@ -148,12 +148,16 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             IntVar memUsed, tmpDuration;
             double dirtyRate;
+            int maxDirtyDuration, maxDirtySize;
 
             // Get attribute vars
             dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
+            //maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
+            //maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
+            
             //memUsed = VF.fixed("memUsed_" + toString(), ( (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
-            memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 40),
-                    ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 40 ), s);
+            memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 50),
+                    ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 50 ), s);
             
             // Min BW = Dirty page rate
             bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
@@ -164,6 +168,18 @@ public class MigrateVMTransition implements KeepRunningVM {
             tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
             s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
             s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
+
+            /*
+            int step = 10, max = bandwidth.getUB();
+            List<Integer> bwEnum = new ArrayList<>();
+            for (int i=step; i<max; i+=step) {
+                if (i > (int) ((dirtyRate * 8))) {
+                    bwEnum.add(i);
+                }
+            }
+            bwEnum.add(bandwidth.getUB());
+            s.post(ICF.member(bandwidth, bwEnum.stream().mapToInt(i->i).toArray()));
+            */
 
             // duration=(memUsed/(BW-DP))
             //tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
@@ -176,8 +192,10 @@ public class MigrateVMTransition implements KeepRunningVM {
             //s.post(ICF.eucl_div(memUsed, duration, tmpDuration)); // Using division
             //s.post(ICF.arithm(bandwidth, "=", tmpDuration, "+", ((dirtyRate * 8))));
 
-            /* Enumerated BW
-            int step = 10, max = 1000;
+            /*
+            
+            // Enumerated BW
+            int step = 50, max = 1000;
             List<Integer> bwEnum = new ArrayList<>();
             for (int i=step; i<max; i+=step) {
                 if (i > (int) ((dirtyRate * 8))) {
@@ -185,6 +203,7 @@ public class MigrateVMTransition implements KeepRunningVM {
                 }
             }
             bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
+
             // Enumerated BWtemp
             int bwTemp[] = new int[bwEnum.size()];
             for (int i=0; i<bwTemp.length; i++) {
@@ -192,14 +211,15 @@ public class MigrateVMTransition implements KeepRunningVM {
             }
             tmpDuration = VF.enumerated("bwTemp_enum", bwTemp, s);
             s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
+            
             // Enumerated duration
             int durEnum[] = new int[bwEnum.size()];
             for (int i=0; i<durEnum.length; i++) {
                 durEnum[i] = (memUsed.getValue()/(bwEnum.get(i)- (int) ((dirtyRate * 8))));
             }
             duration = VF.enumerated("duration_enum", durEnum, s);
-            s.post(ICF.eucl_div(memUsed, tmpDuration, duration));
-            */
+
+            s.post(ICF.eucl_div(memUsed, tmpDuration, duration));*/
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");

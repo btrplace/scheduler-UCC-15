@@ -57,7 +57,7 @@ public class MacroTest {
         double dirtyRate = 21.44; // 21.44 mB/s,
 
         // Define nodes and vms attributes in watts
-        int nodeIdlePower = 110;
+        int nodeIdlePower = 50;
         int vmPower = 15;
         int maxConsumption = (nodeIdlePower*nbSrcNodes*2)+(vmPower*nbVMs)+170;
         //maxConsumption = 2850;
