@@ -55,10 +55,10 @@ public class CompasTest {
         int memDstNode = 16, cpuDstNode = 8;
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int tpl1MemUsed = 1000; double tpl1DirtyRate = 0;
-        int tpl2MemUsed = 1500; double tpl2DirtyRate = 20;
-        int tpl3MemUsed = 1000; double tpl3DirtyRate = 20;
-        int tpl4MemUsed = 1500; double tpl4DirtyRate = 0;
+        int tpl1MemUsed = 1000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
+        int tpl2MemUsed = 1500, tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        int tpl3MemUsed = 1000, tpl3MaxDirtySize = 96, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        int tpl4MemUsed = 1500, tpl4MaxDirtySize = 5, tpl4MaxDirtyDuration = 3; double tpl4DirtyRate = 0; // idle vm
 
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
@@ -85,20 +85,28 @@ public class CompasTest {
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl1MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
+                mo.getAttributes().put(v, "maxDirtySize", tpl1MaxDirtySize);
+                mo.getAttributes().put(v, "maxDirtyDuration", tpl1MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl2MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl2DirtyRate);
+                mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
+                mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
             }
             else {
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl3MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl3DirtyRate);
+                mo.getAttributes().put(v, "maxDirtySize", tpl3MaxDirtySize);
+                mo.getAttributes().put(v, "maxDirtyDuration", tpl3MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl4MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl4DirtyRate);
+                mo.getAttributes().put(v, "maxDirtySize", tpl4MaxDirtySize);
+                mo.getAttributes().put(v, "maxDirtyDuration", tpl4MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
             }
         }
