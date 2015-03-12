@@ -40,11 +40,13 @@ import java.util.List;
 public class CNetworkViewTest {
 
     @Test
-    public void SwitchPortBottleneckTest() throws SchedulerException,ContradictionException {
+    public void DirtyRateModelTest() throws SchedulerException,ContradictionException {
 
         // Init memoryUsed and dirtyRate for each VM
         int     mem_vm1 = 1000, mem_vm2 = 1500;
-        double  dr_vm1 = 21.44, dr_vm2 = 19.28;
+        int     ds_vm1 = 96, ds_vm2 = 96;
+        int     dd_vm1 = 2, dd_vm2 = 2;
+        double  dr_vm1 = 48, dr_vm2 = 48;
 
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
@@ -62,10 +64,14 @@ public class CNetworkViewTest {
         ma.addRunningVM(vm2, n2);
 
         // Put vm attributes
-        mo.getAttributes().put(vm1, "memUsed", mem_vm1); // Go
+        mo.getAttributes().put(vm1, "memUsed", mem_vm1); // Mo
         mo.getAttributes().put(vm2, "memUsed", mem_vm2);
-        mo.getAttributes().put(vm1, "dirtyRate", dr_vm1); // octets/s
+        mo.getAttributes().put(vm1, "dirtyRate", dr_vm1); // Mo/sec
         mo.getAttributes().put(vm2, "dirtyRate", dr_vm2);
+        mo.getAttributes().put(vm1, "maxDirtySize", ds_vm1); // Mo
+        mo.getAttributes().put(vm2, "maxDirtySize", ds_vm2);
+        mo.getAttributes().put(vm1, "maxDirtyDuration", dd_vm1); // sec
+        mo.getAttributes().put(vm2, "maxDirtyDuration", dd_vm2);
 
         // Add a resource view
         ShareableResource rc = new ShareableResource("mem", 0, 0);
@@ -119,12 +125,13 @@ public class CNetworkViewTest {
             if (a instanceof MigrateVM) {
                 if (((MigrateVM) a).getVM().equals(vm1)) {
                     Assert.assertTrue((
-                        (a.getEnd()-a.getStart())) == (int)(double)((mem_vm1*8)/(((MigrateVM) a).getBandwidth()-(int)(double)(dr_vm1*8)))
+                        (a.getEnd()-a.getStart())) == (int)(double)(((mem_vm1*8)/((MigrateVM)a).getBandwidth())+((ds_vm1*8)/((MigrateVM)a).getBandwidth())+(((ds_vm1*8)/((MigrateVM)a).getBandwidth())*((dr_vm1*8)/(((MigrateVM) a).getBandwidth()-(dr_vm1*8)))))
+
                     );
                 }
                 if (((MigrateVM) a).getVM().equals(vm2)) {
                     Assert.assertTrue((
-                        (a.getEnd()-a.getStart())) == (int)(double)((mem_vm2*8)/(((MigrateVM) a).getBandwidth()-(int)(double)(dr_vm2*8)))
+                        (a.getEnd()-a.getStart())) == (int)(double)(((mem_vm2*8)/((MigrateVM)a).getBandwidth())+((ds_vm2*8)/((MigrateVM)a).getBandwidth())+(((ds_vm2*8)/((MigrateVM)a).getBandwidth())*((dr_vm2*8)/(((MigrateVM) a).getBandwidth()-(dr_vm2*8)))))
                     );
                 }
             }
@@ -141,7 +148,9 @@ public class CNetworkViewTest {
 
         // Init memoryUsed and dirtyRate for each VM
         int     mem_vm1 = 1000, mem_vm2 = 1500;
-        double  dr_vm1 = 21.44, dr_vm2 = 19.28;
+        int     ds_vm1 = 96, ds_vm2 = 96;
+        int     dd_vm1 = 2, dd_vm2 = 2;
+        double  dr_vm1 = 48, dr_vm2 = 48;
 
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
@@ -159,10 +168,14 @@ public class CNetworkViewTest {
         ma.addRunningVM(vm2, n2);
 
         // Put vm attributes
-        mo.getAttributes().put(vm1, "memUsed", mem_vm1); // Go
+        mo.getAttributes().put(vm1, "memUsed", mem_vm1); // Mo
         mo.getAttributes().put(vm2, "memUsed", mem_vm2);
-        mo.getAttributes().put(vm1, "dirtyRate", dr_vm1); // octets/s
+        mo.getAttributes().put(vm1, "dirtyRate", dr_vm1); // Mo/sec
         mo.getAttributes().put(vm2, "dirtyRate", dr_vm2);
+        mo.getAttributes().put(vm1, "maxDirtySize", ds_vm1); // Mo
+        mo.getAttributes().put(vm2, "maxDirtySize", ds_vm2);
+        mo.getAttributes().put(vm1, "maxDirtyDuration", dd_vm1); // sec
+        mo.getAttributes().put(vm2, "maxDirtyDuration", dd_vm2);
 
         // Add a resource view
         ShareableResource rc = new ShareableResource("mem", 0, 0);
@@ -184,7 +197,7 @@ public class CNetworkViewTest {
         s1.connect(1000, n1, n2);
         s2.connect(2000, n3);
         sm.connect(2000, s1);
-        sm.connect(300, s2); // Link bottleneck between two switches (300/2)<(19.28*8)
+        sm.connect(500, s2); // Link bottleneck between two switches (300/2)<(19.28*8)
 
         // Set the custom migration transition
         Parameters ps = new DefaultParameters().setVerbosity(1);
@@ -247,7 +260,9 @@ public class CNetworkViewTest {
 
         // Set memoryUsed and dirtyRate (for all VMs)
         int memUsed = 1000; // 1 GB
-        double dirtyRate = 21.44; // 21.44 mB/s,
+        double dirtyRate = 48;
+        int dirtySize = 96;
+        int dirtyDuration = 2;
 
         // Define nodes and vms attributes in watts
         int nodeIdlePower = 110;
@@ -272,6 +287,8 @@ public class CNetworkViewTest {
         for (VM vm : vms) {
             mo.getAttributes().put(vm, "memUsed", memUsed);
             mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
+            mo.getAttributes().put(vm, "maxDirtySize", dirtySize);
+            mo.getAttributes().put(vm, "maxDirtyDuration", dirtyDuration);
         }
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
         for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
