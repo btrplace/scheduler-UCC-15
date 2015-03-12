@@ -22,7 +22,6 @@ import org.btrplace.model.Model;
 import org.btrplace.model.Node;
 import org.btrplace.model.VM;
 import org.btrplace.model.VMState;
-import org.btrplace.model.view.ModelView;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.Action;
@@ -138,7 +137,7 @@ public class MigrateVMTransition implements KeepRunningVM {
         //int migrateDuration = dev.evaluate(rp.getSourceModel(), org.btrplace.plan.event.MigrateVM.class, vm);
 
         // Get the networking view
-        ModelView network = mo.getView(NetworkView.VIEW_ID);
+        NetworkView network = (NetworkView) mo.getView(NetworkView.VIEW_ID);
         if (network == null) {
             throw new SchedulerException(rp.getSourceModel(), "View '" + NetworkView.VIEW_ID + "' is required but missing");
         }
@@ -151,36 +150,28 @@ public class MigrateVMTransition implements KeepRunningVM {
         if (mo.getAttributes().isSet(vm, "dirtyRate") && mo.getAttributes().isSet(vm, "memUsed")) {
 
             double dirtyRate;
-            int memUsed;
-            int maxDirtyDuration, maxDirtySize;
+            int memUsed, maxDirtyDuration, maxDirtySize;
 
             // Get attribute vars
-            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
+            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate") * 8;
             memUsed = mo.getAttributes().getInteger(vm, "memUsed") * 8;
+            //maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
+            //maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
 
             // Enumerated BW
-            int step = 100, max = 1000;
+            int step = 100, max = network.getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth();
             List<Integer> bwEnum = new ArrayList<>();
             for (int i=step; i<=max; i+=step) {
-                if (i > (int) ((dirtyRate * 8))) {
+                if (i > (int) (dirtyRate)) {
                     bwEnum.add(i);
                 }
             }
             bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
 
-            // Enumerated BWtemp
-            IntVar tmpDuration;
-            int bwTemp[] = new int[bwEnum.size()];
-            for (int i=0; i<bwTemp.length; i++) {
-                bwTemp[i] = (bwEnum.get(i) - (int) ((dirtyRate * 8)));
-            }
-            tmpDuration = VF.enumerated("bwTemp_enum", bwTemp, s);
-            s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
-
             // Enumerated duration
             int durEnum[] = new int[bwEnum.size()];
             for (int i=0; i<durEnum.length; i++) {
-                durEnum[i] = ((mo.getAttributes().getInteger(vm, "memUsed") * 8)/(bwEnum.get(i) - (int) ((dirtyRate * 8))));
+                durEnum[i] = (memUsed/(bwEnum.get(i)-(int)(dirtyRate)));
             }
             duration = VF.enumerated("duration_enum", durEnum, s);
 
@@ -188,43 +179,10 @@ public class MigrateVMTransition implements KeepRunningVM {
             Tuples tpl = new Tuples(true);
             int dur;
             for (int i=step; i<=bandwidth.getUB(); i+=step) {
-                dur = (int) (Math.round((mo.getAttributes().getInteger(vm, "memUsed") * 8) / (i- (dirtyRate * 8))));
+                dur = (int) (Math.round(memUsed / (i-dirtyRate)));
                 tpl.add(i, dur);
             }
             s.post(ICF.table(bandwidth, duration, tpl, ""));
-
-            
-            // Compute with bounded vars
-            /*
-            //IntVar memUsed, tmpDuration;
-            maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
-            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
-
-            //memUsed = VF.fixed("memUsed_" + toString(), ( (mo.getAttributes().getInteger(vm, "memUsed") * 8)), s);
-            memUsed = VF.bounded("memUsed_" + toString(), ((mo.getAttributes().getInteger(vm, "memUsed") * 8) - 50),
-                    ((mo.getAttributes().getInteger(vm, "memUsed") * 8) + 50 ), s);
-
-            // Min BW = Dirty page rate
-            bandwidth = VF.bounded("bandwidth_" + toString(), (int) (dirtyRate * 8),
-                   ((NetworkView)network).getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth(), s);
-            duration = VF.bounded("duration_" + toString(), start.getLB(), end.getUB(), s); // Duration max = deadline
-            */
-            
-            // Compute with enumerated vars
-            /*
-            // BW=(memUsed/duration)+DP
-            s.post(ICF.eucl_div(memUsed, tmpDuration, duration));
-            
-            tmpDuration = VF.bounded("memU/dur_" + toString(), 0, bandwidth.getUB(), s);
-            s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
-            s.post(ICF.eucl_div(memUsed, duration, tmpDuration)); // Using division
-            s.post(ICF.arithm(bandwidth, "=", tmpDuration, "+", ((dirtyRate * 8))));
-
-            memUsed=(duration*(BW-DP))
-            tmpDuration = VF.bounded("bw-dr_" + toString(), 0, bandwidth.getUB(), s);
-            s.post(ICF.arithm(tmpDuration, "=", bandwidth, "-", (int) ((dirtyRate * 8))));
-            s.post(ICF.times(tmpDuration, duration, memUsed)); // Using multiplication
-            */
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
