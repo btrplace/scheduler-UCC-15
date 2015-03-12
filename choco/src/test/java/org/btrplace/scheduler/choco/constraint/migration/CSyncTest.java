@@ -76,8 +76,8 @@ public class CSyncTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(1);
-        ps.setTimeLimit(50);
+        ps.setVerbosity(2);
+        ps.setTimeLimit(3);
         ps.doOptimize(false);
 
         // Add the custom vm transition builder for migrations

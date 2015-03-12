@@ -44,7 +44,7 @@ public class CompasTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
 
         // Set nb of nodes and vms
-        int nbNodesRack = 18;
+        int nbNodesRack = 100;
         int nbSrcNodes = nbNodesRack * 2;
         int nbDstNodes = nbNodesRack * 1;
         int nbVMs = nbSrcNodes * 2;
@@ -56,8 +56,8 @@ public class CompasTest {
 
         // Set memoryUsed and dirtyRate (for all VMs)
         int tpl1MemUsed = 1000; double tpl1DirtyRate = 0;
-        int tpl2MemUsed = 1500; double tpl2DirtyRate = 21;
-        int tpl3MemUsed = 1000; double tpl3DirtyRate = 21;
+        int tpl2MemUsed = 1500; double tpl2DirtyRate = 20;
+        int tpl3MemUsed = 1000; double tpl3DirtyRate = 20;
         int tpl4MemUsed = 1500; double tpl4DirtyRate = 0;
 
         // Define power values
