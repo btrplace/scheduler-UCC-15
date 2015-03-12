@@ -147,42 +147,79 @@ public class MigrateVMTransition implements KeepRunningVM {
             if (mo.getAttributes().getBoolean(vm, "postCopy")) postCopy = true;
         }
 
-        if (mo.getAttributes().isSet(vm, "dirtyRate") && mo.getAttributes().isSet(vm, "memUsed")) {
+        // Check if all attributes are defined
+        if (mo.getAttributes().isSet(vm, "memUsed") &&
+            mo.getAttributes().isSet(vm, "dirtyRate") &&
+            mo.getAttributes().isSet(vm, "maxDirtySize") &&
+            mo.getAttributes().isSet(vm, "maxDirtyDuration")) {
 
             double dirtyRate;
             int memUsed, maxDirtyDuration, maxDirtySize;
 
             // Get attribute vars
-            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate") * 8;
             memUsed = mo.getAttributes().getInteger(vm, "memUsed") * 8;
-            //maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
-            //maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
+            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate") * 8;
+            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize") * 8;
+            maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
 
             // Enumerated BW
-            int step = 100, max = network.getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth();
+            int maxBW = network.getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth();
+            int step = 100;
             List<Integer> bwEnum = new ArrayList<>();
-            for (int i=step; i<=max; i+=step) {
+            for (int i=step; i<=maxBW; i+=step) {
                 if (i > (int) (dirtyRate)) {
                     bwEnum.add(i);
                 }
             }
-            bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
+            //bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
 
             // Enumerated duration
-            int durEnum[] = new int[bwEnum.size()];
-            for (int i=0; i<durEnum.length; i++) {
-                durEnum[i] = (memUsed/(bwEnum.get(i)-(int)(dirtyRate)));
+            int durationMin, durationCvg, durationSup = 0;
+            //int durEnum[] = new int[bwEnum.size()];
+            List<Integer> durEnum = new ArrayList<>();
+            for (Integer bw : bwEnum) {
+                
+                // Estimate duration wrt.: bandwidth, memUsed, dirtyRate, maxDirtySize and maxDirtyDuration
+                durationMin = (int) Math.round(memUsed/bw);
+                if (durationMin > maxDirtyDuration) {
+                    durationSup = Math.round(maxDirtySize/bw);
+                    durationCvg = (int) Math.round(durationSup*(dirtyRate/(bw-dirtyRate)));
+                    durEnum.add(durationMin + durationSup + durationCvg);
+                }
+                else {
+                    durationCvg = (int) Math.round(durationMin*(dirtyRate/(bw-dirtyRate)));
+                    durEnum.add(durationMin + durationCvg);
+                }
             }
-            duration = VF.enumerated("duration_enum", durEnum, s);
+            //duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i->i).toArray(), s);
+            
+            // Remove duplicates duration
+            int previousDuration = -1;
+            for (int i=bwEnum.size()-1; i>=0; i--) {
+                if (durEnum.get(i) > previousDuration) {
+                    previousDuration = durEnum.get(i);
+                }
+                else if (previousDuration == durEnum.get(i)) {
+                    durEnum.remove(i);
+                    bwEnum.remove(i);
+                }
+                else {
+                    // Problem !
+                }
+            }
+            
+            // Create the enumerated vars
+            bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
+            duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i->i).toArray(), s);
 
-            // Associate vars using tuples
+            // Associate vars using Tuples
             Tuples tpl = new Tuples(true);
             int dur;
-            for (int i=step; i<=bandwidth.getUB(); i+=step) {
-                dur = (int) (Math.round(memUsed / (i-dirtyRate)));
-                tpl.add(i, dur);
+            for (int i=0; i<bwEnum.size(); i++) {
+                tpl.add(bwEnum.get(i), durEnum.get(i));
             }
             s.post(ICF.table(bandwidth, duration, tpl, ""));
+            
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
