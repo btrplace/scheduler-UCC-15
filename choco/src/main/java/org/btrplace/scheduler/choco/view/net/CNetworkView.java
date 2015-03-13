@@ -42,7 +42,6 @@ public class CNetworkView implements ChocoView {
     private Model source;
     List<Task> tasksList;
     List<IntVar> heightsList;
-    List<List<Task>> tasksPerLink;
 
     public CNetworkView(ReconfigurationProblem p, NetworkView n) throws SchedulerException {
         net = n;
@@ -51,10 +50,12 @@ public class CNetworkView implements ChocoView {
         source = p.getSourceModel();
         tasksList = new ArrayList<>();
         heightsList = new ArrayList<>();
-        tasksPerLink = new ArrayList<>();
     }
 
-    public List<List<Task>> getTasksPerLink() {
+    public List<List<MigrateVMTransition>> getMigrationsPerLink() {
+
+        List<MigrateVMTransition> migrationsList = new ArrayList<>();
+        List<List<MigrateVMTransition>> migrationsPerLink = new ArrayList<>();
 
         List<Port> links = new ArrayList<>();
         for (Port si : net.getAllInterfaces()) {
@@ -70,15 +71,15 @@ public class CNetworkView implements ChocoView {
                         Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
 
                         if (net.getPath(src, dst).contains(si)) {
-                            tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
+                            migrationsList.add((MigrateVMTransition)a);
                         }
                     }
                 }
-                if (!tasksList.isEmpty()) tasksPerLink.add(new ArrayList<Task>(tasksList));
-                tasksList.clear();
+                if (!migrationsList.isEmpty()) migrationsPerLink.add(new ArrayList<MigrateVMTransition>(migrationsList));
+                migrationsList.clear();
             }
         }
-        return tasksPerLink;
+        return migrationsPerLink;
     }
 
     @Override
@@ -124,7 +125,7 @@ public class CNetworkView implements ChocoView {
                             ,Cumulative.Filter.HEIGHTS
                     ));
                 }
-                tasksPerLink.add(new ArrayList<Task>(tasksList));
+                //tasksPerLink.add(new ArrayList<Task>(tasksList));
 
                 tasksList.clear();
                 heightsList.clear();
