@@ -94,8 +94,44 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                         ISF.split(), // Split from max
                         endVars.toArray(new IntVar[endVars.size()])
                 ));
+                //strategies.add(ISF.minDom_LB(endVars.toArray(new IntVar[endVars.size()]))
+                //);
             }
         }
+
+
+        // Per decommissioning per link
+        /*endVars.clear();
+        CNetworkView cnv = (CNetworkView) rp.getView(CNetworkView.VIEW_ID);
+        if (cnv == null) {
+            throw new SchedulerException(rp.getSourceModel(), "Solver View '" + CNetworkView.VIEW_ID +
+                    "' is required but missing");
+        }
+        List<List<MigrateVMTransition>> tasksPerLink = cnv.getMigrationsPerLink();
+        if (!tasksPerLink.isEmpty()) {
+            Collections.sort(tasksPerLink, (tasks, tasks2) -> tasks2.size() - tasks.size());
+            for (List<MigrateVMTransition> migrations : tasksPerLink) {
+                if (!migrations.isEmpty()) {
+                    endVars.clear();
+
+                    for (MigrateVMTransition m : migrations) {
+                        endVars.add(m.getEnd());
+
+                        Node src = map.getVMLocation(m.getVM());
+                        Node dst = rp.getNode(m.getDSlice().getHoster().getValue());
+
+                        //TODO: try something else, per link is not the best choice
+
+                    }
+                    strategies.add(ISF.custom(
+                            ISF.minDomainSize_var_selector(),
+                            ISF.mid_value_selector(),//.max_value_selector(),
+                            ISF.split(), // Split from max
+                            endVars.toArray(new IntVar[endVars.size()])
+                    ));
+                }
+            }
+        }*/
 
         /* End vars for all Nodes actions
         endVars.clear();
@@ -158,32 +194,6 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
                     endVars.toArray(new IntVar[endVars.size()])
             ));*//*
             strategies.add(ISF.maxDom_Split(endVars.toArray(new IntVar[endVars.size()])));
-        }*/
-
-        /* End vars per link
-        endVars.clear();
-        CNetworkView cnv = (CNetworkView) rp.getView(CNetworkView.VIEW_ID);
-        if (cnv == null) {
-            throw new SchedulerException(rp.getSourceModel(), "Solver View '" + CNetworkView.VIEW_ID +
-                    "' is required but missing");
-        }
-        List<List<Task>> tasksPerLink = cnv.getTasksPerLink();
-        if (!tasksPerLink.isEmpty()) {
-            Collections.sort(tasksPerLink, (tasks, tasks2) -> tasks2.size() - tasks.size());
-            for (List<Task> tasks : tasksPerLink) {
-                if (!tasks.isEmpty()) {
-                    endVars.clear();
-                    for (Task t : tasks) {
-                        endVars.add(t.getEnd());
-                    }
-                    strategies.add(ISF.custom(
-                            ISF.minDomainSize_var_selector(),
-                            ISF.mid_value_selector(),//.max_value_selector(),
-                            ISF.split(), // Split from max
-                            endVars.toArray(new IntVar[endVars.size()])
-                    ));
-                }
-            }
         }*/
 
         /* End vars for all actions
