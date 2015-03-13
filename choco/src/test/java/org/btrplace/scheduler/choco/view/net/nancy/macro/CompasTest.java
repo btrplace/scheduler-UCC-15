@@ -44,15 +44,16 @@ public class CompasTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
 
         // Set nb of nodes and vms
-        int nbNodesRack = 100;
+        int nbNodesRack = 10;
         int nbSrcNodes = nbNodesRack * 2;
         int nbDstNodes = nbNodesRack * 1;
-        int nbVMs = nbSrcNodes * 2;
+        int nbVMs = nbSrcNodes * 4;
+        int nbVMsOnDestNodes = 8;
 
         // Set mem + cpu for VMs and Nodes
         int memVM = 3, cpuVM = 2;
-        int memSrcNode = 16, cpuSrcNode = 4;
-        int memDstNode = 16, cpuDstNode = 8;
+        int memSrcNode = 24, cpuSrcNode = 8;
+        int memDstNode = 24, cpuDstNode = 16;
 
         // Set memoryUsed and dirtyRate (for all VMs)
         int tpl1MemUsed = 1000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
@@ -62,7 +63,8 @@ public class CompasTest {
 
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
-        int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+50000;
+        int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
+        maxConsumption = 14000;
         int powerBoot = 20, powerMigrate = 5;
 
         // New default model
@@ -81,7 +83,7 @@ public class CompasTest {
         // Create running VMs on src nodes
         List<VM> vms = new ArrayList<>(); VM v;
         for (int i=0; i<nbSrcNodes; i++) {
-            if (i%2 == 0) {
+            //if (i%2 == 0) {
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl1MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
@@ -94,8 +96,8 @@ public class CompasTest {
                 mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
                 mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
-            }
-            else {
+            //}
+            //else {
                 v = mo.newVM(); vms.add(v);
                 mo.getAttributes().put(v, "memUsed", tpl3MemUsed);
                 mo.getAttributes().put(v, "dirtyRate", tpl3DirtyRate);
@@ -108,7 +110,7 @@ public class CompasTest {
                 mo.getAttributes().put(v, "maxDirtySize", tpl4MaxDirtySize);
                 mo.getAttributes().put(v, "maxDirtyDuration", tpl4MaxDirtyDuration);
                 ma.addRunningVM(v, srcNodes.get(i));
-            }
+            //}
         }
 
         // Add resource views
@@ -144,9 +146,9 @@ public class CompasTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(3);
         ps.setTimeLimit(600);
-        //ps.setMaxEnd(nbVMs+(nbSrcNodes*2));
+       // ps.setMaxEnd(600);
         ps.doOptimize(false);
 
         // Set the custom migration transition
@@ -160,11 +162,10 @@ public class CompasTest {
 
         // Migrate all VMs to destination nodes
         List<SatConstraint> cstrs = new ArrayList<>();
-        for (int i=0; i<nbVMs; i+=4) {
-            cstrs.add(new Fence(vms.get(i), Collections.singleton(dstNodes.get(i/4))));
-            cstrs.add(new Fence(vms.get(i+1), Collections.singleton(dstNodes.get(i/4))));
-            cstrs.add(new Fence(vms.get(i+2), Collections.singleton(dstNodes.get(i/4))));
-            cstrs.add(new Fence(vms.get(i+3), Collections.singleton(dstNodes.get(i/4))));
+        for (int i=0; i<nbVMs; i+=nbVMsOnDestNodes) {
+            for (int j=i; j<i+nbVMsOnDestNodes; j++) {
+                cstrs.add(new Fence(vms.get(j), Collections.singleton(dstNodes.get(i/nbVMsOnDestNodes))));
+            }
         }
 
         // Shutdown source nodes
@@ -189,7 +190,7 @@ public class CompasTest {
                 obj =  planConverter.toJSON(p);
             } catch (JSONConverterException e) {
                 System.err.println("Error while converting plan: " + e.toString());
-                e.printStackTrace();
+        //        e.prin      tStackTrace();
             }
             try {
                 FileWriter file = new FileWriter(path + "compas.json");
@@ -209,6 +210,5 @@ public class CompasTest {
             System.err.println(sc.getStatistics());
         }
     }
-
 }
 
