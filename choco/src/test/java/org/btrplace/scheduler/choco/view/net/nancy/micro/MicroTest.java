@@ -213,7 +213,7 @@ public class MicroTest {
         int mem_vm_type2 = 2, cpu_vm_type2 = 1;
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int vmType1_mem = 500, vmType2_mem = 1500;
+        int vmType1_mem = 1000, vmType2_mem = 1500;
         double dirtyRateHigh = 30; // 21.44 mB/s,
         double dirtyRateLow = 5; // 1.5 mB/s,
 

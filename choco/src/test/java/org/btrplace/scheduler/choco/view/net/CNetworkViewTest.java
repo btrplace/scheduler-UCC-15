@@ -304,7 +304,7 @@ public class CNetworkViewTest {
 
         // Add the EnergyView and set nodes & vms consumption
         EnergyView energyView = new EnergyView(maxConsumption);
-        energyView.setMigrationOverhead(40); // 40% energy overhead during migration
+        //energyView.setMigrationOverhead(40); // 40% energy overhead during migration
         energyView.setBootOverhead(30); // 30% energy overhead during boot
         for (Node n : srcNodes) { energyView.setConsumption(n, nodeIdlePower); }
         for (Node n : dstNodes) { energyView.setConsumption(n, nodeIdlePower); }

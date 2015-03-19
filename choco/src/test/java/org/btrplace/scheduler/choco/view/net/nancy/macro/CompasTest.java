@@ -12,6 +12,8 @@ import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.power.EnergyView;
+import org.btrplace.model.view.power.MinEnergyObjective;
+import org.btrplace.model.view.power.PowerBudget;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
@@ -51,20 +53,20 @@ public class CompasTest {
         int nbVMsOnDestNodes = 8;
 
         // Set mem + cpu for VMs and Nodes
-        int memVM = 3, cpuVM = 2;
-        int memSrcNode = 24, cpuSrcNode = 8;
-        int memDstNode = 24, cpuDstNode = 16;
+        int memVM = 8, cpuVM = 4;
+        int memSrcNode = 64, cpuSrcNode = 32;
+        int memDstNode = 64, cpuDstNode = 64;
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int tpl1MemUsed = 1000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
-        int tpl2MemUsed = 1500, tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 48; // stress --vm 1000 --bytes 70K
-        int tpl3MemUsed = 1000, tpl3MaxDirtySize = 96, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 48; // stress --vm 1000 --bytes 70K
-        int tpl4MemUsed = 1500, tpl4MaxDirtySize = 5, tpl4MaxDirtyDuration = 3; double tpl4DirtyRate = 0; // idle vm
+        int tpl1MemUsed = 3000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
+        int tpl2MemUsed = 6000, tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        int tpl3MemUsed = 3000, tpl3MaxDirtySize = 96, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        int tpl4MemUsed = 6000, tpl4MaxDirtySize = 5, tpl4MaxDirtyDuration = 3; double tpl4DirtyRate = 0; // idle vm
 
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
         int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
-        maxConsumption = 14000;
+        maxConsumption = 5000;
         int powerBoot = 20, powerMigrate = 5;
 
         // New default model
@@ -74,7 +76,7 @@ public class CompasTest {
         // Create online source nodes and offline destination nodes
         List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
-        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOfflineNode(dstNodes.get(i)); }
+        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
 
         // Set boot and shutdown time
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
@@ -124,12 +126,12 @@ public class CompasTest {
 
         // Add the EnergyView and set nodes & vms consumption
         EnergyView energyView = new EnergyView(maxConsumption);
-        energyView.setMigrationOverhead(powerMigrate); // % energy overhead during migration
+        //energyView.setMigrationOverhead(powerMigrate); // % energy overhead during migration
         energyView.setBootOverhead(powerBoot); // % energy overhead during boot
         for (Node n : srcNodes) { energyView.setConsumption(n, powerIdleNode); }
         for (Node n : dstNodes) { energyView.setConsumption(n, powerIdleNode); }
         for (VM vm : vms) { energyView.setConsumption(vm, powerVM); }
-        //mo.attach(energyView);
+        mo.attach(energyView);
 
         // Add a NetworkView view
         NetworkView net = new NetworkView();
@@ -146,9 +148,9 @@ public class CompasTest {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(3);
+        ps.setVerbosity(2);
         ps.setTimeLimit(600);
-       // ps.setMaxEnd(600);
+        //ps.setMaxEnd(600);
         ps.doOptimize(false);
 
         // Set the custom migration transition
@@ -169,15 +171,15 @@ public class CompasTest {
         }
 
         // Shutdown source nodes
-        for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
+        //for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
 
         // Add continuous power budgets
-        //cstrs.add(new PowerBudget(125, 500, 1430));
+        //cstrs.add(new PowerBudget(3*60, 4*60, 5300));
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
-        //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
+        //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
         try {
@@ -190,7 +192,7 @@ public class CompasTest {
                 obj =  planConverter.toJSON(p);
             } catch (JSONConverterException e) {
                 System.err.println("Error while converting plan: " + e.toString());
-        //        e.prin      tStackTrace();
+                //e.printStackTrace();
             }
             try {
                 FileWriter file = new FileWriter(path + "compas.json");
@@ -211,4 +213,3 @@ public class CompasTest {
         }
     }
 }
-
