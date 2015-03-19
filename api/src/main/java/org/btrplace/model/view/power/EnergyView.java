@@ -243,6 +243,7 @@ public class EnergyView implements ModelView, Cloneable {
         public double getBeta() { return beta; }
         public void setAlpha(int a) { alpha = a; }
         public void setBeta(int b) { beta = b; }
-        public int getConsumption(int bw, int time) { return (int) Math.round((alpha*((bw/8)*time))+beta); }
+        //public int getConsumption(int bw, int time) { return (int) Math.round((alpha*((bw/8)*time))+beta); }
+        public int getConsumption(int bw, int time) { return (int) Math.round(((bw/16)*time)+beta); }
     }
 }
