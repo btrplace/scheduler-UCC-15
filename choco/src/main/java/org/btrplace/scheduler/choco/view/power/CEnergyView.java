@@ -43,6 +43,8 @@ public class CEnergyView implements ChocoView {
     private List<IntVar> heights;
     private CPowerView cPowerView;
     private int maxDiscretePower = 0;
+    private Map<String, List> energy;
+    private boolean energyComputed = false;
 
 
     public CEnergyView(ReconfigurationProblem p, EnergyView v) throws SchedulerException {
@@ -52,6 +54,7 @@ public class CEnergyView implements ChocoView {
         source = p.getSourceModel();
         tasks = new ArrayList<>();
         heights = new ArrayList<>();
+        energy = new HashMap<>();
 
         // Retrieve or create the PowerView
         cPowerView = (CPowerView) rp.getView(CPowerView.VIEW_ID);
@@ -83,7 +86,11 @@ public class CEnergyView implements ChocoView {
 
     public Map<String, List> computeEnergy() {
 
-        Map<String, List> energy = new HashMap<>();
+        // Compute energy only once
+        if (energyComputed) {
+            return energy;
+        }
+
         List<Task> tasks = new ArrayList<>();
         List<IntVar> heights = new ArrayList<>();
 
@@ -102,7 +109,7 @@ public class CEnergyView implements ChocoView {
             //solver.post(IntConstraintFactory.arithm(duration, "<=", rp.getEnd()));
             tasks.add(VariableFactory.task(cPowerView.getPowerStart(rp.getNode(n)), duration,
                     cPowerView.getPowerEnd(rp.getNode(n))));
-            heights.add(VF.fixed(ev.getConsumption(n), solver));
+            heights.add(VF.fixed("energy("+n+")", ev.getConsumption(n), solver));
         }
         for (VM v : rp.getVMs()) {  // Add VMs consumption
             int vmPower = ev.getConsumption(v);
@@ -117,36 +124,59 @@ public class CEnergyView implements ChocoView {
             if (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.RUNNING)) {
 
                 //  In the case of a live migration, add the transfer overhead
-                if (vmt instanceof MigrateVMTransition || vmt instanceof RelocatableVM) {
+                if (vmt instanceof MigrateVMTransition) {// || vmt instanceof RelocatableVM) {
                     tasks.add(VariableFactory.task(vmt.getStart(), vmt.getDuration(), vmt.getEnd()));
-                    heights.add(VF.fixed((vmPower*ev.getMigrationOverhead()/100), solver));
+
+                    // Original formula:  Energy = (Alpha * ((BW/8) * 1)) + Beta
+
+                    // Correspond to: (Energy - Beta)
+                    IntVar migEnergyWithoutBeta = VF.bounded("migrationEnergyWithoutBeta("+v+")",
+                            0,
+                            (int) Math.round(((((MigrateVMTransition) vmt).getBandwidth().getUB() / 8) * EnergyView.MIGRATION_ENERGY_ALPHA) + 1),
+                            solver
+                    );
+                    // BW * (Alpha/8) = (Energy - Beta)
+                    //solver.post(ICF.times(((MigrateVMTransition) vmt).getBandwidth(), (int) Math.round(EnergyView.MIGRATION_ENERGY_ALPHA)/8, migEnergyWithoutBeta));
+                    // Simplification (Alpha ~= 0.5):  BW * (Alpha/8) => BW/16
+                    solver.post(ICF.eucl_div(((MigrateVMTransition) vmt).getBandwidth(), VF.fixed(16, solver), migEnergyWithoutBeta));
+                    // Correspond to: Energy
+                    IntVar migEnergy = VF.bounded("energy("+vmt+")",
+                            (int) Math.round(EnergyView.MIGRATION_ENERGY_BETA - 1),
+                            (int) Math.round(migEnergyWithoutBeta.getUB()+EnergyView.MIGRATION_ENERGY_BETA),
+                            solver
+                    );
+                    // Energy = (Energy - Beta) + Beta
+                    solver.post(ICF.arithm(migEnergy, "=", migEnergyWithoutBeta, "+", (int) Math.round(EnergyView.MIGRATION_ENERGY_BETA)));
+                    heights.add(migEnergy);
                 }
 
                 tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
+                heights.add(VF.fixed("energy("+v+")", vmPower, solver));
 
                 // Boot / Resume
             } else if ((currentState.equals(VMState.READY) && futureState.equals(VMState.RUNNING)) ||
                     (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING))) {
                 tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
+                heights.add(VF.fixed("energy("+v+")", vmPower, solver));
 
                 // Halt / Kill / Sleep
             } else if ((currentState.equals(VMState.RUNNING) && futureState.equals(VMState.READY)) ||
                     (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.KILLED)) ||
                     (currentState.equals(VMState.RUNNING) && futureState.equals(VMState.SLEEPING))) {
                 tasks.add(VariableFactory.task(rp.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
+                heights.add(VF.fixed("energy("+v+")", vmPower, solver));
 
                 // Resume
             } else if (currentState.equals(VMState.SLEEPING) && futureState.equals(VMState.RUNNING)) {
                 tasks.add(VariableFactory.task(vmt.getStart(), duration, rp.getEnd()));
-                heights.add(VF.fixed(vmPower, solver));
+                heights.add(VF.fixed("energy("+v+")", vmPower, solver));
             }
         }
 
         energy.put("tasks", tasks);
         energy.put("heights", heights);
+
+        energyComputed = true;
 
         return energy;
     }
@@ -192,7 +222,7 @@ public class CEnergyView implements ChocoView {
         }
 
         // Add nodes/vms consumptions for continuous model
-        Map<String, List> energy = computeEnergy();
+        if (!energyComputed) { computeEnergy(); }
         if (!energy.isEmpty()) {
             tasks.addAll(energy.get("tasks"));
             heights.addAll(energy.get("heights"));

@@ -24,16 +24,19 @@ public class EnergyView implements ModelView, Cloneable {
 
     public static final int DEFAULT_NODE_CONSUMPTION = 120; // 120 Watts
     public static final int DEFAULT_VM_CONSUMPTION = 20; // 20 Watts
-    public static final int DEFAULT_MIGRATION_OVERHEAD = 30; // Percentage of the VM consumption
     public static final int DEFAULT_BOOT_OVERHEAD = 20; // Percentage of the Node consumption
+
+    // Values from HTDC'11 paper
+    public static final double MIGRATION_ENERGY_ALPHA = 0.512;
+    public static final double MIGRATION_ENERGY_BETA = 20.165;
 
     private String viewId;
     private int maxPower;
     Map<Node, Integer> nodeIdlePower;
     Map<VM, Integer> vmPower;
     private List<TimeIntervalBudget> tibList;
-    private int migration_overhead = DEFAULT_MIGRATION_OVERHEAD;
     private int boot_overhead = DEFAULT_BOOT_OVERHEAD;
+    private MigrationEnergy migEnergyModel = new MigrationEnergy(MIGRATION_ENERGY_ALPHA, MIGRATION_ENERGY_BETA);
 
 
     public EnergyView(int maxPower) {
@@ -48,9 +51,9 @@ public class EnergyView implements ModelView, Cloneable {
         return tibList;
     }
 
-    public void setMigrationOverhead(int percentage) { migration_overhead = percentage; }
+    public void setMigEnergyModel(int a, int b) { migEnergyModel.setAlpha(a); migEnergyModel.setBeta(b); }
 
-    public int getMigrationOverhead() { return migration_overhead; }
+    public int getMigrationOverhead(int bw, int time) { return migEnergyModel.getConsumption(bw, time); }
 
     public int getBootOverhead() { return boot_overhead; }
 
@@ -150,7 +153,7 @@ public class EnergyView implements ModelView, Cloneable {
 
                     if (start <= t && end > t) {
                         if (a instanceof MigrateVM) {
-                            power += (getMigrationOverhead()*getConsumption(((MigrateVM) a).getVM())/100);
+                            power += getMigrationOverhead(((MigrateVM) a).getBandwidth(), 1);
                         }
                         if (a instanceof BootNode) {
                             power += (getBootOverhead()*getConsumption(((BootNode) a).getNode())/100);
@@ -231,5 +234,15 @@ public class EnergyView implements ModelView, Cloneable {
         public int getStart() { return start; }
         public int getEnd() { return end; }
         public int getBudget() { return budget; }
+    }
+
+    public class MigrationEnergy {
+        private double alpha, beta;
+        public MigrationEnergy(double a, double b) { alpha = a; beta = b; }
+        public double getAlpha() { return alpha; }
+        public double getBeta() { return beta; }
+        public void setAlpha(int a) { alpha = a; }
+        public void setBeta(int b) { beta = b; }
+        public int getConsumption(int bw, int time) { return (int) Math.round((alpha*((bw/8)*time))+beta); }
     }
 }
