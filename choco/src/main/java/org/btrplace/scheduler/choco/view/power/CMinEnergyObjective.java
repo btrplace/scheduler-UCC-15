@@ -23,10 +23,7 @@ import org.chocosolver.solver.search.strategy.selectors.values.IntDomainMin;
 import org.chocosolver.solver.search.strategy.selectors.variables.InputOrder;
 import org.chocosolver.solver.search.strategy.strategy.AbstractStrategy;
 import org.chocosolver.solver.search.strategy.strategy.IntStrategy;
-import org.chocosolver.solver.variables.BoolVar;
-import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.Task;
-import org.chocosolver.solver.variables.VariableFactory;
+import org.chocosolver.solver.variables.*;
 
 import java.util.*;
 
@@ -87,6 +84,7 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
         solver.post(costConstraint);
         rp.setObjective(true, cost);
 
+        /*
         // Prefer staying migrations
         List<BoolVar> stayVars = new ArrayList<>();
         for (VM vm : rp.getVMs()) {
@@ -119,8 +117,48 @@ public class CMinEnergyObjective implements org.btrplace.scheduler.choco.constra
                     endPowerVars.toArray(new IntVar[endPowerVars.size()])
             ));
         }
+        */
 
-        // Set cost first in the strategy
+        // Per node decommissioning (Boot dst node -> Migrate -> Shutdown src node) strategy
+        List<IntVar> endVars = new ArrayList<IntVar>();
+        for (Node n : rp.getNodes()) {
+            endVars.clear();
+
+            if (rp.getNodeAction(n) instanceof ShutdownableNode) {
+
+                for (VMTransition a : rp.getVMActions()) {
+
+                    if (rp.getNode(n) == (a.getCSlice().getHoster().getValue())) {
+
+                        // Boot dst
+                        if (!endVars.contains(rp.getNodeAction(rp.getNode(a.getDSlice().getHoster().getValue())).getEnd())) {
+                            endVars.add(rp.getNodeAction(rp.getNode(a.getDSlice().getHoster().getValue())).getEnd());
+                        }
+
+                        // Migrate all
+                        endVars.add(a.getEnd());
+                    }
+                }
+
+                // Shutdown
+                endVars.add(rp.getNodeAction(n).getEnd());
+            }
+
+            if (!endVars.isEmpty()) {
+                //endVars.add(rp.getNodeAction(n).getHostingEnd());
+                strategies.add(ISF.custom(
+                        ISF.maxDomainSize_var_selector(),
+                        ISF.mid_value_selector(),//.max_value_selector(),
+                        ISF.split(), // Split from max
+                        endVars.toArray(new IntVar[endVars.size()])
+                ));
+                //strategies.add(ISF.minDom_LB(endVars.toArray(new IntVar[endVars.size()]))
+                //);
+            }
+        }
+
+
+        // Set cost objective as strategy
         strategies.add(new IntStrategy(new IntVar[]{cost, rp.getEnd()}, new InputOrder<>(), new IntDomainMin()));
 
         // Add all defined strategies
