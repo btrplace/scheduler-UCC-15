@@ -142,7 +142,7 @@ public class EnergyView implements ModelView, Cloneable {
             Set<Node> nodes = p.getOrigin().getMapping().getOnlineNodes();
             Set<VM> vms = p.getOrigin().getMapping().getRunningVMs();
 
-            for (int t=0; t<duration; t++) {
+            for (int t=-1; t<=duration; t++) {
 
                 writer.newLine();
                 power = 0;
