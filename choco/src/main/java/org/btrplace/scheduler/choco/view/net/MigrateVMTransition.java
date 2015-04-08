@@ -164,7 +164,7 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             // Enumerated BW
             int maxBW = network.getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth();
-            int step = 100;
+            int step = 1000;
             List<Integer> bwEnum = new ArrayList<>();
             for (int i=step; i<=maxBW; i+=step) {
                 if (i > (int) (dirtyRate)) {
