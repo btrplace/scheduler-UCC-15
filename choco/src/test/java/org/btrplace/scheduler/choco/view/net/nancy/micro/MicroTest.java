@@ -213,9 +213,10 @@ public class MicroTest {
         int mem_vm_type2 = 2, cpu_vm_type2 = 1;
 
         // Set memoryUsed and dirtyRate (for all VMs)
-        int vmType1_mem = 1000, vmType2_mem = 1500;
-        double dirtyRateHigh = 30; // 21.44 mB/s,
-        double dirtyRateLow = 5; // 1.5 mB/s,
+        int tpl1MemUsed = 1000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
+        int tpl2MemUsed = 1550, tpl2MaxDirtySize = 46, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 22.6; // stress --vm 1000 --bytes 20K
+        int tpl3MemUsed = 1000, tpl3MaxDirtySize = 46, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 22.6; // stress --vm 1000 --bytes 20K
+        int tpl4MemUsed = 1550, tpl4MaxDirtySize = 5, tpl4MaxDirtyDuration = 3; double tpl4DirtyRate = 0; // idle vm
 
         /* Define nodes and vms attributes in watts
         int nodeIdlePower = 110;
@@ -246,43 +247,59 @@ public class MicroTest {
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
         ma.addRunningVM(v, srcNodes.get(0));
-        mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        mo.getAttributes().put(v, "memUsed", tpl1MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl1MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl1MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v, srcNodes.get(0));
-        mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        mo.getAttributes().put(v, "memUsed", tpl2MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl2DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
         ma.addRunningVM(v, srcNodes.get(1));
-        mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        mo.getAttributes().put(v, "memUsed", tpl3MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl3DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl3MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl3MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v, srcNodes.get(1));
-        mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        mo.getAttributes().put(v, "memUsed", tpl4MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl4DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl4MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl4MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
         ma.addRunningVM(v, srcNodes.get(2));
-        mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        mo.getAttributes().put(v, "memUsed", tpl1MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl1MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl1MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v, srcNodes.get(2));
-        mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        mo.getAttributes().put(v, "memUsed", tpl2MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl2DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
         ma.addRunningVM(v, srcNodes.get(3));
-        mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
+        mo.getAttributes().put(v, "memUsed", tpl3MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl3DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl3MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl3MaxDirtyDuration);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v, srcNodes.get(3));
-        mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
+        mo.getAttributes().put(v, "memUsed", tpl4MemUsed);
+        mo.getAttributes().put(v, "dirtyRate", tpl4DirtyRate);
+        mo.getAttributes().put(v, "maxDirtySize", tpl4MaxDirtySize);
+        mo.getAttributes().put(v, "maxDirtyDuration", tpl4MaxDirtyDuration);
         
         // Attach resources view
         mo.attach(rcMem);
@@ -312,7 +329,7 @@ public class MicroTest {
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
         ps.setTimeLimit(60);
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Set the custom migration transition
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));

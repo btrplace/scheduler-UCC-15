@@ -8,12 +8,10 @@ import org.btrplace.model.constraint.Fence;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.model.view.power.MinEnergyObjective;
-import org.btrplace.model.view.power.PowerBudget;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
@@ -46,7 +44,7 @@ public class CompasTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
 
         // Set nb of nodes and vms
-        int nbNodesRack = 10;
+        int nbNodesRack = 12;
         int nbSrcNodes = nbNodesRack * 2;
         int nbDstNodes = nbNodesRack * 1;
         int nbVMs = nbSrcNodes * 4;
@@ -66,8 +64,9 @@ public class CompasTest {
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
         int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
-        maxConsumption = 5000;
-        int powerBoot = 20, powerMigrate = 5;
+        maxConsumption = 4950;
+        //maxConsumption = 6000;
+        int powerBoot = 20;
 
         // New default model
         Model mo = new DefaultModel();
@@ -76,7 +75,7 @@ public class CompasTest {
         // Create online source nodes and offline destination nodes
         List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
-        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOfflineNode(dstNodes.get(i)); }
 
         // Set boot and shutdown time
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
@@ -142,16 +141,16 @@ public class CompasTest {
         swSrcRack1.connect(1000, srcNodes.subList(0,nbNodesRack));
         swSrcRack2.connect(1000, srcNodes.subList(nbNodesRack,nbNodesRack*2));
         swDstRack.connect(1000, dstNodes);
-        swMain.connect(10000, swSrcRack1, swSrcRack2, swDstRack);
+        swMain.connect(4000, swSrcRack1, swSrcRack2, swDstRack);
         mo.attach(net);
         net.generateDot(path + "topology.dot", false);
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
-        ps.setTimeLimit(600);
+        ps.setTimeLimit(60);
         //ps.setMaxEnd(600);
-        ps.doOptimize(false);
+        ps.doOptimize(true);
 
         // Set the custom migration transition
         ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
@@ -171,10 +170,10 @@ public class CompasTest {
         }
 
         // Shutdown source nodes
-        //for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
+        for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
 
         // Add continuous power budgets
-        //cstrs.add(new PowerBudget(3*60, 4*60, 5300));
+        //cstrs.add(new PowerBudget(0, 120, 8400));
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
