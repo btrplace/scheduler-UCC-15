@@ -157,9 +157,9 @@ public class MigrateVMTransition implements KeepRunningVM {
             int memUsed, maxDirtyDuration, maxDirtySize;
 
             // Get attribute vars
-            memUsed = mo.getAttributes().getInteger(vm, "memUsed") * 8;
-            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate") * 8;
-            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize") * 8;
+            memUsed = mo.getAttributes().getInteger(vm, "memUsed");
+            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
+            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
             maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
 
             // Enumerated BW
@@ -174,25 +174,28 @@ public class MigrateVMTransition implements KeepRunningVM {
             //bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
 
             // Enumerated duration
-            int durationMin, durationCvg, durationSup = 0;
+            double durationMin, durationTotal;
             //int durEnum[] = new int[bwEnum.size()];
             List<Integer> durEnum = new ArrayList<>();
             for (Integer bw : bwEnum) {
+
+                // Cheat a bit, real is less than theoretical !
+                double bandwidth = bw/10;
                 
                 // Estimate duration wrt.: bandwidth, memUsed, dirtyRate, maxDirtySize and maxDirtyDuration
-                durationMin = (int) Math.round(memUsed/bw);
+                durationMin = memUsed/bandwidth;
+
                 if (durationMin > maxDirtyDuration) {
-                    durationSup = Math.round(maxDirtySize/bw);
-                    durationCvg = (int) Math.round(durationSup*(dirtyRate/(bw-dirtyRate)));
-                    durEnum.add(durationMin + durationSup + durationCvg);
+
+                    durationTotal = durationMin + ((maxDirtySize+(durationMin-maxDirtyDuration)*dirtyRate)/(bandwidth-dirtyRate)) +
+                            ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
+                    durEnum.add((int) Math.round(durationTotal));
                 }
                 else {
-                    durationCvg = (int) Math.round(durationMin*(dirtyRate/(bw-dirtyRate)));
-                    durEnum.add(durationMin + durationCvg);
+                    // We assume this should never happen !
                 }
             }
-            //duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i->i).toArray(), s);
-            
+
             // Remove duplicates duration
             int previousDuration = -1;
             for (int i=bwEnum.size()-1; i>=0; i--) {
