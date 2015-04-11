@@ -25,7 +25,6 @@ import org.btrplace.model.*;
 import org.btrplace.model.view.ModelView;
 import org.btrplace.plan.DefaultReconfigurationPlan;
 import org.btrplace.plan.ReconfigurationPlan;
-import org.btrplace.plan.event.Action;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.duration.DurationEvaluators;
 import org.btrplace.scheduler.choco.transition.*;
@@ -107,7 +106,6 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
 
     private SolverViewsManager viewsManager;
 
-    private Parameters ps;
     /**
      * Make a new RP where the next state for every VM is indicated.
      * If the state for a VM is omitted, it is considered as unchanged
@@ -138,7 +136,7 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
         this.amFactory = ps.getTransitionFactory();
         model = m;
         durEval = ps.getDurationEvaluators();
-        this.ps = ps;
+
         solver = new Solver();
         solver.set(new AllSolutionsRecorder(solver));
         start = VariableFactory.fixed(makeVarLabel("RP.start"), 0, solver);
@@ -456,11 +454,6 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
     private boolean checkConsistency(Solution s, ReconfigurationPlan p) {
         if (p.getDuration() != s.getIntVal(end)) {
             LOGGER.error("The plan effective duration ({}) and the computed duration ({}) mismatch", p.getDuration(), end.getValue());
-            for (Action a : p.getActions()) {
-                if (a.getEnd() > end.getValue()) {
-                    LOGGER.error("Action {} terminates after the theoretical plan termination {}", a, end.getValue());
-                }
-            }
             return false;
         }
         return true;
