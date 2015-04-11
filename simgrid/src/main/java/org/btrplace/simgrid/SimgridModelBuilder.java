@@ -25,6 +25,7 @@ import org.btrplace.model.view.NamingService;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Port;
+import org.btrplace.model.view.net.StaticRouting;
 import org.btrplace.model.view.net.Switch;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -61,8 +62,8 @@ public class SimgridModelBuilder {
         mo.attach(nsNodes);
 
         // Create and attach the switches' namingService view
-        //nsSwitches = NamingService.newSwitchNS();
-        //mo.attach(nsSwitches);
+        nsSwitches = NamingService.newSwitchNS();
+        mo.attach(nsSwitches);
 
         // Create and attach the shareableResource view
         rcCPU = new ShareableResource("core", 1, 1);
@@ -77,12 +78,12 @@ public class SimgridModelBuilder {
         }
 
         // Create and attach the network view
-        //NetworkView netView = new NetworkView(new StaticRouting());
-        //mo.attach(netView);
+        NetworkView netView = new NetworkView(new StaticRouting());
+        mo.attach(netView);
 
         // Import routes from Simgrid XML file
         try {
-          //  importRoutes(netView, xml);
+            importRoutes(netView, xml);
         } catch(Exception e) {
             System.err.println("Error during Simgrid routes import: " + e.toString());
             e.printStackTrace();
