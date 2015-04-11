@@ -28,6 +28,7 @@ import org.btrplace.scheduler.choco.Slice;
 import org.btrplace.scheduler.choco.SliceBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.IntConstraintFactory;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VariableFactory;
@@ -94,9 +95,9 @@ public class BootVM implements VMTransition {
     }
 
     @Override
-    public boolean insertActions(ReconfigurationPlan plan) {
-        Node node = rp.getNode(dSlice.getHoster().getValue());
-        org.btrplace.plan.event.BootVM a = new org.btrplace.plan.event.BootVM(vm, node, start.getValue(), end.getValue());
+    public boolean insertActions(Solution s, ReconfigurationPlan plan) {
+        Node node = rp.getNode(s.getIntVal(dSlice.getHoster()));
+        org.btrplace.plan.event.BootVM a = new org.btrplace.plan.event.BootVM(vm, node, s.getIntVal(start), s.getIntVal(end));
         plan.add(a);
         return true;
     }
@@ -134,6 +135,16 @@ public class BootVM implements VMTransition {
     @Override
     public VM getVM() {
         return vm;
+    }
+
+    @Override
+    public VMState getSourceState() {
+        return VMState.READY;
+    }
+
+    @Override
+    public VMState getFutureState() {
+        return VMState.RUNNING;
     }
 
     /**

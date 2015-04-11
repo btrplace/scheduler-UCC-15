@@ -149,8 +149,6 @@ public class Launcher {
         try {
             // For debug purpose
             cra.setVerbosity(0);
-
-            // Vanilla
             plan = cra.solve(i.getModel(), i.getSatConstraints());
 
             // New model
@@ -163,13 +161,17 @@ public class Launcher {
         } catch (SchedulerException e) {
             e.printStackTrace();
         } finally {
-            System.out.println(cra.getStatistics());
+            try {
+                System.out.println(cra.getStatistics());
+            } catch (SchedulerException ex) {
+                ex.printStackTrace();
+            }
         }
 
         // Save stats to a CSV file
         try {
             createCSV(dst, plan, cra);
-        } catch (IOException e) {
+        } catch (IOException | SchedulerException e) {
             e.printStackTrace();
         }
 
@@ -267,7 +269,7 @@ public class Launcher {
         writerPlan.close();
     }
 
-    public static void createCSV(String fileName, ReconfigurationPlan plan, ChocoScheduler cra) throws IOException {
+    public static void createCSV(String fileName, ReconfigurationPlan plan, ChocoScheduler cra) throws IOException, SchedulerException {
 
         FileWriter writer = new FileWriter(fileName);
         SolvingStatistics stats = cra.getStatistics();
