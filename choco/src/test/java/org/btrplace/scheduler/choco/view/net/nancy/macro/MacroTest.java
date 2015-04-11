@@ -52,9 +52,8 @@ public class MacroTest {
         int mem_vm = 2, mem_node = 16; // VMs: 2GB,     Nodes: 24GB
         int cpu_vm = 1, cpu_node = 4;  // VMs: 2 VCPUs, Nodes: 8 CPUs
 
-        // Set memoryUsed and dirtyRate (for all VMs)
+        // Set memoryUsed for all VMs
         int memUsed = 1000; // 1 GB
-        double dirtyRate = 21.44; // 21.44 mB/s,
 
         // Define nodes and vms attributes in watts
         int nodeIdlePower = 50;
@@ -78,7 +77,9 @@ public class MacroTest {
         // Put attributes
         for (VM vm : vms) {
             mo.getAttributes().put(vm, "memUsed", memUsed);
-            mo.getAttributes().put(vm, "dirtyRate", dirtyRate);
+            mo.getAttributes().put(vm, "dirtyRate", 3.0);
+            mo.getAttributes().put(vm, "maxDirtySize", 96);
+            mo.getAttributes().put(vm, "maxDirtyDuration", 2);
         }
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
         for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
@@ -114,7 +115,7 @@ public class MacroTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective

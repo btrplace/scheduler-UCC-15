@@ -29,7 +29,7 @@ import java.util.List;
 public class CDeadlineTest {
 
     @Test
-    public void test() {
+    public void test() throws SchedulerException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
@@ -82,7 +82,7 @@ public class CDeadlineTest {
         ps.doOptimize(false);
 
         // Add the custom vm transition builder for migrations
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective

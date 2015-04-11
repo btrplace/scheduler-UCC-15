@@ -5,11 +5,9 @@ import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
-import org.btrplace.model.constraint.MinMTTR;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.power.EnergyView;
@@ -158,7 +156,7 @@ public class SoccTest {
         ps.doOptimize(true);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());

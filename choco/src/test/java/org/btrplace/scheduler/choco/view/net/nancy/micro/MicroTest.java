@@ -21,7 +21,6 @@ import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -35,7 +34,6 @@ import java.util.List;
  */
 public class MicroTest {
 
-    @Test
     public void IntraNodeTest() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
@@ -134,7 +132,7 @@ public class MicroTest {
         ps.doOptimize(true);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register the Sync constraint
@@ -194,7 +192,6 @@ public class MicroTest {
         }
     }
 
-    @Test
     public void InterNodeTest() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
@@ -332,7 +329,7 @@ public class MicroTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective

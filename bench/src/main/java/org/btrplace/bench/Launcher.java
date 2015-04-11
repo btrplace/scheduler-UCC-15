@@ -221,7 +221,7 @@ public class Launcher {
         Attributes attrs = i.getModel().getAttributes();
 
         // Set the custom migration transition
-        cra.getTransitionFactory().remove(cra.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        cra.getTransitionFactory().remove(cra.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         cra.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objectives

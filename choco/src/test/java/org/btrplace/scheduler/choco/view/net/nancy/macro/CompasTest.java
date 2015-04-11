@@ -23,7 +23,6 @@ import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -37,7 +36,6 @@ import java.util.List;
  */
 public class CompasTest {
 
-    @Test
     public void execute() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
@@ -153,7 +151,7 @@ public class CompasTest {
         ps.doOptimize(true);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
