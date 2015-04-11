@@ -26,6 +26,9 @@ import org.btrplace.json.model.InstanceConverter;
 import org.btrplace.model.Attributes;
 import org.btrplace.model.Instance;
 import org.btrplace.model.VM;
+import org.btrplace.model.VMState;
+import org.btrplace.model.view.net.NetworkView;
+import org.btrplace.model.view.net.Switch;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.MigrateVM;
 import org.btrplace.scheduler.SchedulerException;
@@ -34,11 +37,15 @@ import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.duration.DurationEvaluators;
 import org.btrplace.scheduler.choco.duration.LinearToAResourceActionDuration;
 import org.btrplace.scheduler.choco.runner.SolvingStatistics;
+import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
+import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
+import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -85,7 +92,7 @@ public class Launcher {
     public static void launch(boolean repair, boolean optimize, int timeout, String src, String dst) {
 
         // Create and customize a scheduler
-        ChocoScheduler cra = new DefaultChocoScheduler();
+        DefaultChocoScheduler cra = new DefaultChocoScheduler();
         ReconfigurationPlan plan = null;
 
         // Manage options behaviors
@@ -132,14 +139,23 @@ public class Launcher {
             e.printStackTrace();
         }
 
-        //Set custom actions durations
-        setAttributes(i, cra.getDurationEvaluators());
+        // Set vanilla parameters
+        setVanillaParameters(i, cra);
+
+        // Set new model parameters
+        //setNewParameters(i, cra);
 
         // Try to solve
         try {
             // For debug purpose
             cra.setVerbosity(0);
+
+            // Vanilla
             plan = cra.solve(i.getModel(), i.getSatConstraints());
+
+            // New model
+            //plan = cra.solve(i.getModel(), i.getSatConstraints(), new MinMTTRObjective());
+
             if (plan == null) {
                 System.err.println("No solution !");
                 throw new RuntimeException();
@@ -167,9 +183,11 @@ public class Launcher {
         }
     }
 
-    public static void setAttributes(Instance i, DurationEvaluators dev) {
+    public static void setVanillaParameters(Instance i, DefaultChocoScheduler cra) {
 
+        DurationEvaluators dev = cra.getDurationEvaluators();
         Attributes attrs = i.getModel().getAttributes();
+
         for (VM vm : i.getModel().getMapping().getAllVMs()) {
             // Hypervisor
             //attrs.put(vm, "template", "kvm");
@@ -194,6 +212,52 @@ public class Launcher {
             attrs.put(n, "shutdown", 6);
         }*/
     }
+
+    public static void setNewParameters(Instance i, DefaultChocoScheduler cra) {
+
+        DurationEvaluators dev = cra.getDurationEvaluators();
+        Attributes attrs = i.getModel().getAttributes();
+
+        // Set the custom migration transition
+        cra.getTransitionFactory().remove(cra.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        cra.getTransitionFactory().add(new MigrateVMTransition.Builder());
+
+        // Register custom objectives
+        cra.getConstraintMapper().register(new CMinMTTRObjective.Builder());
+        cra.getConstraintMapper().register(new CMinEnergyObjective.Builder());
+
+        // Add a network view
+        NetworkView net = new NetworkView();
+        Switch swMain = net.newSwitch();
+        swMain.connect(10000, new ArrayList<>(i.getModel().getMapping().getAllNodes()));
+        i.getModel().attach(net);
+
+        for (VM vm : i.getModel().getMapping().getAllVMs()) {
+
+            // Can be re-instantiated
+            attrs.put(vm, "clone", true);
+
+            // Set migration parameters
+            attrs.put(vm, "memUsed", 2000);
+            attrs.put(vm, "dirtyRate", 3);
+            attrs.put(vm, "maxDirtySize", 96);
+            attrs.put(vm, "maxDirtyDuration", 2);
+
+            // Actions durations
+            attrs.put(vm, "forge", 3);
+            attrs.put(vm, "kill", 2);
+            //attrs.put(vm, "boot", 5);
+            //attrs.put(vm, "shutdown", 2);
+            //attrs.put(vm, "suspend", 4);
+            //attrs.put(vm, "resume", 5);
+            //attrs.put(vm, "allocate", 5);
+        }
+        /*for (Node n : i.getModel().getMapping().getAllNodes()) {
+            attrs.put(n, "boot", 6);
+            attrs.put(n, "shutdown", 6);
+        }*/
+    }
+
 
     public static void savePlan(String fileName, ReconfigurationPlan plan) throws IOException {
         // Write the plan in a specific file
