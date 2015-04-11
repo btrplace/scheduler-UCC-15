@@ -23,10 +23,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.model.InstanceConverter;
-import org.btrplace.model.Attributes;
-import org.btrplace.model.Instance;
-import org.btrplace.model.VM;
-import org.btrplace.model.VMState;
+import org.btrplace.model.*;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.plan.ReconfigurationPlan;
@@ -231,6 +228,10 @@ public class Launcher {
         // Add a network view
         NetworkView net = new NetworkView();
         Switch swMain = net.newSwitch();
+        for (Node n : i.getModel().getMapping().getAllNodes()) {
+
+        }
+
         swMain.connect(10000, new ArrayList<>(i.getModel().getMapping().getAllNodes()));
         i.getModel().attach(net);
 
