@@ -38,6 +38,9 @@ import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.chocosolver.solver.search.loop.monitors.IMonitorSolution;
 import org.chocosolver.solver.search.measure.IMeasures;
+import org.chocosolver.solver.search.solution.AllSolutionsRecorder;
+import org.chocosolver.solver.search.solution.ISolutionRecorder;
+import org.chocosolver.solver.trace.Chatterbox;
 
 import java.util.*;
 import java.util.concurrent.Callable;
@@ -67,6 +70,7 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
     private long start;
 
     private List<SolutionStatistics> measures;
+    private ISolutionRecorder solutions;
 
     /**
      * Choco version of the constraints.
@@ -91,7 +95,6 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
         rp = null;
         start = System.currentTimeMillis();
         measures = new ArrayList<>();
-
         //Build the core problem
         coreRPDuration = -System.currentTimeMillis();
         rp = buildRP();
@@ -107,7 +110,7 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
         //Customize the core problem
         speRPDuration = -System.currentTimeMillis();
         if (!injectConstraints()) {
-            return new InstanceResult(null, makeStatistics());
+            return new InstanceResult(null, getStatistics());
         }
         speRPDuration += System.currentTimeMillis();
 
@@ -117,6 +120,7 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
         rp.getLogger().debug("optimize: {}; timeLimit: {}; manageableVMs: {}", params.doOptimize(), params.getTimeLimit(), rp.getManageableVMs().size());
 
         //The solution monitor to store the measures at each solution
+        solutions = new AllSolutionsRecorder(rp.getSolver());
         rp.getSolver().getSearchLoop().plugSearchMonitor(new IMonitorSolution() {
             @Override
             public void onSolution() {
@@ -138,7 +142,7 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
 
         //The actual solving process
         ReconfigurationPlan p = rp.solve(params.getTimeLimit(), params.doOptimize());
-        return new InstanceResult(p, makeStatistics());
+        return new InstanceResult(p, getStatistics());
     }
 
     private ReconfigurationProblem buildRP() throws SchedulerException {
@@ -283,10 +287,11 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
         }
     }
 
-    private SingleRunnerStatistics makeStatistics() {
+    public SingleRunnerStatistics getStatistics() throws SchedulerException {
         if (rp == null) {
             return new SingleRunnerStatistics(params, 0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0);
         }
+
         IMeasures m2 = rp.getSolver().getMeasures();
         SingleRunnerStatistics st = new SingleRunnerStatistics(
                 params,
@@ -298,12 +303,15 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
                 (long) (m2.getTimeCount() * 1000),
                 m2.getNodeCount(),
                 m2.getBackTrackCount(),
-                params.getTimeLimit() <= m2.getTimeCount(),
+                rp.getSolver().hasReachedLimit(), //assumed timeout is the only limit
                 coreRPDuration,
                 speRPDuration);
-
+        int i = 0;
+        //Merge the statistics with the solution.
         for (SolutionStatistics m : measures) {
+            m.setReconfigurationPlan(rp.buildReconfigurationPlan(solutions.getSolutions().get(i), rp.getSourceModel()));
             st.addSolution(m);
+            i++;
         }
         return st;
     }
