@@ -37,6 +37,7 @@ import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -247,7 +248,17 @@ public class MigrateVMTransition implements KeepRunningVM {
     }
 
     @Override
-    public boolean insertActions(ReconfigurationPlan plan) {
+    public VMState getSourceState() {
+        return VMState.RUNNING;
+    }
+
+    @Override
+    public VMState getFutureState() {
+        return VMState.RUNNING;
+    }
+
+    @Override
+    public boolean insertActions(Solution s, ReconfigurationPlan plan) {
         if (cSlice.getHoster().getValue() != dSlice.getHoster().getValue()) {
             Action a;
             Node dst = rp.getNode(dSlice.getHoster().getValue());

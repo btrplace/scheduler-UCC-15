@@ -11,13 +11,13 @@ import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.ReconfigurationProblem;
 import org.btrplace.scheduler.choco.transition.BootableNode;
 import org.btrplace.scheduler.choco.transition.NodeTransition;
-import org.btrplace.scheduler.choco.transition.RelocatableVM;
 import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.view.*;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.LCF;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
@@ -114,7 +114,7 @@ public class CEnergyView implements ChocoView {
         for (VM v : rp.getVMs()) {  // Add VMs consumption
             int vmPower = ev.getConsumption(v);
             VMState currentState = rp.getSourceModel().getMapping().getState(v);
-            VMState futureState = rp.getNextState(v);
+            VMState futureState = rp.getFutureState(v);
             VMTransition vmt = rp.getVMAction(v);
 
             IntVar duration = rp.makeUnboundedDuration(rp.makeVarLabel("Dur(", v, ")"));
@@ -263,7 +263,7 @@ public class CEnergyView implements ChocoView {
     }
 
     @Override
-    public boolean insertActions(ReconfigurationProblem rp, ReconfigurationPlan p) {
+    public boolean insertActions(ReconfigurationProblem rp, Solution s, ReconfigurationPlan p) {
         return true;
     }
 

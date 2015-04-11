@@ -10,19 +10,15 @@ import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
-import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.net.VHPCRouting;
 import org.btrplace.model.view.power.EnergyView;
 import org.btrplace.plan.ReconfigurationPlan;
-import org.btrplace.plan.event.Action;
-import org.btrplace.plan.event.MigrateVM;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
-import org.btrplace.scheduler.choco.*;
-import org.btrplace.scheduler.choco.constraint.mttr.CMinMTTR;
+import org.btrplace.scheduler.choco.DefaultChocoScheduler;
+import org.btrplace.scheduler.choco.DefaultParameters;
 import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
-import org.chocosolver.solver.Cause;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.testng.Assert;
 import org.testng.annotations.Test;
@@ -39,6 +35,7 @@ import java.util.List;
  */
 public class CNetworkViewTest {
 
+    /*
     @Test
     public void DirtyRateModelTest() throws SchedulerException,ContradictionException {
 
@@ -97,7 +94,7 @@ public class CNetworkViewTest {
 
         // Set the custom transition
         Parameters ps = new DefaultParameters().setVerbosity(1);
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // New reconfiguration problem
@@ -137,12 +134,14 @@ public class CNetworkViewTest {
             }
         }
     }
+    */
 
     /**
      * Force sequential migrations by ensuring that (max(BW)/2 < DR))
      *
      * @throws SchedulerException
      */
+    /*
     @Test
     public void SequentialOnlyTest() throws SchedulerException,ContradictionException {
 
@@ -150,7 +149,7 @@ public class CNetworkViewTest {
         int     mem_vm1 = 1000, mem_vm2 = 1500;
         int     ds_vm1 = 96, ds_vm2 = 96;
         int     dd_vm1 = 2, dd_vm2 = 2;
-        double  dr_vm1 = 48, dr_vm2 = 48;
+        double  dr_vm1 = 3, dr_vm2 = 3;
 
         Model mo = new DefaultModel();
         Mapping ma = mo.getMapping();
@@ -201,7 +200,7 @@ public class CNetworkViewTest {
 
         // Set the custom migration transition
         Parameters ps = new DefaultParameters().setVerbosity(1);
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // New reconfiguration problem
@@ -243,6 +242,7 @@ public class CNetworkViewTest {
         // Verify that migrations are scheduled sequentially
         Assert.assertTrue(start_vm1 == end_vm2 || start_vm2 == end_vm1);
     }
+    */
 
     @Test
     public void VHPCTest() throws SchedulerException,ContradictionException {
@@ -324,7 +324,7 @@ public class CNetworkViewTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective
