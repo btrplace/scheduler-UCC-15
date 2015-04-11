@@ -5,18 +5,19 @@ import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
-import org.btrplace.model.constraint.MinMTTR;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.power.EnergyView;
+import org.btrplace.model.view.power.MinEnergyObjective;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.DefaultParameters;
 import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
+import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -62,7 +63,7 @@ public class SoccTest {
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
         int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
-        maxConsumption = 11500;
+        //maxConsumption = 11500;
         int powerBoot = 20;
 
         // New default model
@@ -147,11 +148,11 @@ public class SoccTest {
         ps.setVerbosity(2);
         ps.setTimeLimit(5);
         //ps.setMaxEnd(600);
-        ps.doOptimize(true);
+        ps.doOptimize(false);
 
         // Set the custom migration transition
-        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
-        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -183,9 +184,9 @@ public class SoccTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        Instance i = new Instance(mo, cstrs, new MinMTTR());
+        //Instance i = new Instance(mo, cstrs, new MinMTTR());
         //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
-        //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
+        Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
         try {
