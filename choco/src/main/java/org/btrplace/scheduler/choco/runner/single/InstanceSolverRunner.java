@@ -140,6 +140,19 @@ public class InstanceSolverRunner implements Callable<InstanceResult> {
             }
         });
 
+        if (params.getVerbosity() >=1) {
+            Chatterbox.showSolutions(rp.getSolver());
+        }
+        if (params.getVerbosity() >= 2) {
+            //every second
+            Chatterbox.showStatisticsDuringResolution(rp.getSolver(), 1000);
+        }
+        if (params.getVerbosity() >= 3) {
+            Chatterbox.showDecisions(rp.getSolver());
+        }
+        if (params.getVerbosity() >= 4) {
+            Chatterbox.showContradiction(rp.getSolver());
+        }
         //The actual solving process
         ReconfigurationPlan p = rp.solve(params.getTimeLimit(), params.doOptimize());
         return new InstanceResult(p, getStatistics());

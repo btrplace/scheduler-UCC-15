@@ -46,7 +46,6 @@ import org.chocosolver.solver.search.strategy.selectors.variables.Occurrence;
 import org.chocosolver.solver.search.strategy.strategy.RealStrategy;
 import org.chocosolver.solver.search.strategy.strategy.SetStrategy;
 import org.chocosolver.solver.search.strategy.strategy.StrategiesSequencer;
-import org.chocosolver.solver.trace.Chatterbox;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.RealVar;
 import org.chocosolver.solver.variables.SetVar;
@@ -193,20 +192,6 @@ public class DefaultReconfigurationProblem implements ReconfigurationProblem {
         }
 
         appendNaiveBranchHeuristic();
-
-        if (ps.getVerbosity() >=1) {
-            Chatterbox.showSolutions(solver);
-        }
-        if (ps.getVerbosity() >= 2) {
-            //every second
-            Chatterbox.showStatisticsDuringResolution(solver, 1000);
-        }
-        if (ps.getVerbosity() >= 3) {
-            Chatterbox.showDecisions(solver);
-        }
-        if (ps.getVerbosity() >= 4) {
-            Chatterbox.showContradiction(solver);
-        }
 
         getLogger().debug("{} constraints; {} integers", solver.getNbCstrs(), solver.retrieveIntVars().length + solver.retrieveBoolVars().length);
 
