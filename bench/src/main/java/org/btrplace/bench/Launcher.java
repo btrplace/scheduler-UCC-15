@@ -195,7 +195,7 @@ public class Launcher {
             //attrs.put(vm, "template", "kvm");
 
             // Can be re-instantiated
-            attrs.put(vm, "clone", true);
+            //attrs.put(vm, "clone", true);
 
             // Migration duration: Memory/100
             dev.register(MigrateVM.class, new LinearToAResourceActionDuration<VM>("memory", 0.01));
@@ -237,7 +237,7 @@ public class Launcher {
         for (VM vm : i.getModel().getMapping().getAllVMs()) {
 
             // Can be re-instantiated
-            attrs.put(vm, "clone", true);
+            //attrs.put(vm, "clone", true);
 
             // Set migration parameters
             attrs.put(vm, "memUsed", 2000);
