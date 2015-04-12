@@ -24,6 +24,7 @@ import net.minidev.json.parser.ParseException;
 import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.model.InstanceConverter;
 import org.btrplace.model.*;
+import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.plan.ReconfigurationPlan;
@@ -137,19 +138,21 @@ public class Launcher {
         }
 
         // Set vanilla parameters
-        setVanillaParameters(i, cra);
+        //setVanillaParameters(i, cra);
 
         // Set new model parameters
-        //setNewParameters(i, cra);
+        setNewParameters(i, cra);
 
         // Try to solve
         try {
             // For debug purpose
-            cra.setVerbosity(0);
-            plan = cra.solve(i.getModel(), i.getSatConstraints());
+            cra.setVerbosity(2);
+
+            // Vanilla
+            //plan = cra.solve(i.getModel(), i.getSatConstraints());
 
             // New model
-            //plan = cra.solve(i.getModel(), i.getSatConstraints(), new MinMTTRObjective());
+            plan = cra.solve(i.getModel(), i.getSatConstraints(), new MinMTTRObjective());
 
             if (plan == null) {
                 System.err.println("No solution !");
@@ -188,11 +191,9 @@ public class Launcher {
         Attributes attrs = i.getModel().getAttributes();
 
         for (VM vm : i.getModel().getMapping().getAllVMs()) {
-            // Hypervisor
-            //attrs.put(vm, "template", "kvm");
 
-            // Can be re-instantiated
-            //attrs.put(vm, "clone", true);
+            // Cannot be re-instantiated
+            attrs.put(vm, "clone", false);
 
             // Migration duration: Memory/100
             dev.register(MigrateVM.class, new LinearToAResourceActionDuration<VM>("memory", 0.01));
@@ -206,10 +207,6 @@ public class Launcher {
             //attrs.put(vm, "resume", 5);
             //attrs.put(vm, "allocate", 5);
         }
-        /*for (Node n : i.getModel().getMapping().getAllNodes()) {
-            attrs.put(n, "boot", 6);
-            attrs.put(n, "shutdown", 6);
-        }*/
     }
 
     public static void setNewParameters(Instance i, DefaultChocoScheduler cra) {
@@ -228,22 +225,31 @@ public class Launcher {
         // Add a network view
         NetworkView net = new NetworkView();
         Switch swMain = net.newSwitch();
-        for (Node n : i.getModel().getMapping().getAllNodes()) {
-
+        /* TODO: patch getFirstPath
+        List<Switch> switches = new ArrayList<>();
+        for (int s=0; s<(i.getModel().getMapping().getAllNodes().size()/250); s++) {
+            Switch sw = net.newSwitch();
+            switches.add(sw);
+            swMain.connect(10000, sw);
         }
-
-        swMain.connect(10000, new ArrayList<>(i.getModel().getMapping().getAllNodes()));
+        int nb = 0;
+        for (Node n : i.getModel().getMapping().getAllNodes()) {
+            switches.get(nb/250).connect(1000, n);
+            nb++;
+        }
+        */
+        swMain.connect(1000, new ArrayList<Node>(i.getModel().getMapping().getAllNodes()));
         i.getModel().attach(net);
 
         for (VM vm : i.getModel().getMapping().getAllVMs()) {
 
-            // Can be re-instantiated
-            //attrs.put(vm, "clone", true);
+            // Cannot be re-instantiated
+            attrs.put(vm, "clone", false);
 
             // Set migration parameters
-            attrs.put(vm, "memUsed", 2000);
-            attrs.put(vm, "dirtyRate", 3);
-            attrs.put(vm, "maxDirtySize", 96);
+            attrs.put(vm, "memUsed", Integer.valueOf(attrs.get(vm, "template").toString().split("m")[1]));
+            attrs.put(vm, "dirtyRate", 2.0);
+            attrs.put(vm, "maxDirtySize", 10);
             attrs.put(vm, "maxDirtyDuration", 2);
 
             // Actions durations
@@ -254,11 +260,13 @@ public class Launcher {
             //attrs.put(vm, "suspend", 4);
             //attrs.put(vm, "resume", 5);
             //attrs.put(vm, "allocate", 5);
+
+            /* TODO: generate fence from inputs BUT seems useless
+            if (vm.id() == 13718) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 4345) { new Fence(vm, Collections.singleton(n)); } } }
+            if (vm.id() == 5685) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 157) { new Fence(vm, Collections.singleton(n)); } } }
+            if (vm.id() == 1069) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 4796) { new Fence(vm, Collections.singleton(n)); } } }
+            */
         }
-        /*for (Node n : i.getModel().getMapping().getAllNodes()) {
-            attrs.put(n, "boot", 6);
-            attrs.put(n, "shutdown", 6);
-        }*/
     }
 
 
