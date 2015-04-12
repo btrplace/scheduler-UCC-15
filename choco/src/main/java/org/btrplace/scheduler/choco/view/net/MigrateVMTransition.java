@@ -183,21 +183,21 @@ public class MigrateVMTransition implements KeepRunningVM {
                 // Cheat a bit, real is less than theoretical !
                 double bandwidth = bw/10;
                 
-                // Estimate duration wrt.: bandwidth, memUsed, dirtyRate, maxDirtySize and maxDirtyDuration
+                // Estimate duration
                 durationMin = memUsed/bandwidth;
 
                 if (durationMin > maxDirtyDuration) {
 
                     durationTotal = durationMin + ((maxDirtySize+(durationMin-maxDirtyDuration)*dirtyRate)/(bandwidth-dirtyRate)) +
                             ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
-                    durEnum.add((int) Math.round(durationTotal));
                 }
                 else {
-                    // We assume this should never happen !
+                    durationTotal = durationMin + (((maxDirtySize/maxDirtyDuration)*durationMin)/(bandwidth-(maxDirtySize/maxDirtyDuration)));
                 }
+                durEnum.add((int) Math.round(durationTotal));
             }
 
-            // Remove duplicates duration
+            /* Remove duplicates duration
             int previousDuration = -1;
             for (int i=bwEnum.size()-1; i>=0; i--) {
                 if (durEnum.get(i) > previousDuration) {
@@ -211,6 +211,7 @@ public class MigrateVMTransition implements KeepRunningVM {
                     // Problem !
                 }
             }
+            */
             
             // Create the enumerated vars
             bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
@@ -259,11 +260,12 @@ public class MigrateVMTransition implements KeepRunningVM {
 
     @Override
     public boolean insertActions(Solution s, ReconfigurationPlan plan) {
-        if (cSlice.getHoster().getValue() != dSlice.getHoster().getValue()) {
+        if (s.getIntVal(cSlice.getHoster()) != s.getIntVal(dSlice.getHoster())) {
+            assert s.getIntVal(stay) == 0;
             Action a;
-            Node dst = rp.getNode(dSlice.getHoster().getValue());
-            int st = getStart().getValue();
-            int ed = getEnd().getValue();
+            Node dst = rp.getNode(s.getIntVal(dSlice.getHoster()));
+            int st = s.getIntVal(getStart());
+            int ed = s.getIntVal(getEnd());
             int bw = getBandwidth().getValue();
             a = new org.btrplace.plan.event.MigrateVM(vm, src, dst, st, ed, bw);
             plan.add(a);
