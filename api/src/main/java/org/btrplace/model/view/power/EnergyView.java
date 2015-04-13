@@ -103,7 +103,7 @@ public class EnergyView implements ModelView, Cloneable {
 
     public boolean plotConsumption(ReconfigurationPlan p, String outputFile) {
 
-        char SEPARATOR = ',';
+        char SEPARATOR = ';';
 
         // Get actions
         Set<Action> actionsSet = p.getActions();

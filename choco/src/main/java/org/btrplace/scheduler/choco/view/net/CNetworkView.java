@@ -18,6 +18,7 @@ import org.btrplace.scheduler.choco.view.SolverViewBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
@@ -170,7 +171,7 @@ public class CNetworkView implements ChocoView {
     }
 
     @Override
-    public boolean insertActions(ReconfigurationProblem rp, ReconfigurationPlan p) { return true; }
+    public boolean insertActions(ReconfigurationProblem rp, Solution s, ReconfigurationPlan p) { return true; }
 
     @Override
     public boolean cloneVM(VM vm, VM clone) { return true; }

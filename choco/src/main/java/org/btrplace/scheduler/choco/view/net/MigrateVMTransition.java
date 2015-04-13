@@ -37,6 +37,7 @@ import org.chocosolver.solver.constraints.Arithmetic;
 import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.constraints.extension.Tuples;
+import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.VF;
@@ -157,9 +158,9 @@ public class MigrateVMTransition implements KeepRunningVM {
             int memUsed, maxDirtyDuration, maxDirtySize;
 
             // Get attribute vars
-            memUsed = mo.getAttributes().getInteger(vm, "memUsed") * 8;
-            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate") * 8;
-            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize") * 8;
+            memUsed = mo.getAttributes().getInteger(vm, "memUsed");
+            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
+            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
             maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
 
             // Enumerated BW
@@ -174,26 +175,29 @@ public class MigrateVMTransition implements KeepRunningVM {
             //bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
 
             // Enumerated duration
-            int durationMin, durationCvg, durationSup = 0;
+            double durationMin, durationTotal;
             //int durEnum[] = new int[bwEnum.size()];
             List<Integer> durEnum = new ArrayList<>();
             for (Integer bw : bwEnum) {
+
+                // Cheat a bit, real is less than theoretical !
+                double bandwidth = bw/10;
                 
-                // Estimate duration wrt.: bandwidth, memUsed, dirtyRate, maxDirtySize and maxDirtyDuration
-                durationMin = (int) Math.round(memUsed/bw);
+                // Estimate duration
+                durationMin = memUsed/bandwidth;
+
                 if (durationMin > maxDirtyDuration) {
-                    durationSup = Math.round(maxDirtySize/bw);
-                    durationCvg = (int) Math.round(durationSup*(dirtyRate/(bw-dirtyRate)));
-                    durEnum.add(durationMin + durationSup + durationCvg);
+
+                    durationTotal = durationMin + ((maxDirtySize+(durationMin-maxDirtyDuration)*dirtyRate)/(bandwidth-dirtyRate)) +
+                            ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
                 }
                 else {
-                    durationCvg = (int) Math.round(durationMin*(dirtyRate/(bw-dirtyRate)));
-                    durEnum.add(durationMin + durationCvg);
+                    durationTotal = durationMin + (((maxDirtySize/maxDirtyDuration)*durationMin)/(bandwidth-(maxDirtySize/maxDirtyDuration)));
                 }
+                durEnum.add((int) Math.round(durationTotal));
             }
-            //duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i->i).toArray(), s);
-            
-            // Remove duplicates duration
+
+            /* Remove duplicates duration
             int previousDuration = -1;
             for (int i=bwEnum.size()-1; i>=0; i--) {
                 if (durEnum.get(i) > previousDuration) {
@@ -207,6 +211,7 @@ public class MigrateVMTransition implements KeepRunningVM {
                     // Problem !
                 }
             }
+            */
             
             // Create the enumerated vars
             bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
@@ -244,12 +249,23 @@ public class MigrateVMTransition implements KeepRunningVM {
     }
 
     @Override
-    public boolean insertActions(ReconfigurationPlan plan) {
-        if (cSlice.getHoster().getValue() != dSlice.getHoster().getValue()) {
+    public VMState getSourceState() {
+        return VMState.RUNNING;
+    }
+
+    @Override
+    public VMState getFutureState() {
+        return VMState.RUNNING;
+    }
+
+    @Override
+    public boolean insertActions(Solution s, ReconfigurationPlan plan) {
+        if (s.getIntVal(cSlice.getHoster()) != s.getIntVal(dSlice.getHoster())) {
+            assert s.getIntVal(stay) == 0;
             Action a;
-            Node dst = rp.getNode(dSlice.getHoster().getValue());
-            int st = getStart().getValue();
-            int ed = getEnd().getValue();
+            Node dst = rp.getNode(s.getIntVal(dSlice.getHoster()));
+            int st = s.getIntVal(getStart());
+            int ed = s.getIntVal(getEnd());
             int bw = getBandwidth().getValue();
             a = new org.btrplace.plan.event.MigrateVM(vm, src, dst, st, ed, bw);
             plan.add(a);

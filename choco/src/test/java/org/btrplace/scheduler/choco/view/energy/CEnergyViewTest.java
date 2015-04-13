@@ -27,7 +27,7 @@ import java.util.List;
 public class CEnergyViewTest {
 
     @Test
-    public void DiscreteTest() {
+    public void DiscreteTest() throws SchedulerException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
@@ -112,7 +112,7 @@ public class CEnergyViewTest {
     }
 
     @Test
-    public void ContinuousTest() {
+    public void ContinuousTest() throws SchedulerException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";

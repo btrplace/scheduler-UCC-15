@@ -5,6 +5,7 @@ import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
+import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
 import org.btrplace.model.view.net.NetworkView;
@@ -43,7 +44,7 @@ public class SoccTest {
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
 
         // Set nb of nodes and vms
-        int nbNodesRack = 28;
+        int nbNodesRack = 24;
         int nbSrcNodes = nbNodesRack * 2;
         int nbDstNodes = nbNodesRack * 1;
         int nbVMs = nbSrcNodes * 2;
@@ -56,14 +57,18 @@ public class SoccTest {
 
         // Set memoryUsed and dirtyRate (for all VMs)
         int tpl1MemUsed = 2000, tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
-        int tpl2MemUsed = 4000, tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 48; // stress --vm 1000 --bytes 70K
-        int tpl3MemUsed = 2000, tpl3MaxDirtySize = 96, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        //int tpl2MemUsed = 4000, tpl2MaxDirtySize = 136, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 24; // stress --vm 1000 --bytes 70K
+        //int tpl3MemUsed = 2000, tpl3MaxDirtySize = 136, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 24; // stress --vm 1000 --bytes 70K
+        int tpl2MemUsed = 4000, tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 3; // stress --vm 1000 --bytes 70K
+        int tpl3MemUsed = 2000, tpl3MaxDirtySize = 96, tpl3MaxDirtyDuration = 2; double tpl3DirtyRate = 3; // stress --vm 1000 --bytes 70K
         int tpl4MemUsed = 4000, tpl4MaxDirtySize = 5, tpl4MaxDirtyDuration = 3; double tpl4DirtyRate = 0; // idle vm
 
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
         int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
-        //maxConsumption = 11500;
+        maxConsumption = 9000; // socc_cap.json
+        //maxConsumption = 9200;
+
         int powerBoot = 20;
 
         // New default model
@@ -73,11 +78,11 @@ public class SoccTest {
         // Create online source nodes and offline destination nodes
         List<Node> srcNodes = new ArrayList<>(), dstNodes = new ArrayList<>();
         for (int i=0; i<nbSrcNodes; i++) { srcNodes.add(mo.newNode()); ma.addOnlineNode(srcNodes.get(i)); }
-        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOnlineNode(dstNodes.get(i)); }
+        for (int i=0; i<nbDstNodes; i++) { dstNodes.add(mo.newNode()); ma.addOfflineNode(dstNodes.get(i)); }
 
         // Set boot and shutdown time
         for (Node n : dstNodes) { mo.getAttributes().put(n, "boot", 120); /*~2 minutes to boot*/ }
-        for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 30); /*~30 seconds to shutdown*/ }
+        for (Node n : srcNodes) {  mo.getAttributes().put(n, "shutdown", 17); /*~30 seconds to shutdown*/ }
 
         // Create running VMs on src nodes
         List<VM> vms = new ArrayList<>(); VM v;
@@ -146,12 +151,12 @@ public class SoccTest {
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
-        ps.setTimeLimit(5);
+        ps.setTimeLimit(10);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
@@ -166,7 +171,7 @@ public class SoccTest {
                 cstrs.add(new Fence(vms.get(j), Collections.singleton(dstNodes.get(i/nbVMsOnDestNodes))));
             }
         }*/
-        
+
         int vm_num = 0;
         for (int i=0; i<nbDstNodes; i++) {
             cstrs.add(new Fence(vms.get(vm_num), Collections.singleton(dstNodes.get(i))));
@@ -177,7 +182,7 @@ public class SoccTest {
         }
 
         // Shutdown source nodes
-        //for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
+        for (Node n : srcNodes) { cstrs.add(new Offline(n)); }
 
         // Add continuous power budgets
         //cstrs.add(new PowerBudget(0, 120, 8400));

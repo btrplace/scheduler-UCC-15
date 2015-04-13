@@ -32,7 +32,7 @@ public class CSyncTest {
             "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/";
 
     @Test
-    public void precopyTest() {
+    public void precopyTest() throws SchedulerException {
 
         // Set nb of nodes and vms
         int nbSrcNodes = 2;
@@ -81,7 +81,7 @@ public class CSyncTest {
         ps.doOptimize(false);
 
         // Add the custom vm transition builder for migrations
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective
@@ -134,7 +134,7 @@ public class CSyncTest {
     }
 
     @Test
-    public void postcopyTest() {
+    public void postcopyTest() throws SchedulerException {
 
         // Set nb of nodes and vms
         int nbSrcNodes = 2;
@@ -183,7 +183,7 @@ public class CSyncTest {
         ps.doOptimize(false);
 
         // Add the custom vm transition builder for migrations
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING).get(0));
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
         ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register custom objective

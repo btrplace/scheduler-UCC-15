@@ -23,9 +23,10 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.model.InstanceConverter;
-import org.btrplace.model.Attributes;
-import org.btrplace.model.Instance;
-import org.btrplace.model.VM;
+import org.btrplace.model.*;
+import org.btrplace.model.view.net.MinMTTRObjective;
+import org.btrplace.model.view.net.NetworkView;
+import org.btrplace.model.view.net.Switch;
 import org.btrplace.plan.ReconfigurationPlan;
 import org.btrplace.plan.event.MigrateVM;
 import org.btrplace.scheduler.SchedulerException;
@@ -34,11 +35,15 @@ import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.duration.DurationEvaluators;
 import org.btrplace.scheduler.choco.duration.LinearToAResourceActionDuration;
 import org.btrplace.scheduler.choco.runner.SolvingStatistics;
+import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
+import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
+import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -85,7 +90,7 @@ public class Launcher {
     public static void launch(boolean repair, boolean optimize, int timeout, String src, String dst) {
 
         // Create and customize a scheduler
-        ChocoScheduler cra = new DefaultChocoScheduler();
+        DefaultChocoScheduler cra = new DefaultChocoScheduler();
         ReconfigurationPlan plan = null;
 
         // Manage options behaviors
@@ -132,14 +137,23 @@ public class Launcher {
             e.printStackTrace();
         }
 
-        //Set custom actions durations
-        setAttributes(i, cra.getDurationEvaluators());
+        // Set vanilla parameters
+        //setVanillaParameters(i, cra);
+
+        // Set new model parameters
+        setNewParameters(i, cra);
 
         // Try to solve
         try {
             // For debug purpose
-            cra.setVerbosity(0);
-            plan = cra.solve(i.getModel(), i.getSatConstraints());
+            cra.setVerbosity(2);
+
+            // Vanilla
+            //plan = cra.solve(i.getModel(), i.getSatConstraints());
+
+            // New model
+            plan = cra.solve(i.getModel(), i.getSatConstraints(), new MinMTTRObjective());
+
             if (plan == null) {
                 System.err.println("No solution !");
                 throw new RuntimeException();
@@ -147,13 +161,17 @@ public class Launcher {
         } catch (SchedulerException e) {
             e.printStackTrace();
         } finally {
-            System.out.println(cra.getStatistics());
+            try {
+                System.out.println(cra.getStatistics());
+            } catch (SchedulerException ex) {
+                ex.printStackTrace();
+            }
         }
 
         // Save stats to a CSV file
         try {
             createCSV(dst, plan, cra);
-        } catch (IOException e) {
+        } catch (IOException | SchedulerException e) {
             e.printStackTrace();
         }
 
@@ -167,15 +185,15 @@ public class Launcher {
         }
     }
 
-    public static void setAttributes(Instance i, DurationEvaluators dev) {
+    public static void setVanillaParameters(Instance i, DefaultChocoScheduler cra) {
 
+        DurationEvaluators dev = cra.getDurationEvaluators();
         Attributes attrs = i.getModel().getAttributes();
-        for (VM vm : i.getModel().getMapping().getAllVMs()) {
-            // Hypervisor
-            //attrs.put(vm, "template", "kvm");
 
-            // Can be re-instantiated
-            attrs.put(vm, "clone", true);
+        for (VM vm : i.getModel().getMapping().getAllVMs()) {
+
+            // Cannot be re-instantiated
+            attrs.put(vm, "clone", false);
 
             // Migration duration: Memory/100
             dev.register(MigrateVM.class, new LinearToAResourceActionDuration<VM>("memory", 0.01));
@@ -189,11 +207,68 @@ public class Launcher {
             //attrs.put(vm, "resume", 5);
             //attrs.put(vm, "allocate", 5);
         }
-        /*for (Node n : i.getModel().getMapping().getAllNodes()) {
-            attrs.put(n, "boot", 6);
-            attrs.put(n, "shutdown", 6);
-        }*/
     }
+
+    public static void setNewParameters(Instance i, DefaultChocoScheduler cra) {
+
+        DurationEvaluators dev = cra.getDurationEvaluators();
+        Attributes attrs = i.getModel().getAttributes();
+
+        // Set the custom migration transition
+        cra.getTransitionFactory().remove(cra.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        cra.getTransitionFactory().add(new MigrateVMTransition.Builder());
+
+        // Register custom objectives
+        cra.getConstraintMapper().register(new CMinMTTRObjective.Builder());
+        cra.getConstraintMapper().register(new CMinEnergyObjective.Builder());
+
+        // Add a network view
+        NetworkView net = new NetworkView();
+        Switch swMain = net.newSwitch();
+        /* TODO: patch getFirstPath
+        List<Switch> switches = new ArrayList<>();
+        for (int s=0; s<(i.getModel().getMapping().getAllNodes().size()/250); s++) {
+            Switch sw = net.newSwitch();
+            switches.add(sw);
+            swMain.connect(10000, sw);
+        }
+        int nb = 0;
+        for (Node n : i.getModel().getMapping().getAllNodes()) {
+            switches.get(nb/250).connect(1000, n);
+            nb++;
+        }
+        */
+        swMain.connect(1000, new ArrayList<Node>(i.getModel().getMapping().getAllNodes()));
+        i.getModel().attach(net);
+
+        for (VM vm : i.getModel().getMapping().getAllVMs()) {
+
+            // Cannot be re-instantiated
+            attrs.put(vm, "clone", false);
+
+            // Set migration parameters
+            attrs.put(vm, "memUsed", Integer.valueOf(attrs.get(vm, "template").toString().split("m")[1]));
+            attrs.put(vm, "dirtyRate", 2.0);
+            attrs.put(vm, "maxDirtySize", 10);
+            attrs.put(vm, "maxDirtyDuration", 2);
+
+            // Actions durations
+            attrs.put(vm, "forge", 3);
+            attrs.put(vm, "kill", 2);
+            //attrs.put(vm, "boot", 5);
+            //attrs.put(vm, "shutdown", 2);
+            //attrs.put(vm, "suspend", 4);
+            //attrs.put(vm, "resume", 5);
+            //attrs.put(vm, "allocate", 5);
+
+            /* TODO: generate fence from inputs BUT seems useless
+            if (vm.id() == 13718) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 4345) { new Fence(vm, Collections.singleton(n)); } } }
+            if (vm.id() == 5685) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 157) { new Fence(vm, Collections.singleton(n)); } } }
+            if (vm.id() == 1069) { for (Node n : i.getModel().getMapping().getAllNodes()) { if (n.id() == 4796) { new Fence(vm, Collections.singleton(n)); } } }
+            */
+        }
+    }
+
 
     public static void savePlan(String fileName, ReconfigurationPlan plan) throws IOException {
         // Write the plan in a specific file
@@ -203,7 +278,7 @@ public class Launcher {
         writerPlan.close();
     }
 
-    public static void createCSV(String fileName, ReconfigurationPlan plan, ChocoScheduler cra) throws IOException {
+    public static void createCSV(String fileName, ReconfigurationPlan plan, ChocoScheduler cra) throws IOException, SchedulerException {
 
         FileWriter writer = new FileWriter(fileName);
         SolvingStatistics stats = cra.getStatistics();
