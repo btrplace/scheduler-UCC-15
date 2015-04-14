@@ -2,9 +2,7 @@ package org.btrplace.model.view.net;
 
 import org.btrplace.model.Node;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by vkherbac on 12/12/14.
@@ -26,7 +24,8 @@ public class DefaultRouting implements Routing {
         if (net == null) { return Collections.emptyList(); }
 
         // Return the first path found
-        return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
+        //return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
+        return getIndirectPath(net.getSwitchInterface(n1), net.getSwitchInterface(n2));
     }
 
     @Override
@@ -64,5 +63,39 @@ public class DefaultRouting implements Routing {
         } else {
             return Collections.emptyList();
         }
+    }
+
+    protected List<Port> getIndirectPath(Port srcPort, Port dstPort) {
+
+        Switch srcSwitch = (Switch) srcPort.getHost();
+        Map<Switch,Port> srcConnectedSwitches = new HashMap<>();
+        for (Port p : srcSwitch.getPorts()) {
+            if(p.getRemote().getHost() instanceof Switch) {
+                srcConnectedSwitches.put((Switch) p.getRemote().getHost(), p);
+            }
+        }
+        Switch dstSwitch = (Switch) dstPort.getHost();
+        Map<Switch,Port> dstConnectedSwitches = new HashMap<>();
+        for (Port p : dstSwitch.getPorts()) {
+            if(p.getRemote().getHost() instanceof Switch) {
+                dstConnectedSwitches.put((Switch) p.getRemote().getHost(), p);
+            }
+        }
+        List mainSwitch = new ArrayList<>(srcConnectedSwitches.keySet());
+        mainSwitch.retainAll(dstConnectedSwitches.keySet());
+
+        if (mainSwitch.size() != 1) {
+            // Problem !
+            return Collections.emptyList();
+        }
+
+        return Arrays.asList(
+                srcPort,
+                srcPort.getRemote(),
+                srcConnectedSwitches.get(mainSwitch.get(0)),
+                dstConnectedSwitches.get(mainSwitch.get(0)),
+                dstPort.getRemote(),
+                dstPort
+        );
     }
 }
