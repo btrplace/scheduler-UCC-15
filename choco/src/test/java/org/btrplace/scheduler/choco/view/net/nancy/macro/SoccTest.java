@@ -45,8 +45,8 @@ public class SoccTest {
 
         // Set nb of nodes and vms
         int nbNodesRack = 24;
-        int nbSrcNodes = nbNodesRack * 2;
-        int nbDstNodes = nbNodesRack * 1;
+        int nbSrcNodes = nbNodesRack * 8;
+        int nbDstNodes = nbNodesRack * 4;
         int nbVMs = nbSrcNodes * 2;
         int nbVMsOnDestNodes = 4;
 
@@ -66,7 +66,7 @@ public class SoccTest {
         // Define power values
         int powerIdleNode = 110, powerVM = 16;
         int maxConsumption = (nbSrcNodes*powerIdleNode)+(nbDstNodes*powerIdleNode)+(powerVM*nbVMs)+5000;
-        maxConsumption = 9000; // socc_cap.json
+        //maxConsumption = 9000; // socc_cap.json
         //maxConsumption = 9200;
 
         int powerBoot = 20;
@@ -139,12 +139,30 @@ public class SoccTest {
         NetworkView net = new NetworkView();
         Switch swSrcRack1 = net.newSwitch();
         Switch swSrcRack2 = net.newSwitch();
-        Switch swDstRack = net.newSwitch();
+        Switch swSrcRack3 = net.newSwitch();
+        Switch swSrcRack4 = net.newSwitch();
+        Switch swSrcRack5 = net.newSwitch();
+        Switch swSrcRack6 = net.newSwitch();
+        Switch swSrcRack7 = net.newSwitch();
+        Switch swSrcRack8 = net.newSwitch();
+        Switch swDstRack1 = net.newSwitch();
+        Switch swDstRack2 = net.newSwitch();
+        Switch swDstRack3 = net.newSwitch();
+        Switch swDstRack4 = net.newSwitch();
         Switch swMain = net.newSwitch();
         swSrcRack1.connect(1000, srcNodes.subList(0,nbNodesRack));
         swSrcRack2.connect(1000, srcNodes.subList(nbNodesRack,nbNodesRack*2));
-        swDstRack.connect(1000, dstNodes);
-        swMain.connect(10000, swSrcRack1, swSrcRack2, swDstRack);
+        swSrcRack3.connect(1000, srcNodes.subList(nbNodesRack*2,nbNodesRack*3));
+        swSrcRack4.connect(1000, srcNodes.subList(nbNodesRack*3,nbNodesRack*4));
+        swSrcRack5.connect(1000, srcNodes.subList(nbNodesRack*4,nbNodesRack*5));
+        swSrcRack6.connect(1000, srcNodes.subList(nbNodesRack*5,nbNodesRack*6));
+        swSrcRack7.connect(1000, srcNodes.subList(nbNodesRack*6,nbNodesRack*7));
+        swSrcRack8.connect(1000, srcNodes.subList(nbNodesRack*7,nbNodesRack*8));
+        swDstRack1.connect(1000, dstNodes.subList(0,nbNodesRack));
+        swDstRack2.connect(1000, dstNodes.subList(nbNodesRack,nbNodesRack*2));
+        swDstRack3.connect(1000, srcNodes.subList(nbNodesRack*2,nbNodesRack*3));
+        swDstRack4.connect(1000, srcNodes.subList(nbNodesRack*3,nbNodesRack*4));
+        swMain.connect(20000, swSrcRack1, swSrcRack2, swSrcRack3, swSrcRack4, swDstRack1, swDstRack2);
         mo.attach(net);
         net.generateDot(path + "topology.dot", false);
 
