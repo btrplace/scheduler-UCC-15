@@ -181,7 +181,7 @@ public class MigrateVMTransition implements KeepRunningVM {
             for (Integer bw : bwEnum) {
 
                 // Cheat a bit, real is less than theoretical !
-                double bandwidth = bw/10;
+                double bandwidth = bw/9;
                 
                 // Estimate duration
                 durationMin = memUsed/bandwidth;
