@@ -519,9 +519,9 @@ public class SoccTest {
         swSrcRack8.connect(1000, srcNodes.subList(nbNodesRack*7,nbNodesRack*8));
         swDstRack1.connect(1000, dstNodes.subList(0,nbNodesRack));
         swDstRack2.connect(1000, dstNodes.subList(nbNodesRack,nbNodesRack*2));
-        swDstRack3.connect(1000, srcNodes.subList(nbNodesRack*2,nbNodesRack*3));
-        swDstRack4.connect(1000, srcNodes.subList(nbNodesRack*3,nbNodesRack*4));
-        swMain.connect(40000, swSrcRack1, swSrcRack2, swSrcRack3, swSrcRack4, swSrcRack5, swSrcRack6, swSrcRack7,swSrcRack8,
+        swDstRack3.connect(1000, dstNodes.subList(nbNodesRack*2,nbNodesRack*3));
+        swDstRack4.connect(1000, dstNodes.subList(nbNodesRack*3,nbNodesRack*4));
+        swMain.connect(40000, swSrcRack1, swSrcRack2, swSrcRack3, swSrcRack4, swSrcRack5, swSrcRack6, swSrcRack7, swSrcRack8,
                 swDstRack1, swDstRack2, swDstRack3, swDstRack4);
         mo.attach(net);
         net.generateDot(path + "topology.dot", false);
@@ -529,7 +529,7 @@ public class SoccTest {
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
         ps.setVerbosity(2);
-        ps.setTimeLimit(10);
+        ps.setTimeLimit(60);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
 
