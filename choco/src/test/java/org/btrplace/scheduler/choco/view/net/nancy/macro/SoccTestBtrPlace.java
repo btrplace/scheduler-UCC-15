@@ -332,7 +332,7 @@ public class SoccTestBtrPlace {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(0);
         ps.setTimeLimit(10);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
@@ -829,7 +829,7 @@ public class SoccTestBtrPlace {
     @Test
     public void go() throws Exception {
         StringBuilder res = new StringBuilder("SIZE;DURATION\n");
-        int nb = 3;
+        int nb = 10;
         for (int i = 0; i < nb; i++) {
             res.append("10;" + duration(decommissioning_10gb()) + ";BtrPlace\n");
         }

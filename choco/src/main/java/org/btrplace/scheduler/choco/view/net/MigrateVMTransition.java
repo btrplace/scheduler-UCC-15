@@ -224,7 +224,6 @@ public class MigrateVMTransition implements KeepRunningVM {
                 tpl.add(bwEnum.get(i), durEnum.get(i));
             }
             s.post(ICF.table(bandwidth, duration, tpl, ""));
-            
         }
         else {
             throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");

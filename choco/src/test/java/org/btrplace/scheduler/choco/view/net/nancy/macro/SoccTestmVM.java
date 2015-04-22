@@ -182,6 +182,7 @@ public class SoccTestmVM {
         //cstrs.add(new PowerBudget(0, 120, 8400));
 
         // Set a custom objective
+        //System.out.println(mo.getMapping());
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
         //Instance i = new Instance(mo, cstrs, new MinMTTR());
         Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
@@ -832,10 +833,11 @@ public class SoccTestmVM {
     @Test
     public void go() throws Exception {
         StringBuilder res = new StringBuilder("SIZE;DURATION\n");
-        int nb = 3;
+        int nb = 10;
         for (int i = 0; i < nb; i++) {
             res.append("10;" + duration(decommissioning_10gb()) + ";mVM\n");
         }
+
         for (int i = 0; i < nb; i++) {
             res.append("20;" + duration(decommissioning_20gb()) + ";mVM\n");
         }
