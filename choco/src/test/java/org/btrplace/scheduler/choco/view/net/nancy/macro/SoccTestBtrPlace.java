@@ -5,10 +5,10 @@ import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
+import org.btrplace.model.constraint.MinMTTR;
 import org.btrplace.model.constraint.Offline;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.view.ShareableResource;
-import org.btrplace.model.view.net.MinMTTRObjective;
 import org.btrplace.model.view.net.NetworkView;
 import org.btrplace.model.view.net.Switch;
 import org.btrplace.model.view.power.EnergyView;
@@ -18,7 +18,6 @@ import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.DefaultParameters;
 import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
-import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
 import org.chocosolver.solver.exception.ContradictionException;
@@ -35,7 +34,7 @@ import java.util.List;
 /**
  * Created by vkherbac on 11/03/15.
  */
-public class SoccTest {
+public class SoccTestBtrPlace {
 
     @Test
     public void decommissioning_10gb() throws SchedulerException,ContradictionException {
@@ -154,8 +153,8 @@ public class SoccTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
-        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -181,8 +180,8 @@ public class SoccTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        //Instance i = new Instance(mo, cstrs, new MinMTTR());
-        Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs, new MinMTTR());
+        //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
         //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
@@ -338,8 +337,8 @@ public class SoccTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
-        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -365,8 +364,8 @@ public class SoccTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        //Instance i = new Instance(mo, cstrs, new MinMTTR());
-        Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs, new MinMTTR());
+        //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
         //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
@@ -534,8 +533,8 @@ public class SoccTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
-        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -561,8 +560,8 @@ public class SoccTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        //Instance i = new Instance(mo, cstrs, new MinMTTR());
-        Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs, new MinMTTR());
+        //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
         //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
@@ -772,8 +771,8 @@ public class SoccTest {
         ps.doOptimize(false);
 
         // Set the custom migration transition
-        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
-        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
         // Register custom objectives
         ps.getConstraintMapper().register(new CMinMTTRObjective.Builder());
         ps.getConstraintMapper().register(new CMinEnergyObjective.Builder());
@@ -799,8 +798,8 @@ public class SoccTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        //Instance i = new Instance(mo, cstrs, new MinMTTR());
-        Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
+        Instance i = new Instance(mo, cstrs, new MinMTTR());
+        //Instance i = new Instance(mo, cstrs, new MinMTTRObjective());
         //Instance i = new Instance(mo, cstrs,  new MinEnergyObjective());
 
         ReconfigurationPlan p;
