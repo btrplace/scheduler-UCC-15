@@ -831,16 +831,16 @@ public class SoccTestBtrPlace {
         StringBuilder res = new StringBuilder("SIZE;DURATION\n");
         int nb = 3;
         for (int i = 0; i < nb; i++) {
-            res.append("10;" + duration(decommissioning_10gb()) + "\n");
+            res.append("10;" + duration(decommissioning_10gb()) + ";BtrPlace\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("20;" + duration(decommissioning_20gb()) + "\n");
+            res.append("20;" + duration(decommissioning_20gb()) + ";BtrPlace\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("40;" + duration(decommissioning_40gb()) + "\n");
+            res.append("40;" + duration(decommissioning_40gb()) + ";BtrPlace\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("100;" + duration(decommissioning_100gb()) + "\n");
+            res.append("100;" + duration(decommissioning_100gb()) + ";BtrPlace\n");
         }
         System.err.println(res);
         Assert.fail();

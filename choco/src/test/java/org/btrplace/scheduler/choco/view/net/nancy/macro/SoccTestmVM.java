@@ -834,16 +834,16 @@ public class SoccTestmVM {
         StringBuilder res = new StringBuilder("SIZE;DURATION\n");
         int nb = 3;
         for (int i = 0; i < nb; i++) {
-            res.append("10;" + duration(decommissioning_10gb()) + "\n");
+            res.append("10;" + duration(decommissioning_10gb()) + ";mVM\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("20;" + duration(decommissioning_20gb()) + "\n");
+            res.append("20;" + duration(decommissioning_20gb()) + ";mVM\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("40;" + duration(decommissioning_40gb()) + "\n");
+            res.append("40;" + duration(decommissioning_40gb()) + ";mVM\n");
         }
         for (int i = 0; i < nb; i++) {
-            res.append("100;" + duration(decommissioning_100gb()) + "\n");
+            res.append("100;" + duration(decommissioning_100gb()) + ";mVM\n");
         }
         System.err.println(res);
         Assert.fail();

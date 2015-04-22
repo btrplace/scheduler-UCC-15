@@ -87,14 +87,14 @@ public class CMinMTTRObjective implements org.btrplace.scheduler.choco.constrain
 
             if (!endVars.isEmpty()) {
                 //endVars.add(rp.getNodeAction(n).getHostingEnd());
-                strategies.add(ISF.custom(
+                /*strategies.add(ISF.custom(
                         ISF.maxDomainSize_var_selector(),
                         ISF.mid_value_selector(),//.max_value_selector(),
                         ISF.split(), // Split from max
                         endVars.toArray(new IntVar[endVars.size()])
-                ));
-                //strategies.add(ISF.minDom_LB(endVars.toArray(new IntVar[endVars.size()]))
-                //);
+                ));*/
+                strategies.add(ISF.minDom_LB(endVars.toArray(new IntVar[endVars.size()]))
+                );
             }
         }
 
