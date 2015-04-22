@@ -1,5 +1,6 @@
 package org.btrplace.scheduler.choco.view.net.nancy.macro;
 
+import com.sun.org.glassfish.external.statistics.Statistic;
 import net.minidev.json.JSONObject;
 import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
@@ -17,6 +18,8 @@ import org.btrplace.plan.gantt.ActionsToCSV;
 import org.btrplace.scheduler.SchedulerException;
 import org.btrplace.scheduler.choco.DefaultChocoScheduler;
 import org.btrplace.scheduler.choco.DefaultParameters;
+import org.btrplace.scheduler.choco.runner.SolutionStatistics;
+import org.btrplace.scheduler.choco.runner.SolvingStatistics;
 import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
 import org.btrplace.scheduler.choco.view.power.CMinEnergyObjective;
 import org.btrplace.scheduler.choco.view.power.CPowerBudget;
@@ -37,7 +40,7 @@ import java.util.List;
 public class SoccTestBtrPlace {
 
     @Test
-    public void decommissioning_10gb() throws SchedulerException,ContradictionException {
+    public SolvingStatistics decommissioning_10gb() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
@@ -147,7 +150,7 @@ public class SoccTestBtrPlace {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(0);
         ps.setTimeLimit(10);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
@@ -208,16 +211,14 @@ public class SoccTestBtrPlace {
 
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             energyView.plotConsumption(p, path + "energy.csv");
-            System.err.println(p);
-            System.err.flush();
 
         } finally {
-            System.err.println(sc.getStatistics());
+            return sc.getStatistics();
         }
     }
 
     @Test
-    public void decommissioning_20gb() throws SchedulerException,ContradictionException {
+    public SolvingStatistics decommissioning_20gb() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
@@ -392,16 +393,13 @@ public class SoccTestBtrPlace {
 
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             energyView.plotConsumption(p, path + "energy.csv");
-            System.err.println(p);
-            System.err.flush();
-
         } finally {
-            System.err.println(sc.getStatistics());
+            return sc.getStatistics();
         }
     }
 
     @Test
-    public void decommissioning_40gb() throws SchedulerException,ContradictionException {
+    public SolvingStatistics decommissioning_40gb() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
@@ -527,7 +525,7 @@ public class SoccTestBtrPlace {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(0);
         ps.setTimeLimit(60);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
@@ -588,17 +586,14 @@ public class SoccTestBtrPlace {
 
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             energyView.plotConsumption(p, path + "energy.csv");
-            System.err.println(p);
-            System.err.flush();
-
         } finally {
-            System.err.println(sc.getStatistics());
+            return sc.getStatistics();
         }
     }
 
 
     @Test
-    public void decommissioning_100gb() throws SchedulerException,ContradictionException {
+    public SolvingStatistics decommissioning_100gb() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
                 "/choco/src/test/java/org/btrplace/scheduler/choco/view/net/nancy/macro/";
@@ -765,7 +760,7 @@ public class SoccTestBtrPlace {
 
         // Set parameters
         DefaultParameters ps = new DefaultParameters();
-        ps.setVerbosity(2);
+        ps.setVerbosity(0);
         ps.setTimeLimit(60);
         //ps.setMaxEnd(600);
         ps.doOptimize(false);
@@ -826,11 +821,34 @@ public class SoccTestBtrPlace {
 
             ActionsToCSV.convert(p.getActions(), path + "actions.csv");
             energyView.plotConsumption(p, path + "energy.csv");
-            System.err.println(p);
-            System.err.flush();
-
         } finally {
-            System.err.println(sc.getStatistics());
+            return sc.getStatistics();
         }
+    }
+
+    @Test
+    public void go() throws Exception {
+        StringBuilder res = new StringBuilder("SIZE;DURATION\n");
+        int nb = 3;
+        for (int i = 0; i < nb; i++) {
+            res.append("10;" + duration(decommissioning_10gb()) + "\n");
+        }
+        for (int i = 0; i < nb; i++) {
+            res.append("20;" + duration(decommissioning_20gb()) + "\n");
+        }
+        for (int i = 0; i < nb; i++) {
+            res.append("40;" + duration(decommissioning_40gb()) + "\n");
+        }
+        for (int i = 0; i < nb; i++) {
+            res.append("100;" + duration(decommissioning_100gb()) + "\n");
+        }
+        System.err.println(res);
+        Assert.fail();
+    }
+
+    public double duration(SolvingStatistics s) {
+        SolutionStatistics x= s.getSolutions().get(0);
+        System.out.println(s);
+        return x.getTime() + s.getCoreRPBuildDuration() + s.getSpeRPDuration();
     }
 }
