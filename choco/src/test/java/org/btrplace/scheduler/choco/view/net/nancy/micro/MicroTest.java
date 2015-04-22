@@ -5,7 +5,6 @@ import org.btrplace.json.JSONConverterException;
 import org.btrplace.json.plan.ReconfigurationPlanConverter;
 import org.btrplace.model.*;
 import org.btrplace.model.constraint.Fence;
-import org.btrplace.model.constraint.MinMTTR;
 import org.btrplace.model.constraint.SatConstraint;
 import org.btrplace.model.constraint.migration.Sync;
 import org.btrplace.model.view.ShareableResource;
@@ -22,7 +21,6 @@ import org.btrplace.scheduler.choco.view.net.CMinMTTRObjective;
 import org.btrplace.scheduler.choco.view.net.MigrateVMTransition;
 import org.chocosolver.solver.exception.ContradictionException;
 import org.testng.Assert;
-import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -36,7 +34,6 @@ import java.util.List;
  */
 public class MicroTest {
 
-    @Test
     public void IntraNodeTest() throws SchedulerException,ContradictionException {
 
         String path = new File("").getAbsolutePath() +
@@ -55,8 +52,8 @@ public class MicroTest {
 
         // Set memoryUsed and dirtyRate (for all VMs)
         int vmType1_mem = 1000, vmType2_mem = 2000;
-        int tpl1MaxDirtySize = 5, tpl1MaxDirtyDuration = 3; double tpl1DirtyRate = 0; // idle vm
-        int tpl2MaxDirtySize = 96, tpl2MaxDirtyDuration = 2; double tpl2DirtyRate = 48; // stress --vm 1000 --bytes 70K
+        double dirtyRateHigh = 40; // 21.44 mB/s,
+        double dirtyRateLow = 0; // 1.5 mB/s,
 
         /* Define nodes and vms attributes in watts
         int nodeIdlePower = 110;
@@ -87,30 +84,22 @@ public class MicroTest {
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
         ma.addRunningVM(v, srcNodes.get(0));
         mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
-        mo.getAttributes().put(v, "maxDirtySize", tpl1MaxDirtySize);
-        mo.getAttributes().put(v, "maxDirtyDuration", tpl1MaxDirtyDuration);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v, srcNodes.get(0));
         mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", tpl2DirtyRate);
-        mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
-        mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type1); rcCPU.setConsumption(v, cpu_vm_type1);
-        ma.addRunningVM(v, srcNodes.get(0));
+        ma.addRunningVM(v,srcNodes.get(0));
         mo.getAttributes().put(v, "memUsed", vmType1_mem);
-        mo.getAttributes().put(v, "dirtyRate", tpl2DirtyRate);
-        mo.getAttributes().put(v, "maxDirtySize", tpl2MaxDirtySize);
-        mo.getAttributes().put(v, "maxDirtyDuration", tpl2MaxDirtyDuration);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateHigh);
         v = mo.newVM(); vms.add(v);
         rcMem.setConsumption(v, mem_vm_type2); rcCPU.setConsumption(v, cpu_vm_type2);
         ma.addRunningVM(v,srcNodes.get(0));
         mo.getAttributes().put(v, "memUsed", vmType2_mem);
-        mo.getAttributes().put(v, "dirtyRate", tpl1DirtyRate);
-        mo.getAttributes().put(v, "maxDirtySize", tpl1MaxDirtySize);
-        mo.getAttributes().put(v, "maxDirtyDuration", tpl1MaxDirtyDuration);
+        mo.getAttributes().put(v, "dirtyRate", dirtyRateLow);
 
         // Attach resources views
         mo.attach(rcMem);
@@ -143,8 +132,8 @@ public class MicroTest {
         ps.doOptimize(true);
 
         // Set the custom migration transition
-        //ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
-        //ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
+        ps.getTransitionFactory().remove(ps.getTransitionFactory().getBuilder(VMState.RUNNING, VMState.RUNNING));
+        ps.getTransitionFactory().add(new MigrateVMTransition.Builder());
 
         // Register the Sync constraint
         ps.getConstraintMapper().register(new CSync.Builder());
@@ -169,9 +158,7 @@ public class MicroTest {
 
         // Set a custom objective
         DefaultChocoScheduler sc = new DefaultChocoScheduler(ps);
-        //Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
-        Instance i = new Instance(mo, cstrs,  new MinMTTR());
-
+        Instance i = new Instance(mo, cstrs,  new MinMTTRObjective());
 
         ReconfigurationPlan p;
         try {
