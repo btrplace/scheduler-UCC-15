@@ -24,8 +24,8 @@ public class DefaultRouting implements Routing {
         if (net == null) { return Collections.emptyList(); }
 
         // Return the first path found
-        //return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
-        return getIndirectPath(net.getSwitchInterface(n1), net.getSwitchInterface(n2));
+        return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
+        //return getIndirectPath(net.getSwitchInterface(n1), net.getSwitchInterface(n2));
     }
 
     @Override
