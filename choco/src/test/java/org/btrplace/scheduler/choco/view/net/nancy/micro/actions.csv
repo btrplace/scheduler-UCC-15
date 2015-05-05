@@ -1,0 +1,9 @@
+VM,NODE,Start,End
+vm#6,node#3,0,16
+vm#2,node#1,0,16
+vm#3,node#1,16,40
+vm#7,node#3,16,40
+vm#0,node#0,40,56
+vm#4,node#2,40,56
+vm#5,node#2,56,80
+vm#1,node#0,56,80

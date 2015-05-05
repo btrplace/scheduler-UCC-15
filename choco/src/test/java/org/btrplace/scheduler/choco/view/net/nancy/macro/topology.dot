@@ -1,0 +1,153 @@
+digraph G {
+node0 [shape=box, color=green, label="Node 0"];
+node1 [shape=box, color=green, label="Node 1"];
+node2 [shape=box, color=green, label="Node 2"];
+node3 [shape=box, color=green, label="Node 3"];
+node4 [shape=box, color=green, label="Node 4"];
+node5 [shape=box, color=green, label="Node 5"];
+node6 [shape=box, color=green, label="Node 6"];
+node7 [shape=box, color=green, label="Node 7"];
+node8 [shape=box, color=green, label="Node 8"];
+node9 [shape=box, color=green, label="Node 9"];
+node10 [shape=box, color=green, label="Node 10"];
+node11 [shape=box, color=green, label="Node 11"];
+node12 [shape=box, color=green, label="Node 12"];
+node13 [shape=box, color=green, label="Node 13"];
+node14 [shape=box, color=green, label="Node 14"];
+node15 [shape=box, color=green, label="Node 15"];
+node16 [shape=box, color=green, label="Node 16"];
+node17 [shape=box, color=green, label="Node 17"];
+node18 [shape=box, color=green, label="Node 18"];
+node19 [shape=box, color=green, label="Node 19"];
+node20 [shape=box, color=green, label="Node 20"];
+node21 [shape=box, color=green, label="Node 21"];
+node22 [shape=box, color=green, label="Node 22"];
+node23 [shape=box, color=green, label="Node 23"];
+node24 [shape=box, color=green, label="Node 24"];
+node25 [shape=box, color=green, label="Node 25"];
+node26 [shape=box, color=green, label="Node 26"];
+node27 [shape=box, color=green, label="Node 27"];
+node28 [shape=box, color=green, label="Node 28"];
+node29 [shape=box, color=green, label="Node 29"];
+node30 [shape=box, color=green, label="Node 30"];
+node31 [shape=box, color=green, label="Node 31"];
+node32 [shape=box, color=green, label="Node 32"];
+node33 [shape=box, color=green, label="Node 33"];
+node34 [shape=box, color=green, label="Node 34"];
+node35 [shape=box, color=green, label="Node 35"];
+node36 [shape=box, color=green, label="Node 36"];
+node37 [shape=box, color=green, label="Node 37"];
+node38 [shape=box, color=green, label="Node 38"];
+node39 [shape=box, color=green, label="Node 39"];
+node40 [shape=box, color=green, label="Node 40"];
+node41 [shape=box, color=green, label="Node 41"];
+node42 [shape=box, color=green, label="Node 42"];
+node43 [shape=box, color=green, label="Node 43"];
+node44 [shape=box, color=green, label="Node 44"];
+node45 [shape=box, color=green, label="Node 45"];
+node46 [shape=box, color=green, label="Node 46"];
+node47 [shape=box, color=green, label="Node 47"];
+node48 [shape=box, color=green, label="Node 48"];
+node49 [shape=box, color=green, label="Node 49"];
+node50 [shape=box, color=green, label="Node 50"];
+node51 [shape=box, color=green, label="Node 51"];
+node52 [shape=box, color=green, label="Node 52"];
+node53 [shape=box, color=green, label="Node 53"];
+node54 [shape=box, color=green, label="Node 54"];
+node55 [shape=box, color=green, label="Node 55"];
+node56 [shape=box, color=green, label="Node 56"];
+node57 [shape=box, color=green, label="Node 57"];
+node58 [shape=box, color=green, label="Node 58"];
+node59 [shape=box, color=green, label="Node 59"];
+node60 [shape=box, color=green, label="Node 60"];
+node61 [shape=box, color=green, label="Node 61"];
+node62 [shape=box, color=green, label="Node 62"];
+node63 [shape=box, color=green, label="Node 63"];
+node64 [shape=box, color=green, label="Node 64"];
+node65 [shape=box, color=green, label="Node 65"];
+node66 [shape=box, color=green, label="Node 66"];
+node67 [shape=box, color=green, label="Node 67"];
+node68 [shape=box, color=green, label="Node 68"];
+node69 [shape=box, color=green, label="Node 69"];
+node70 [shape=box, color=green, label="Node 70"];
+node71 [shape=box, color=green, label="Node 71"];
+switch0 [shape=record, color=blue, label="Switch 0\n[Unlimited]|<p1>/1|<p2>/2|<p3>/3|<p4>/4|<p5>/5|<p6>/6|<p7>/7|<p8>/8|<p9>/9|<p10>/10|<p11>/11|<p12>/12|<p13>/13|<p14>/14|<p15>/15|<p16>/16|<p17>/17|<p18>/18|<p19>/19|<p20>/20|<p21>/21|<p22>/22|<p23>/23|<p24>/24|<p25>/25"];
+switch1 [shape=record, color=blue, label="Switch 1\n[Unlimited]|<p1>/1|<p2>/2|<p3>/3|<p4>/4|<p5>/5|<p6>/6|<p7>/7|<p8>/8|<p9>/9|<p10>/10|<p11>/11|<p12>/12|<p13>/13|<p14>/14|<p15>/15|<p16>/16|<p17>/17|<p18>/18|<p19>/19|<p20>/20|<p21>/21|<p22>/22|<p23>/23|<p24>/24|<p25>/25"];
+switch2 [shape=record, color=blue, label="Switch 2\n[Unlimited]|<p1>/1|<p2>/2|<p3>/3|<p4>/4|<p5>/5|<p6>/6|<p7>/7|<p8>/8|<p9>/9|<p10>/10|<p11>/11|<p12>/12|<p13>/13|<p14>/14|<p15>/15|<p16>/16|<p17>/17|<p18>/18|<p19>/19|<p20>/20|<p21>/21|<p22>/22|<p23>/23|<p24>/24|<p25>/25"];
+switch3 [shape=record, color=blue, label="Switch 3\n[Unlimited]|<p1>/1|<p2>/2|<p3>/3"];
+switch0:p1 -> node0 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p2 -> node1 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p3 -> node2 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p4 -> node3 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p5 -> node4 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p6 -> node5 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p7 -> node6 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p8 -> node7 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p9 -> node8 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p10 -> node9 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p11 -> node10 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p12 -> node11 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p13 -> node12 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p14 -> node13 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p15 -> node14 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p16 -> node15 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p17 -> node16 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p18 -> node17 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p19 -> node18 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p20 -> node19 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p21 -> node20 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p22 -> node21 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p23 -> node22 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p24 -> node23 [arrowhead=none, color=red, label="1Gb/s"]
+switch0:p25 -> switch3:p1 [arrowhead=none, color=red, label="10Gb/s"]
+switch1:p1 -> node24 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p2 -> node25 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p3 -> node26 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p4 -> node27 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p5 -> node28 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p6 -> node29 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p7 -> node30 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p8 -> node31 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p9 -> node32 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p10 -> node33 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p11 -> node34 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p12 -> node35 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p13 -> node36 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p14 -> node37 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p15 -> node38 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p16 -> node39 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p17 -> node40 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p18 -> node41 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p19 -> node42 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p20 -> node43 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p21 -> node44 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p22 -> node45 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p23 -> node46 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p24 -> node47 [arrowhead=none, color=red, label="1Gb/s"]
+switch1:p25 -> switch3:p2 [arrowhead=none, color=red, label="10Gb/s"]
+switch2:p1 -> node48 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p2 -> node49 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p3 -> node50 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p4 -> node51 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p5 -> node52 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p6 -> node53 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p7 -> node54 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p8 -> node55 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p9 -> node56 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p10 -> node57 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p11 -> node58 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p12 -> node59 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p13 -> node60 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p14 -> node61 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p15 -> node62 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p16 -> node63 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p17 -> node64 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p18 -> node65 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p19 -> node66 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p20 -> node67 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p21 -> node68 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p22 -> node69 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p23 -> node70 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p24 -> node71 [arrowhead=none, color=red, label="1Gb/s"]
+switch2:p25 -> switch3:p3 [arrowhead=none, color=red, label="10Gb/s"]
+}
