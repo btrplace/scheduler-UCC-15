@@ -1,9 +1,0 @@
-VM,NODE,Start,End
-boot_node#2,node#2,0,120
-boot_node#3,node#3,0,120
-vm#1,node#1,120,128
-vm#3,node#1,128,136
-vm#0,node#0,136,144
-shutdown_node#1,node#1,136,166
-vm#2,node#0,144,152
-shutdown_node#0,node#0,152,182
