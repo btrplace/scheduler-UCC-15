@@ -89,9 +89,83 @@ public class CNetworkView implements ChocoView {
     @Override
     public boolean beforeSolve(ReconfigurationProblem rp) throws SchedulerException {
 
+        List<Task> linkInputTasksList = new ArrayList<>();
+        List<Task> linkOutputTasksList = new ArrayList<>();
+        List<IntVar> linkInputHeightsList = new ArrayList<>();
+        List<IntVar> linkOutputHeightsList = new ArrayList<>();
         List<Port> links = new ArrayList<>();
 
-        // Interfaces limitation
+        // Interfaces limitation (FULL-DUPLEX VERSION)
+        for(Port si : net.getAllInterfaces()) {
+
+            // Add two cumulatives per link (INPUT + OUTPUT)
+            if (!links.contains(si) && !links.contains(si.getRemote())) {
+                links.add(si);
+
+                for (VM vm : rp.getVMs()) {
+                    VMTransition a = rp.getVMAction(vm);
+
+                    if (a != null && a instanceof MigrateVMTransition &&
+                            (a.getCSlice().getHoster().getValue() != a.getDSlice().getHoster().getValue())) {
+
+                        Node src = source.getMapping().getVMLocation(vm);
+                        Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
+
+                        if (net.getPath(src, dst).contains(si)) {
+
+                            // SI OUTPUT & REMOTE INPUT
+                            if (net.getPath(src, dst).indexOf(si) < net.getPath(src, dst).indexOf(si.getRemote())) {
+                                linkOutputTasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
+                                linkOutputHeightsList.add(((MigrateVMTransition) a).getBandwidth());
+                            }
+                            // SI INPUT & REMOTE OUTPUT
+                            else {
+                                linkInputTasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
+                                linkInputHeightsList.add(((MigrateVMTransition) a).getBandwidth());
+                            }
+                        }
+                    }
+                }
+                
+                if (!linkOutputTasksList.isEmpty()) {
+                    solver.post(new Cumulative(
+                            linkOutputTasksList.toArray(new Task[linkOutputTasksList.size()]),
+                            linkOutputHeightsList.toArray(new IntVar[linkOutputHeightsList.size()]),
+                            VF.fixed(si.getBandwidth(), solver),
+                            true
+                            ,Cumulative.Filter.TIME
+                            //,Cumulative.Filter.SWEEP
+                            //,Cumulative.Filter.SWEEP_HEI_SORT
+                            ,Cumulative.Filter.NRJ
+                            ,Cumulative.Filter.HEIGHTS
+                    ));
+                }
+                linkOutputTasksList.clear();
+                linkOutputHeightsList.clear();
+                
+                if (!linkInputTasksList.isEmpty()) {
+                    solver.post(new Cumulative(
+                            linkInputTasksList.toArray(new Task[linkInputTasksList.size()]),
+                            linkInputHeightsList.toArray(new IntVar[linkInputHeightsList.size()]),
+                            VF.fixed(si.getBandwidth(), solver),
+                            true
+                            ,Cumulative.Filter.TIME
+                            //,Cumulative.Filter.SWEEP
+                            //,Cumulative.Filter.SWEEP_HEI_SORT
+                            ,Cumulative.Filter.NRJ
+                            ,Cumulative.Filter.HEIGHTS
+                    ));
+                }
+                linkInputTasksList.clear();
+                linkInputHeightsList.clear();
+            }
+        }
+
+        /* Interfaces limitation (HALF-DUPLEX VERSION)
+        
+        List<Task> tasksList = new ArrayList<>();
+        List<IntVar> heightsList = new ArrayList<>();
+        
         for(Port si : net.getAllInterfaces()) {
 
             // Only add one cumulative per link (local+remote ports)
@@ -131,7 +205,10 @@ public class CNetworkView implements ChocoView {
                 tasksList.clear();
                 heightsList.clear();
             }
-        }
+        }*/
+
+        List<Task> switchesTasksList = new ArrayList<>();
+        List<IntVar> switchesHeightsList = new ArrayList<>();
 
         // Switches capacity limitation
         for(Switch sw : net.getSwitches()) {
@@ -149,21 +226,21 @@ public class CNetworkView implements ChocoView {
                         Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
 
                         if (!Collections.disjoint(sw.getPorts(), net.getPath(src, dst))) {
-                            tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
-                            heightsList.add(((MigrateVMTransition) a).getBandwidth());
+                            switchesTasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
+                            switchesHeightsList.add(((MigrateVMTransition) a).getBandwidth());
                         }
                     }
                 }
 
                 solver.post(ICF.cumulative(
-                        tasksList.toArray(new Task[tasksList.size()]),
-                        heightsList.toArray(new IntVar[heightsList.size()]),
+                        switchesTasksList.toArray(new Task[switchesTasksList.size()]),
+                        switchesHeightsList.toArray(new IntVar[switchesHeightsList.size()]),
                         VF.fixed(sw.getCapacity(), solver),
                         true
                 ));
 
-                tasksList.clear();
-                heightsList.clear();
+                switchesTasksList.clear();
+                switchesHeightsList.clear();
             }
         }
 

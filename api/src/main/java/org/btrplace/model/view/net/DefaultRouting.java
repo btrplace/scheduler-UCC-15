@@ -23,7 +23,7 @@ public class DefaultRouting implements Routing {
 
         if (net == null) { return Collections.emptyList(); }
 
-        // Return the first path found
+        // Return the first path found (ordered list of ports)
         return getFirstPath(new ArrayList<>(Collections.singletonList(net.getSwitchInterface(n1))), n2);
         //return getIndirectPath(net.getSwitchInterface(n1), net.getSwitchInterface(n2));
     }
@@ -39,6 +39,12 @@ public class DefaultRouting implements Routing {
         return max;
     }
 
+    /**
+     * Get the first path found between two nodes
+     * @param currentPath the initial path, it typically contains the first port(s) => recursive function
+     * @param dst the destination node
+     * @return the ordered list of ports that make the path
+     */
     private List<Port> getFirstPath(List<Port> currentPath, Node dst) {
 
         if (currentPath.get(currentPath.size()-1).getHost() instanceof Switch) {

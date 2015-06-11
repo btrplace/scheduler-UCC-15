@@ -175,7 +175,7 @@ public class MigrateVMTransition implements KeepRunningVM {
             //bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
 
             // Enumerated duration
-            double durationMin, durationTotal;
+            double durationMin, durationColdPages, durationHotPages, durationTotal;
             //int durEnum[] = new int[bwEnum.size()];
             List<Integer> durEnum = new ArrayList<>();
             for (Integer bw : bwEnum) {
@@ -187,9 +187,10 @@ public class MigrateVMTransition implements KeepRunningVM {
                 durationMin = memUsed/bandwidth;
 
                 if (durationMin > maxDirtyDuration) {
-
-                    durationTotal = durationMin + ((maxDirtySize+(durationMin-maxDirtyDuration)*dirtyRate)/(bandwidth-dirtyRate)) +
-                            ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
+                    
+                    durationColdPages = ((maxDirtySize+((durationMin-maxDirtyDuration)*dirtyRate))/(bandwidth-dirtyRate));
+                    durationHotPages = ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
+                    durationTotal = durationMin + durationColdPages + durationHotPages;
                 }
                 else {
                     durationTotal = durationMin + (((maxDirtySize/maxDirtyDuration)*durationMin)/(bandwidth-(maxDirtySize/maxDirtyDuration)));
@@ -219,7 +220,6 @@ public class MigrateVMTransition implements KeepRunningVM {
 
             // Associate vars using Tuples
             Tuples tpl = new Tuples(true);
-            int dur;
             for (int i=0; i<bwEnum.size(); i++) {
                 tpl.add(bwEnum.get(i), durEnum.get(i));
             }
