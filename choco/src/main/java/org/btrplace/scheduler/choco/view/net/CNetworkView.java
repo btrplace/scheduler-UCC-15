@@ -57,9 +57,18 @@ public class CNetworkView implements ChocoView {
     @Override
     public boolean beforeSolve(ReconfigurationProblem rp) throws SchedulerException {
 
-        // Unidirectional links limitation (FULL-DUPLEX)
+        // Links limitation
         Map<Port,Port> uniLinks = new HashMap<>(); // Create an exhaustive list of unidirectional links
-        for (Port si : net.getAllInterfaces()) { if (!uniLinks.containsKey(si)) { uniLinks.put(si, si.getRemote()); } }
+        for (Port p : net.getAllInterfaces()) {
+            // Full duplex (2 cumulatives per link)
+            if (!uniLinks.containsKey(p)) {
+                uniLinks.put(p, p.getRemote());
+            }
+            /* Half duplex (1cumulative per link)
+            if (!uniLinks.containsKey(p) && !uniLinks.containsKey(p.getRemote())) {
+                uniLinks.put(p, p.getRemote());
+            }*/
+        }
         for (Port inputPort : uniLinks.keySet()) {
 
             for (VM vm : rp.getVMs()) {
@@ -98,49 +107,6 @@ public class CNetworkView implements ChocoView {
             tasksList.clear();
             heightsList.clear();
         }
-
-        /* Links limitation (HALF-DUPLEX)
-        List<Port> links = new ArrayList<>();
-        for(Port si : net.getAllInterfaces()) {
-
-            // Only add one cumulative per link (local+remote ports)
-            if (!links.contains(si) && !links.contains(si.getRemote())) {
-                links.add(si);
-
-                for (VM vm : rp.getVMs()) {
-                    VMTransition a = rp.getVMAction(vm);
-
-                    if (a != null && a instanceof MigrateVMTransition &&
-                            (a.getCSlice().getHoster().getValue() != a.getDSlice().getHoster().getValue())) {
-
-                        Node src = source.getMapping().getVMLocation(vm);
-                        Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
-
-                        if (net.getPath(src, dst).contains(si)) {
-                            tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
-                            heightsList.add(((MigrateVMTransition) a).getBandwidth());
-                        }
-                    }
-                }
-                if (!tasksList.isEmpty()) {
-                    solver.post(new Cumulative(
-                            tasksList.toArray(new Task[tasksList.size()]),
-                            heightsList.toArray(new IntVar[heightsList.size()]),
-                            VF.fixed(si.getBandwidth(), solver),
-                            true
-                            ,Cumulative.Filter.TIME
-                            //,Cumulative.Filter.SWEEP
-                            //,Cumulative.Filter.SWEEP_HEI_SORT
-                            ,Cumulative.Filter.NRJ
-                            ,Cumulative.Filter.HEIGHTS
-                    ));
-                }
-                //tasksPerLink.add(new ArrayList<Task>(tasksList));
-
-                tasksList.clear();
-                heightsList.clear();
-            }
-        }*/
 
         // Switches capacity limitation
         for(Switch sw : net.getSwitches()) {
