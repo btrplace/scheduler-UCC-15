@@ -58,18 +58,21 @@ public class CNetworkView implements ChocoView {
     public boolean beforeSolve(ReconfigurationProblem rp) throws SchedulerException {
 
         // Links limitation
+        /*
         Map<Port,Port> uniLinks = new HashMap<>(); // Create an exhaustive list of unidirectional links
         for (Port p : net.getAllInterfaces()) {
             // Full duplex (2 cumulatives per link)
             if (!uniLinks.containsKey(p)) {
                 uniLinks.put(p, p.getRemote());
             }
-            /* Half duplex (1 cumulative per link)
-            if (!uniLinks.containsKey(p) && !uniLinks.containsKey(p.getRemote())) {
-                uniLinks.put(p, p.getRemote());
-            }*/
+            // Half duplex (1 cumulative per link)
+            //if (!uniLinks.containsKey(p) && !uniLinks.containsKey(p.getRemote())) {
+            //    uniLinks.put(p, p.getRemote());
+            //}
         }
         for (Port inputPort : uniLinks.keySet()) {
+        */
+        for (Port inputPort : net.getAllInterfaces()) {
 
             for (VM vm : rp.getVMs()) {
                 VMTransition a = rp.getVMAction(vm);
@@ -79,12 +82,14 @@ public class CNetworkView implements ChocoView {
 
                     Node src = source.getMapping().getVMLocation(vm);
                     Node dst = rp.getNode(a.getDSlice().getHoster().getValue());
+                    
+                    List<Port> path = net.getPath(src, dst);
 
                     // If inputPort is on migration path
-                    if (net.getPath(src, dst).contains(inputPort)) {
+                    if (path.contains(inputPort)) {
 
                         // ONLY if inputPort is an INPUT port
-                        if (net.getPath(src, dst).indexOf(inputPort) < net.getPath(src, dst).indexOf(uniLinks.get(inputPort))) {
+                        if (path.indexOf(inputPort) < path.indexOf(inputPort.getRemote())) {
                             tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
                             heightsList.add(((MigrateVMTransition) a).getBandwidth());
                         }
@@ -95,7 +100,7 @@ public class CNetworkView implements ChocoView {
                 solver.post(new Cumulative(
                         tasksList.toArray(new Task[tasksList.size()]),
                         heightsList.toArray(new IntVar[heightsList.size()]),
-                        VF.fixed(Math.min(inputPort.getBandwidth(), uniLinks.get(inputPort).getBandwidth()), solver),
+                        VF.fixed(Math.min(inputPort.getBandwidth(), inputPort.getRemote().getBandwidth()), solver),
                         true
                         ,Cumulative.Filter.TIME
                         //,Cumulative.Filter.SWEEP
