@@ -64,7 +64,7 @@ public class CNetworkView implements ChocoView {
             if (!uniLinks.containsKey(p)) {
                 uniLinks.put(p, p.getRemote());
             }
-            /* Half duplex (1cumulative per link)
+            /* Half duplex (1 cumulative per link)
             if (!uniLinks.containsKey(p) && !uniLinks.containsKey(p.getRemote())) {
                 uniLinks.put(p, p.getRemote());
             }*/
@@ -84,7 +84,7 @@ public class CNetworkView implements ChocoView {
                     if (net.getPath(src, dst).contains(inputPort)) {
 
                         // ONLY if inputPort is an INPUT port
-                        if (net.getPath(src, dst).indexOf(inputPort) < net.getPath(src, dst).indexOf(inputPort.getRemote())) {
+                        if (net.getPath(src, dst).indexOf(inputPort) < net.getPath(src, dst).indexOf(uniLinks.get(inputPort))) {
                             tasksList.add(new Task(a.getStart(), a.getDuration(), a.getEnd()));
                             heightsList.add(((MigrateVMTransition) a).getBandwidth());
                         }
@@ -95,7 +95,7 @@ public class CNetworkView implements ChocoView {
                 solver.post(new Cumulative(
                         tasksList.toArray(new Task[tasksList.size()]),
                         heightsList.toArray(new IntVar[heightsList.size()]),
-                        VF.fixed(Math.min(inputPort.getBandwidth(), inputPort.getRemote().getBandwidth()), solver),
+                        VF.fixed(Math.min(inputPort.getBandwidth(), uniLinks.get(inputPort).getBandwidth()), solver),
                         true
                         ,Cumulative.Filter.TIME
                         //,Cumulative.Filter.SWEEP

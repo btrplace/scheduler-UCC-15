@@ -55,6 +55,7 @@ public class DefaultRouting implements Routing {
                 currentPath.add(p);
                 if (p.getRemote().getHost() instanceof Node) {
                     if (p.getRemote().getHost().equals(dst)) {
+                        currentPath.add(p.getRemote());
                         return currentPath;
                     }
                 } else {
