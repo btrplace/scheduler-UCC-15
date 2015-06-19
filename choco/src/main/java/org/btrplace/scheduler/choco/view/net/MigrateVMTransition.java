@@ -34,17 +34,11 @@ import org.btrplace.scheduler.choco.transition.VMTransition;
 import org.btrplace.scheduler.choco.transition.VMTransitionBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.Arithmetic;
-import org.chocosolver.solver.constraints.ICF;
 import org.chocosolver.solver.constraints.Operator;
-import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
-import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 
 
 /**
@@ -148,87 +142,6 @@ public class MigrateVMTransition implements KeepRunningVM {
             if (mo.getAttributes().getBoolean(vm, "postCopy")) postCopy = true;
         }
 
-        // Check if all attributes are defined
-        if (mo.getAttributes().isSet(vm, "memUsed") &&
-            mo.getAttributes().isSet(vm, "dirtyRate") &&
-            mo.getAttributes().isSet(vm, "maxDirtySize") &&
-            mo.getAttributes().isSet(vm, "maxDirtyDuration")) {
-
-            double dirtyRate;
-            int memUsed, maxDirtyDuration, maxDirtySize;
-
-            // Get attribute vars
-            memUsed = mo.getAttributes().getInteger(vm, "memUsed");
-            dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
-            maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
-            maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
-
-            // Enumerated BW
-            int maxBW = network.getSwitchInterface(p.getSourceModel().getMapping().getVMLocation(e)).getBandwidth();
-            int step = 500;
-            List<Integer> bwEnum = new ArrayList<>();
-            for (int i=step; i<=maxBW; i+=step) {
-                if (i > (int) (dirtyRate)) {
-                    bwEnum.add(i);
-                }
-            }
-            //bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
-
-            // Enumerated duration
-            double durationMin, durationColdPages, durationHotPages, durationTotal;
-            //int durEnum[] = new int[bwEnum.size()];
-            List<Integer> durEnum = new ArrayList<>();
-            for (Integer bw : bwEnum) {
-
-                // Cheat a bit, real is less than theoretical !
-                double bandwidth = bw/9;
-                
-                // Estimate duration
-                durationMin = memUsed/bandwidth;
-
-                if (durationMin > maxDirtyDuration) {
-                    
-                    durationColdPages = ((maxDirtySize+((durationMin-maxDirtyDuration)*dirtyRate))/(bandwidth-dirtyRate));
-                    durationHotPages = ((maxDirtySize/bandwidth)*((maxDirtySize/maxDirtyDuration)/(bandwidth-(maxDirtySize/maxDirtyDuration))));
-                    durationTotal = durationMin + durationColdPages + durationHotPages;
-                }
-                else {
-                    durationTotal = durationMin + (((maxDirtySize/maxDirtyDuration)*durationMin)/(bandwidth-(maxDirtySize/maxDirtyDuration)));
-                }
-                durEnum.add((int) Math.round(durationTotal));
-            }
-
-            /* Remove duplicates duration
-            int previousDuration = -1;
-            for (int i=bwEnum.size()-1; i>=0; i--) {
-                if (durEnum.get(i) > previousDuration) {
-                    previousDuration = durEnum.get(i);
-                }
-                else if (previousDuration == durEnum.get(i)) {
-                    durEnum.remove(i);
-                    bwEnum.remove(i);
-                }
-                else {
-                    // Problem !
-                }
-            }
-            */
-            
-            // Create the enumerated vars
-            bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i->i).toArray(), s);
-            duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i->i).toArray(), s);
-
-            // Associate vars using Tuples
-            Tuples tpl = new Tuples(true);
-            for (int i=0; i<bwEnum.size(); i++) {
-                tpl.add(bwEnum.get(i), durEnum.get(i));
-            }
-            s.post(ICF.table(bandwidth, duration, tpl, ""));
-        }
-        else {
-            throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
-        }
-
         //VariableFactory.task(start, duration, end);
     }
 
@@ -240,6 +153,10 @@ public class MigrateVMTransition implements KeepRunningVM {
 
     public IntVar getBandwidth() {
         return bandwidth;
+    }
+
+    public void setBandwidth(IntVar bw) {
+        bandwidth = bw;
     }
 
     @Override
@@ -286,6 +203,10 @@ public class MigrateVMTransition implements KeepRunningVM {
     @Override
     public IntVar getDuration() {
         return duration;
+    }
+
+    public void setDuration(IntVar dur) {
+        duration = dur;
     }
 
     @Override

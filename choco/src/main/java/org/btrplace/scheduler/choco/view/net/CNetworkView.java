@@ -17,6 +17,7 @@ import org.btrplace.scheduler.choco.view.DelegatedBuilder;
 import org.btrplace.scheduler.choco.view.SolverViewBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
+import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
@@ -56,22 +57,92 @@ public class CNetworkView implements ChocoView {
 
     @Override
     public boolean beforeSolve(ReconfigurationProblem rp) throws SchedulerException {
+        
+        Model mo = rp.getSourceModel();
+        Solver s = rp.getSolver();
+        
+        // Pre-compute duration and bandwidth for each VM migration
+        for (VMTransition migration : rp.getVMActions()) {
 
-        // Links limitation
-        /*
-        Map<Port,Port> uniLinks = new HashMap<>(); // Create an exhaustive list of unidirectional links
-        for (Port p : net.getAllInterfaces()) {
-            // Full duplex (2 cumulatives per link)
-            if (!uniLinks.containsKey(p)) {
-                uniLinks.put(p, p.getRemote());
+            if (migration instanceof MigrateVMTransition) {
+                
+                VM vm = migration.getVM();
+                IntVar bandwidth, duration;
+                
+                Node src = rp.getSourceModel().getMapping().getVMLocation(vm);
+                Node dst = rp.getNode(migration.getDSlice().getHoster().getValue());
+                
+                if (dst == null) {
+                    throw new SchedulerException(null, "Destination node for VM '" + vm + "' is not known !");
+                }
+
+                // Check if all attributes are defined
+                if (mo.getAttributes().isSet(vm, "memUsed") &&
+                        mo.getAttributes().isSet(vm, "dirtyRate") &&
+                        mo.getAttributes().isSet(vm, "maxDirtySize") &&
+                        mo.getAttributes().isSet(vm, "maxDirtyDuration")) {
+
+                    double dirtyRate;
+                    int memUsed, maxDirtyDuration, maxDirtySize;
+
+                    // Get attribute vars
+                    memUsed = mo.getAttributes().getInteger(vm, "memUsed");
+                    dirtyRate = mo.getAttributes().getDouble(vm, "dirtyRate");
+                    maxDirtySize = mo.getAttributes().getInteger(vm, "maxDirtySize");
+                    maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
+
+                    // Enumerated BW
+                    int maxBW = net.getMaxBW(src, dst);
+                    int step = maxBW;
+                    List<Integer> bwEnum = new ArrayList<>();
+                    for (int i = step; i <= maxBW; i += step) {
+                        if (i > (int) (dirtyRate)) {
+                            bwEnum.add(i);
+                        }
+                    }
+
+                    // Enumerated duration
+                    double durationMin, durationColdPages, durationHotPages, durationTotal;
+                    List<Integer> durEnum = new ArrayList<>();
+                    for (Integer bw : bwEnum) {
+
+                        // Cheat a bit, real is less than theoretical !
+                        double bandwidth_octet = bw / 9;
+
+                        // Estimate duration
+                        durationMin = memUsed / bandwidth_octet;
+                        if (durationMin > maxDirtyDuration) {
+
+                            durationColdPages = ((maxDirtySize + ((durationMin - maxDirtyDuration) * dirtyRate)) / (bandwidth_octet - dirtyRate));
+                            durationHotPages = ((maxDirtySize / bandwidth_octet) * ((maxDirtySize / maxDirtyDuration) / (bandwidth_octet - (maxDirtySize / maxDirtyDuration))));
+                            durationTotal = durationMin + durationColdPages + durationHotPages;
+                        } else {
+                            durationTotal = durationMin + (((maxDirtySize / maxDirtyDuration) * durationMin) / (bandwidth_octet - (maxDirtySize / maxDirtyDuration)));
+                        }
+                        durEnum.add((int) Math.round(durationTotal));
+                    }
+
+                    // Create the enumerated vars
+                    bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i -> i).toArray(), s);
+                    duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i -> i).toArray(), s);
+                    
+                    // Set the vars in the VM transition
+                    ((MigrateVMTransition) migration).setBandwidth(bandwidth);
+                    ((MigrateVMTransition) migration).setDuration(duration);
+
+                    // Associate vars using Tuples
+                    Tuples tpl = new Tuples(true);
+                    for (int i = 0; i < bwEnum.size(); i++) {
+                        tpl.add(bwEnum.get(i), durEnum.get(i));
+                    }
+                    s.post(ICF.table(bandwidth, duration, tpl, ""));
+                } else {
+                    throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
+                }
             }
-            // Half duplex (1 cumulative per link)
-            //if (!uniLinks.containsKey(p) && !uniLinks.containsKey(p.getRemote())) {
-            //    uniLinks.put(p, p.getRemote());
-            //}
         }
-        for (Port inputPort : uniLinks.keySet()) {
-        */
+        
+        // Links limitation
         for (Port inputPort : net.getAllInterfaces()) {
 
             for (VM vm : rp.getVMs()) {
