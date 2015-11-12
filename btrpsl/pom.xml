@@ -23,7 +23,7 @@
     <parent>
         <groupId>org.btrplace</groupId>
         <artifactId>scheduler</artifactId>
-        <version>0.42-SNAPSHOT</version>
+        <version>0.42-UCC15</version>
     </parent>
     <name>btrpsl</name>
     <artifactId>btrpsl</artifactId>
@@ -44,12 +44,18 @@
         <dependency>
             <groupId>org.btrplace</groupId>
             <artifactId>scheduler-api</artifactId>
-            <version>0.42-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.btrplace</groupId>
             <artifactId>scheduler-json</artifactId>
-            <version>0.42-SNAPSHOT</version>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.btrplace</groupId>
+            <artifactId>scheduler-choco</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
         </dependency>
 
         <dependency>
@@ -62,12 +68,6 @@
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.9.9-RC2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.btrplace</groupId>
-            <artifactId>scheduler-choco</artifactId>
-            <version>0.42-SNAPSHOT</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>scheduler</artifactId>
         <groupId>org.btrplace</groupId>
-        <version>0.42-SNAPSHOT</version>
+        <version>0.42-UCC15</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -15,7 +15,7 @@
         <dependency>
             <groupId>org.btrplace</groupId>
             <artifactId>scheduler-api</artifactId>
-            <version>0.42-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
     </dependencies>
 
