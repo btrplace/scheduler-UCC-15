@@ -17,14 +17,15 @@ import org.btrplace.scheduler.choco.view.DelegatedBuilder;
 import org.btrplace.scheduler.choco.view.SolverViewBuilder;
 import org.chocosolver.solver.Solver;
 import org.chocosolver.solver.constraints.ICF;
-import org.chocosolver.solver.constraints.extension.Tuples;
 import org.chocosolver.solver.constraints.nary.cumulative.Cumulative;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.IntVar;
 import org.chocosolver.solver.variables.Task;
 import org.chocosolver.solver.variables.VF;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Created by vkherbac on 30/12/14.
@@ -92,19 +93,19 @@ public class CNetworkView implements ChocoView {
                     maxDirtyDuration = mo.getAttributes().getInteger(vm, "maxDirtyDuration");
 
                     // Enumerated BW
-                    int maxBW = net.getMaxBW(src, dst);
-                    int step = maxBW;
+                    int bw = net.getMaxBW(src, dst);
+                    /*int step = maxBW;
                     List<Integer> bwEnum = new ArrayList<>();
                     for (int i = step; i <= maxBW; i += step) {
                         if (i > (int) (dirtyRate)) {
                             bwEnum.add(i);
                         }
-                    }
+                    }*/
 
                     // Enumerated duration
                     double durationMin, durationColdPages, durationHotPages, durationTotal;
-                    List<Integer> durEnum = new ArrayList<>();
-                    for (Integer bw : bwEnum) {
+                    /*List<Integer> durEnum = new ArrayList<>();
+                    for (Integer bw : bwEnum) {*/
 
                         // Cheat a bit, real is less than theoretical !
                         double bandwidth_octet = bw / 9;
@@ -119,23 +120,26 @@ public class CNetworkView implements ChocoView {
                         } else {
                             durationTotal = durationMin + (((maxDirtySize / maxDirtyDuration) * durationMin) / (bandwidth_octet - (maxDirtySize / maxDirtyDuration)));
                         }
-                        durEnum.add((int) Math.round(durationTotal));
+                        /*durEnum.add((int) Math.round(durationTotal));
                     }
 
                     // Create the enumerated vars
                     bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i -> i).toArray(), s);
-                    duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i -> i).toArray(), s);
+                    duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i -> i).toArray(), s);*/
+
+                    bandwidth = VF.fixed(bw, s);
+                    duration = VF.fixed((int) Math.round(durationTotal), s);
                     
                     // Set the vars in the VM transition
                     ((MigrateVMTransition) migration).setBandwidth(bandwidth);
                     ((MigrateVMTransition) migration).setDuration(duration);
 
-                    // Associate vars using Tuples
+                    /* Associate vars using Tuples
                     Tuples tpl = new Tuples(true);
                     for (int i = 0; i < bwEnum.size(); i++) {
                         tpl.add(bwEnum.get(i), durEnum.get(i));
                     }
-                    s.post(ICF.table(bandwidth, duration, tpl, ""));
+                    s.post(ICF.table(bandwidth, duration, tpl, ""));*/
                 } else {
                     throw new SchedulerException(null, "Unable to retrieve attributes for the vm '" + vm + "'");
                 }
