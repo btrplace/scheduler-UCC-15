@@ -68,7 +68,8 @@ public class CNetworkView implements ChocoView {
             if (migration instanceof MigrateVMTransition) {
                 
                 VM vm = migration.getVM();
-                IntVar bandwidth, duration;
+                IntVar bandwidth = ((MigrateVMTransition) migration).getBandwidth();
+                IntVar duration = ((MigrateVMTransition) migration).getDuration();
                 
                 Node src = rp.getSourceModel().getMapping().getVMLocation(vm);
                 Node dst = rp.getNode(migration.getDSlice().getHoster().getValue());
@@ -127,12 +128,15 @@ public class CNetworkView implements ChocoView {
                     bandwidth = VF.enumerated("bandwidth_enum", bwEnum.stream().mapToInt(i -> i).toArray(), s);
                     duration = VF.enumerated("duration_enum", durEnum.stream().mapToInt(i -> i).toArray(), s);*/
 
-                    bandwidth = VF.fixed(bw, s);
-                    duration = VF.fixed((int) Math.round(durationTotal), s);
+                    s.post(ICF.arithm(bandwidth, "=", bw));
+                    s.post(ICF.arithm(duration, "=", (int) Math.round(durationTotal)));
+                    
+                    //bandwidth = VF.fixed(bw, s);
+                    //duration = VF.fixed((int) Math.round(durationTotal), s);
                     
                     // Set the vars in the VM transition
-                    ((MigrateVMTransition) migration).setBandwidth(bandwidth);
-                    ((MigrateVMTransition) migration).setDuration(duration);
+                    //((MigrateVMTransition) migration).setBandwidth(bandwidth);
+                    //((MigrateVMTransition) migration).setDuration(duration);
 
                     /* Associate vars using Tuples
                     Tuples tpl = new Tuples(true);

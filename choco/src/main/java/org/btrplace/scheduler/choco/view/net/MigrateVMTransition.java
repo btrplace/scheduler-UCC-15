@@ -38,6 +38,7 @@ import org.chocosolver.solver.constraints.Operator;
 import org.chocosolver.solver.search.solution.Solution;
 import org.chocosolver.solver.variables.BoolVar;
 import org.chocosolver.solver.variables.IntVar;
+import org.chocosolver.solver.variables.VF;
 import org.chocosolver.solver.variables.VariableFactory;
 
 
@@ -142,7 +143,10 @@ public class MigrateVMTransition implements KeepRunningVM {
             if (mo.getAttributes().getBoolean(vm, "postCopy")) postCopy = true;
         }
 
-        //VariableFactory.task(start, duration, end);
+        duration = p.makeUnboundedDuration(PREFIX, vm, ").migDuration");
+        bandwidth = VF.bounded(PREFIX + vm + ").migBandwidth", 0, Integer.MAX_VALUE/100, s);
+        
+        VariableFactory.task(start, duration, end);
     }
 
     public boolean usesPostCopy() { return postCopy; }
